@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
@@ -15,13 +14,13 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
     required TasksRepository tasksRepository,
   })  : _tasksRepository = tasksRepository,
         super(const TasksState.initial()) {
-    on<_fetchTasks>(_onFetchTasks);
+    on<_FetchTasks>(_onFetchTasks);
   }
 
   final TasksRepository _tasksRepository;
 
   FutureOr<void> _onFetchTasks(
-      _fetchTasks event, Emitter<TasksState> emit) async {
+      _FetchTasks event, Emitter<TasksState> emit) async {
     emit(const _LoadInProgress());
     final List<Task>? result = await _tasksRepository.fetchTasks();
     if (result == null) {

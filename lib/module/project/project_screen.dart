@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/Document/document.dart';
-import 'package:pma/module/Note/note_screen.dart';
+import 'package:pma/module/Note/bloc/notes_bloc.dart';
+import 'package:pma/module/Note/notes_repository.dart';
+import 'package:pma/module/Note/notes_screen.dart';
 import 'package:pma/module/project/bloc/project_bloc.dart';
 import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/task/bloc/tasks_bloc.dart';
@@ -64,7 +66,12 @@ class _ProjectScreenState extends State<ProjectScreen> {
                         ),
                         child: const TasksScreen(),
                       ),
-                      const NoteScreen(),
+                      BlocProvider<NotesBloc>(
+                        create: (BuildContext context) => NotesBloc(
+                          notesRepository: NotesRepository(),
+                        ),
+                        child: const NotesScreen(),
+                      ),
                       const DocumentScreen(),
                     ],
                   ),
