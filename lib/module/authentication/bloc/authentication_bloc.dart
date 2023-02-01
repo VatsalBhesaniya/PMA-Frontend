@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:pma/app/user_repository.dart';
+import 'package:pma/module/app/user_repository.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';

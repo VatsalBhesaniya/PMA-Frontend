@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pma/authentication/bloc/authentication_bloc.dart';
-import 'package:pma/login/bloc/login_bloc.dart';
-
-import '../constants/route_constants.dart';
-import '../router/go_router.dart';
+import 'package:pma/constants/route_constants.dart';
+import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
+import 'package:pma/module/login/bloc/login_bloc.dart';
+import 'package:pma/router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
