@@ -3,8 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class UserRepository {
-  static const String baseUrl = 'http://10.0.2.2:8000/';
-  final String loginUrl = '${baseUrl}login';
+  static const String _baseUrl = 'http://10.0.2.2:8000/';
+  final String _loginUrl = '${_baseUrl}login';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   // getUser
@@ -29,10 +29,13 @@ class UserRepository {
   //login
   Future<String?> login(
       {required String email, required String password}) async {
-    final http.Response response = await http.post(Uri.parse(loginUrl), body: {
-      'username': 'bhesaniyavatsal@gmail.com',
-      'password': '1234',
-    });
+    final http.Response response = await http.post(
+      Uri.parse(_loginUrl),
+      body: <String, dynamic>{
+        'username': 'bhesaniyavatsal@gmail.com',
+        'password': '1234',
+      },
+    );
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse =
           jsonDecode(response.body) as Map<String, dynamic>;
