@@ -19,7 +19,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   final ProjectsRepository _projectsRepository;
 
-  Future<FutureOr<void>> _onFetchProjects(
+  FutureOr<void> _onFetchProjects(
       _FetchProjects event, Emitter<HomeState> emit) async {
     emit(const _LoadInProgress());
     final List<Project>? result = await _projectsRepository.fetchProjects();

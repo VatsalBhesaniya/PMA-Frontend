@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
-import 'package:pma/details_screen.dart';
 import 'package:pma/home/home_screen.dart';
 import 'package:pma/login/login_screen.dart';
+import 'package:pma/project/project_screen.dart';
 
 // GoRouter configuration
 // The route configuration for the app.
@@ -21,14 +21,18 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/${RouteConstants.home}',
       name: RouteConstants.home,
-      builder: (BuildContext context, GoRouterState state) =>
-          const HomeScreen(),
+      builder: (BuildContext context, GoRouterState state) {
+        return const HomeScreen();
+      },
       routes: <RouteBase>[
         GoRoute(
-          path: 'details',
-          name: 'details',
-          builder: (BuildContext context, GoRouterState state) =>
-              const DetailsScreen(),
+          path: 'projects/:id',
+          name: 'project',
+          builder: (BuildContext context, GoRouterState state) {
+            return ProjectScreen(
+              projectId: state.params['id']!,
+            );
+          },
         ),
       ],
     ),

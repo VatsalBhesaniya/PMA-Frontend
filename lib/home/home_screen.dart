@@ -44,26 +44,22 @@ class HomeScreen extends StatelessWidget {
                 },
                 loadInProgress: () => const CircularProgressIndicator(),
                 fetchProjectsSuccess: (List<Project> projects) {
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () =>
-                            context.goNamed(RouteConstants.details),
-                        child: const Text('Go to the Details screen'),
-                      ),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: projects.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final Project project = projects[index];
-                            return ListTile(
-                              title: Text(project.title),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                  return ListView.builder(
+                    itemCount: projects.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final Project project = projects[index];
+                      return ListTile(
+                        onTap: () {
+                          context.goNamed(
+                            RouteConstants.project,
+                            params: <String, String>{
+                              'id': project.id.toString(),
+                            },
+                          );
+                        },
+                        title: Text(project.title),
+                      );
+                    },
                   );
                 },
                 fetchProjectsFailure: () {
