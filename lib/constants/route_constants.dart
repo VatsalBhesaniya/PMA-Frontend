@@ -4,4 +4,5 @@ class RouteConstants {
   static String login = 'login';
   static String home = 'home';
   static String project = 'project';
+  static String task = 'task';
 }

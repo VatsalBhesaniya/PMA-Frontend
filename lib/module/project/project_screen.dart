@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/Document/document.dart';
 import 'package:pma/module/Note/note_screen.dart';
 import 'package:pma/module/project/bloc/project_bloc.dart';
 import 'package:pma/module/project/project_repository.dart';
-import 'package:pma/module/task/task_screen.dart';
+import 'package:pma/module/task/bloc/tasks_bloc.dart';
+import 'package:pma/module/task/tasks_repository.dart';
+import 'package:pma/module/task/tasks_screen.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({
@@ -56,11 +56,16 @@ class _ProjectScreenState extends State<ProjectScreen> {
                       ],
                     ),
                   ),
-                  body: const TabBarView(
+                  body: TabBarView(
                     children: <Widget>[
-                      TaskScreen(),
-                      NoteScreen(),
-                      DocumentScreen(),
+                      BlocProvider<TasksBloc>(
+                        create: (BuildContext context) => TasksBloc(
+                          tasksRepository: TasksRepository(),
+                        ),
+                        child: const TasksScreen(),
+                      ),
+                      const NoteScreen(),
+                      const DocumentScreen(),
                     ],
                   ),
                 ),
