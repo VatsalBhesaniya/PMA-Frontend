@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
-import 'package:pma/project/bloc/project_bloc.dart';
-import 'package:pma/project/project_repository.dart';
+import 'package:pma/module/Document/document.dart';
+import 'package:pma/module/Note/note_screen.dart';
+import 'package:pma/module/project/bloc/project_bloc.dart';
+import 'package:pma/module/project/project_repository.dart';
+import 'package:pma/module/task/bloc/tasks_bloc.dart';
+import 'package:pma/module/task/tasks_repository.dart';
+import 'package:pma/module/task/tasks_screen.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({
@@ -40,19 +43,31 @@ class _ProjectScreenState extends State<ProjectScreen> {
               return const CircularProgressIndicator();
             },
             fetchProjectSuccess: (Project project) {
-              return Scaffold(
-                appBar: AppBar(
-                  title: Text(project.title),
-                ),
-                body: Column(
-                  children: <Widget>[
-                    ElevatedButton(
-                      onPressed: () => context.goNamed(RouteConstants.home),
-                      child: const Text('Go back to the Home screen'),
+              return DefaultTabController(
+                length: 3,
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: Text(project.title),
+                    bottom: const TabBar(
+                      tabs: <Tab>[
+                        Tab(text: 'Tasks'),
+                        Tab(text: 'Notes'),
+                        Tab(text: 'Documents'),
+                      ],
                     ),
-                    Text(project.createdAt),
-                    Text(project.createdBy.toString()),
-                  ],
+                  ),
+                  body: TabBarView(
+                    children: <Widget>[
+                      BlocProvider<TasksBloc>(
+                        create: (BuildContext context) => TasksBloc(
+                          tasksRepository: TasksRepository(),
+                        ),
+                        child: const TasksScreen(),
+                      ),
+                      const NoteScreen(),
+                      const DocumentScreen(),
+                    ],
+                  ),
                 ),
               );
             },

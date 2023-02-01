@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
-import 'package:pma/home/home_screen.dart';
-import 'package:pma/login/login_screen.dart';
-import 'package:pma/project/project_screen.dart';
+import 'package:pma/module/home/home_screen.dart';
+import 'package:pma/module/login/login_screen.dart';
+import 'package:pma/module/project/project_screen.dart';
 
 // GoRouter configuration
 // The route configuration for the app.
