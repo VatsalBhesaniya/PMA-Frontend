@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
+import 'package:pma/module/Document/document.dart';
+import 'package:pma/module/Note/note_screen.dart';
 import 'package:pma/module/project/bloc/project_bloc.dart';
 import 'package:pma/module/project/project_repository.dart';
+import 'package:pma/module/task/task_screen.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({
@@ -41,7 +44,6 @@ class _ProjectScreenState extends State<ProjectScreen> {
             },
             fetchProjectSuccess: (Project project) {
               return DefaultTabController(
-                initialIndex: 1,
                 length: 3,
                 child: Scaffold(
                   appBar: AppBar(
@@ -54,25 +56,11 @@ class _ProjectScreenState extends State<ProjectScreen> {
                       ],
                     ),
                   ),
-                  body: TabBarView(
+                  body: const TabBarView(
                     children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          ElevatedButton(
-                            onPressed: () =>
-                                context.goNamed(RouteConstants.home),
-                            child: const Text('Go back to the Home screen'),
-                          ),
-                          Text(project.createdAt),
-                          Text(project.createdBy.toString()),
-                        ],
-                      ),
-                      const Center(
-                        child: Text("It's rainy here"),
-                      ),
-                      const Center(
-                        child: Text("It's sunny here"),
-                      ),
+                      TaskScreen(),
+                      NoteScreen(),
+                      DocumentScreen(),
                     ],
                   ),
                 ),
