@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/note.dart';
-import 'package:pma/module/Note/bloc/notes_bloc.dart';
+import 'package:pma/module/Notes/bloc/notes_bloc.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({super.key});
@@ -35,7 +35,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 return ListTile(
                   onTap: () {
                     context.goNamed(
-                      RouteConstants.task,
+                      RouteConstants.note,
                       params: <String, String>{
                         'id': task.id.toString(),
                       },
