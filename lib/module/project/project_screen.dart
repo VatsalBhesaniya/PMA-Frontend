@@ -9,9 +9,9 @@ import 'package:pma/module/Note/notes_repository.dart';
 import 'package:pma/module/Note/notes_screen.dart';
 import 'package:pma/module/project/bloc/project_bloc.dart';
 import 'package:pma/module/project/project_repository.dart';
-import 'package:pma/module/task/bloc/tasks_bloc.dart';
-import 'package:pma/module/task/tasks_repository.dart';
-import 'package:pma/module/task/tasks_screen.dart';
+import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
+import 'package:pma/module/tasks/tasks_repository.dart';
+import 'package:pma/module/tasks/tasks_screen.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({

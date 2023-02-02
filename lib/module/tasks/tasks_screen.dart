@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/task.dart';
-import 'package:pma/module/task/bloc/tasks_bloc.dart';
+import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
