@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/note.dart';
-import 'package:pma/module/Note/notes_repository.dart';
+import 'package:pma/module/Notes/notes_repository.dart';
 
 part 'notes_state.dart';
 part 'notes_event.dart';
