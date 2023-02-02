@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
+import 'package:pma/module/document/document_screen.dart';
 import 'package:pma/module/home/home_screen.dart';
 import 'package:pma/module/login/login_screen.dart';
 import 'package:pma/module/note/note_screen.dart';
@@ -51,6 +52,15 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             return NoteScreen(
               noteId: state.params['id']!,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'document/:id',
+          name: RouteConstants.document,
+          builder: (BuildContext context, GoRouterState state) {
+            return DocumentScreen(
+              documentId: state.params['id']!,
             );
           },
         ),
