@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/task.dart';
-import 'package:pma/module/task/tasks_repository.dart';
+import 'package:pma/module/tasks/tasks_repository.dart';
 
 part 'tasks_state.dart';
 part 'tasks_event.dart';
