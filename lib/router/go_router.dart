@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/module/home/home_screen.dart';
 import 'package:pma/module/login/login_screen.dart';
+import 'package:pma/module/note/note_screen.dart';
 import 'package:pma/module/project/project_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
 
@@ -41,6 +42,15 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             return TaskScreen(
               taskId: state.params['id']!,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'note/:id',
+          name: RouteConstants.note,
+          builder: (BuildContext context, GoRouterState state) {
+            return NoteScreen(
+              noteId: state.params['id']!,
             );
           },
         ),

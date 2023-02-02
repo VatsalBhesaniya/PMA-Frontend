@@ -35,7 +35,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 return ListTile(
                   onTap: () {
                     context.goNamed(
-                      RouteConstants.task,
+                      RouteConstants.note,
                       params: <String, String>{
                         'id': task.id.toString(),
                       },
