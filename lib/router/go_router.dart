@@ -4,6 +4,7 @@ import 'package:pma/constants/route_constants.dart';
 import 'package:pma/module/home/home_screen.dart';
 import 'package:pma/module/login/login_screen.dart';
 import 'package:pma/module/project/project_screen.dart';
+import 'package:pma/module/task/task_screen.dart';
 
 // GoRouter configuration
 // The route configuration for the app.
@@ -27,10 +28,19 @@ final GoRouter router = GoRouter(
       routes: <RouteBase>[
         GoRoute(
           path: 'projects/:id',
-          name: 'project',
+          name: RouteConstants.project,
           builder: (BuildContext context, GoRouterState state) {
             return ProjectScreen(
               projectId: state.params['id']!,
+            );
+          },
+        ),
+        GoRoute(
+          path: 'task/:id',
+          name: RouteConstants.task,
+          builder: (BuildContext context, GoRouterState state) {
+            return TaskScreen(
+              taskId: state.params['id']!,
             );
           },
         ),
