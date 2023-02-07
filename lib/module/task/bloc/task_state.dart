@@ -8,4 +8,18 @@ class TaskState with _$TaskState {
     required Task task,
   }) = _FetchTaskSuccess;
   const factory TaskState.fetchTaskFailure() = _FetchTaskFailure;
+  const factory TaskState.fetchAttachedNotesLoading() =
+      _FetchAttachedNotesLoading;
+  const factory TaskState.fetchAttachedNotesSuccess({
+    required List<Note> notes,
+  }) = _FetchAttachedNotesSuccess;
+  const factory TaskState.fetchAttachedNotesFailure() =
+      _FetchAttachedNotesFailure;
+  const factory TaskState.fetchAttachedDocumentsLoading() =
+      _FetchAttachedDocumentsLoading;
+  const factory TaskState.fetchAttachedDocumentsSuccess({
+    required List<Document> documents,
+  }) = _FetchAttachedDocumentsSuccess;
+  const factory TaskState.fetchAttachedDocumentsFailure() =
+      _FetchAttachedDocumentsFailure;
 }

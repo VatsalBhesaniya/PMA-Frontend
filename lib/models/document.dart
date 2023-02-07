@@ -16,6 +16,7 @@ class Document with _$Document {
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey(name: 'updated_at') String? updatedAt,
     @JsonKey(name: 'last_updated_by') int? lastUpdatedBy,
+    @JsonKey(ignore: true) @Default(false) bool isExpanded,
   }) = _Document;
 
   factory Document.fromJson(Map<String, dynamic> json) =>

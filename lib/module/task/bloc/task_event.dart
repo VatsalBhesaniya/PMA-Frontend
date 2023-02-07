@@ -5,4 +5,16 @@ class TaskEvent with _$TaskEvent {
   const factory TaskEvent.fetchTask({
     required int taskId,
   }) = _FetchTask;
+  const factory TaskEvent.fetchAttachedNotes({
+    required List<int> noteIds,
+  }) = _FetchAttachedNotes;
+  const factory TaskEvent.expandTask({
+    required List<Note> notes,
+  }) = _ExpandTask;
+  const factory TaskEvent.fetchAttachedDocuments({
+    required List<int> documentIds,
+  }) = _FetchAttachedDocuments;
+  const factory TaskEvent.expandDocument({
+    required List<Document> documents,
+  }) = _ExpandDocument;
 }
