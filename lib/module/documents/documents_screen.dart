@@ -3,16 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/document.dart';
-import 'package:pma/module/Document/bloc/documents_bloc.dart';
+import 'package:pma/module/Documents/bloc/documents_bloc.dart';
 
-class DocumentScreen extends StatefulWidget {
-  const DocumentScreen({super.key});
+class DocumentsScreen extends StatefulWidget {
+  const DocumentsScreen({super.key});
 
   @override
-  State<DocumentScreen> createState() => _DocumentScreenState();
+  State<DocumentsScreen> createState() => _DocumentsScreenState();
 }
 
-class _DocumentScreenState extends State<DocumentScreen> {
+class _DocumentsScreenState extends State<DocumentsScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DocumentsBloc, DocumentsState>(

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pma/models/project.dart';
-import 'package:pma/module/Document/bloc/documents_bloc.dart';
-import 'package:pma/module/Document/document.dart';
-import 'package:pma/module/Document/documents_repository.dart';
+import 'package:pma/module/Documents/bloc/documents_bloc.dart';
+import 'package:pma/module/Documents/documents_repository.dart';
 import 'package:pma/module/Notes/bloc/notes_bloc.dart';
 import 'package:pma/module/Notes/notes_repository.dart';
 import 'package:pma/module/Notes/notes_screen.dart';
+import 'package:pma/module/documents/documents_screen.dart';
 import 'package:pma/module/project/bloc/project_bloc.dart';
 import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
@@ -78,7 +78,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                         create: (BuildContext context) => DocumentsBloc(
                           documentsRepository: DocumentsRepository(),
                         ),
-                        child: const DocumentScreen(),
+                        child: const DocumentsScreen(),
                       ),
                     ],
                   ),
