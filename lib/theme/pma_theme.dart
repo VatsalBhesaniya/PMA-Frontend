@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 ThemeData buildLightTheme() {
   final ThemeData base = ThemeData.light();
@@ -68,25 +69,11 @@ const ColorScheme _dartColorScheme = ColorScheme(
   brightness: Brightness.dark,
 );
 
-TextTheme _buildTextTheme(TextTheme base) {
-  return base
-      .copyWith(
-        bodySmall: base.bodySmall?.copyWith(
-          fontWeight: FontWeight.w400,
-          fontSize: 14,
-          letterSpacing: defaultLetterSpacing,
-        ),
-        labelLarge: base.labelLarge?.copyWith(
-          fontWeight: FontWeight.w500,
-          fontSize: 14,
-          letterSpacing: defaultLetterSpacing,
-        ),
-      )
-      .apply(
-        fontFamily: 'Rubik',
-        displayColor: brown900,
-        bodyColor: brown900,
-      );
+TextTheme _buildTextTheme(TextTheme baseTheme) {
+  return GoogleFonts.poppinsTextTheme(baseTheme);
+  // return GoogleFonts.poppinsTextTheme(baseTheme).copyWith(
+  //   bodySmall: GoogleFonts.oswald(textStyle: baseTheme.bodySmall),
+  // );
 }
 
 IconThemeData _buildIconTheme(IconThemeData original) {
