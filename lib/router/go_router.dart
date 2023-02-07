@@ -6,7 +6,9 @@ import 'package:pma/module/home/home_screen.dart';
 import 'package:pma/module/login/login_screen.dart';
 import 'package:pma/module/note/note_screen.dart';
 import 'package:pma/module/project/project_screen.dart';
+import 'package:pma/module/settings/settings_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
+import 'package:pma/profile/profile_screen.dart';
 
 // GoRouter configuration
 // The route configuration for the app.
@@ -29,7 +31,7 @@ final GoRouter router = GoRouter(
       },
       routes: <RouteBase>[
         GoRoute(
-          path: 'projects/:id',
+          path: '${RouteConstants.project}/:id',
           name: RouteConstants.project,
           builder: (BuildContext context, GoRouterState state) {
             return ProjectScreen(
@@ -38,7 +40,7 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
-          path: 'task/:id',
+          path: '${RouteConstants.task}/:id',
           name: RouteConstants.task,
           builder: (BuildContext context, GoRouterState state) {
             return TaskScreen(
@@ -47,7 +49,7 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
-          path: 'note/:id',
+          path: '${RouteConstants.note}/:id',
           name: RouteConstants.note,
           builder: (BuildContext context, GoRouterState state) {
             return NoteScreen(
@@ -56,7 +58,7 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
-          path: 'document/:id',
+          path: '${RouteConstants.document}/:id',
           name: RouteConstants.document,
           builder: (BuildContext context, GoRouterState state) {
             return DocumentScreen(
@@ -65,6 +67,20 @@ final GoRouter router = GoRouter(
           },
         ),
       ],
+    ),
+    GoRoute(
+      path: '/${RouteConstants.settings}',
+      name: RouteConstants.settings,
+      builder: (BuildContext context, GoRouterState state) {
+        return const SettingsScreen();
+      },
+    ),
+    GoRoute(
+      path: '/${RouteConstants.profile}',
+      name: RouteConstants.profile,
+      builder: (BuildContext context, GoRouterState state) {
+        return const ProfileScreen();
+      },
     ),
   ],
 );

@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
-import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/module/home/bloc/home_bloc.dart';
 import 'package:pma/module/home/projects_repository.dart';
 
@@ -22,9 +21,9 @@ class HomeScreen extends StatelessWidget {
           actions: <Widget>[
             IconButton(
               onPressed: () {
-                context.read<AuthenticationBloc>().add(Logout());
+                context.goNamed(RouteConstants.settings);
               },
-              icon: const Icon(Icons.logout),
+              icon: const Icon(Icons.settings),
             ),
           ],
         ),

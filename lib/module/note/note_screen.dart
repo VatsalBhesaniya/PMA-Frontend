@@ -40,11 +40,12 @@ class _NoteScreenState extends State<NoteScreen> {
             fetchNoteSuccess: (Note note) {
               return Scaffold(
                 appBar: AppBar(
-                  title: Text(note.title),
+                  title: const Text('Note Detail'),
                 ),
                 body: SafeArea(
                   child: Column(
                     children: <Widget>[
+                      Text(note.title),
                       const Text('Created At'),
                       Text(note.createdAt),
                     ],
