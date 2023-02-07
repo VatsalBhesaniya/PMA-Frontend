@@ -2,6 +2,8 @@
 class RouteConstants {
   static String root = '/';
   static String login = 'login';
+  static String settings = 'settings';
+  static String profile = 'profile';
   static String home = 'home';
   static String project = 'project';
   static String task = 'task';

@@ -12,6 +12,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData currentTheme = Theme.of(context);
     return BlocProvider<HomeBloc>(
       create: (BuildContext context) => HomeBloc(
         projectsRepository: ProjectsRepository(),
@@ -25,6 +26,12 @@ class HomeScreen extends StatelessWidget {
                 context.read<AuthenticationBloc>().add(Logout());
               },
               icon: const Icon(Icons.logout),
+            ),
+            IconButton(
+              onPressed: () {
+                context.goNamed(RouteConstants.settings);
+              },
+              icon: const Icon(Icons.settings),
             ),
           ],
         ),
