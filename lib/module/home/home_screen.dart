@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
-import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/module/home/bloc/home_bloc.dart';
 import 'package:pma/module/home/projects_repository.dart';
 
@@ -12,7 +11,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData currentTheme = Theme.of(context);
     return BlocProvider<HomeBloc>(
       create: (BuildContext context) => HomeBloc(
         projectsRepository: ProjectsRepository(),
@@ -21,12 +19,6 @@ class HomeScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Home'),
           actions: <Widget>[
-            IconButton(
-              onPressed: () {
-                context.read<AuthenticationBloc>().add(Logout());
-              },
-              icon: const Icon(Icons.logout),
-            ),
             IconButton(
               onPressed: () {
                 context.goNamed(RouteConstants.settings);

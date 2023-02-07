@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
+import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/theme/theme_changer.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -32,6 +33,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 16),
             _buildMenuItems(),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                context.read<AuthenticationBloc>().add(Logout());
+              },
+              child: const Text('Logout'),
+            ),
           ],
         ),
       ),
