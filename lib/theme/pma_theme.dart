@@ -70,10 +70,12 @@ const ColorScheme _dartColorScheme = ColorScheme(
 );
 
 TextTheme _buildTextTheme(TextTheme baseTheme) {
-  return GoogleFonts.poppinsTextTheme(baseTheme);
-  // return GoogleFonts.poppinsTextTheme(baseTheme).copyWith(
-  //   bodySmall: GoogleFonts.oswald(textStyle: baseTheme.bodySmall),
-  // );
+  return GoogleFonts.poppinsTextTheme(baseTheme).copyWith(
+    bodyLarge: GoogleFonts.poppins(
+      textStyle: baseTheme.bodyLarge,
+      fontSize: 18,
+    ),
+  );
 }
 
 IconThemeData _buildIconTheme(IconThemeData original) {
