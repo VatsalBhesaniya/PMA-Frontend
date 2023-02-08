@@ -50,6 +50,7 @@ const ColorScheme _lightColorScheme = ColorScheme(
   onSurface: brown900,
   onBackground: brown900,
   onError: surfaceWhite,
+  outline: Colors.blueGrey,
   brightness: Brightness.light,
 );
 
@@ -66,6 +67,7 @@ const ColorScheme _dartColorScheme = ColorScheme(
   onSurface: Colors.blueGrey,
   onBackground: Colors.grey,
   onError: Colors.red,
+  outline: Colors.blueGrey,
   brightness: Brightness.dark,
 );
 
