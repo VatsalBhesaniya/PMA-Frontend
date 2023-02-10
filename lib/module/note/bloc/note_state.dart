@@ -8,4 +8,5 @@ class NoteState with _$NoteState {
     required Note note,
   }) = _FetchNoteSuccess;
   const factory NoteState.fetchNoteFailure() = _FetchNoteFailure;
+  const factory NoteState.updateNoteFailure() = _UpdateNoteFailure;
 }

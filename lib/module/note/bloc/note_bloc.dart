@@ -15,6 +15,8 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   })  : _noteRepository = noteRepository,
         super(const NoteState.initial()) {
     on<_FetchNote>(_onFetchNote);
+    on<_EditNote>(_onEditNote);
+    on<_UpdateNote>(_onUpdateNote);
   }
 
   final NoteRepository _noteRepository;
@@ -24,6 +26,22 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     final Note? result = await _noteRepository.fetchNote(noteId: event.noteId);
     if (result == null) {
       emit(const _FetchNoteFailure());
+    } else {
+      emit(_FetchNoteSuccess(note: result));
+    }
+  }
+
+  void _onEditNote(_EditNote event, Emitter<NoteState> emit) {
+    emit(const _LoadInProgress());
+    emit(_FetchNoteSuccess(note: event.note));
+  }
+
+  FutureOr<void> _onUpdateNote(
+      _UpdateNote event, Emitter<NoteState> emit) async {
+    emit(const _LoadInProgress());
+    final Note? result = await _noteRepository.updateNote(note: event.note);
+    if (result == null) {
+      emit(const _UpdateNoteFailure());
     } else {
       emit(_FetchNoteSuccess(note: result));
     }
