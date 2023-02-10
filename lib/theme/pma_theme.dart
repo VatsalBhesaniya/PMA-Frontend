@@ -50,6 +50,7 @@ const ColorScheme _lightColorScheme = ColorScheme(
   onSurface: brown900,
   onBackground: brown900,
   onError: surfaceWhite,
+  outline: Colors.blueGrey,
   brightness: Brightness.light,
 );
 
@@ -66,14 +67,17 @@ const ColorScheme _dartColorScheme = ColorScheme(
   onSurface: Colors.blueGrey,
   onBackground: Colors.grey,
   onError: Colors.red,
+  outline: Colors.blueGrey,
   brightness: Brightness.dark,
 );
 
 TextTheme _buildTextTheme(TextTheme baseTheme) {
-  return GoogleFonts.poppinsTextTheme(baseTheme);
-  // return GoogleFonts.poppinsTextTheme(baseTheme).copyWith(
-  //   bodySmall: GoogleFonts.oswald(textStyle: baseTheme.bodySmall),
-  // );
+  return GoogleFonts.poppinsTextTheme(baseTheme).copyWith(
+    bodyLarge: GoogleFonts.poppins(
+      textStyle: baseTheme.bodyLarge,
+      fontSize: 18,
+    ),
+  );
 }
 
 IconThemeData _buildIconTheme(IconThemeData original) {

@@ -186,7 +186,7 @@ class _TaskScreenState extends State<TaskScreen> {
         );
       },
       body: ListTile(
-        title: Text(note.description ?? ''),
+        title: Text(note.contentPlainText ?? ''),
         subtitle: const Text(
           'To delete this panel, tap the trash can icon',
         ),
