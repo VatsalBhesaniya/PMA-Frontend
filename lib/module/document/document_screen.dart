@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/module/document/bloc/document_bloc.dart';
 import 'package:pma/module/document/document_repository.dart';
+import 'package:pma/utils/dio_client.dart';
 
 class DocumentScreen extends StatefulWidget {
   const DocumentScreen({
@@ -21,7 +22,9 @@ class _DocumentScreenState extends State<DocumentScreen> {
   Widget build(BuildContext context) {
     return BlocProvider<DocumentBloc>(
       create: (BuildContext context) => DocumentBloc(
-        documentRepository: DocumentRepository(),
+        documentRepository: DocumentRepository(
+          dioClient: context.read<DioClient>(),
+        ),
       ),
       child: BlocBuilder<DocumentBloc, DocumentState>(
         builder: (BuildContext context, DocumentState state) {

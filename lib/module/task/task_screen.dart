@@ -5,6 +5,7 @@ import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
 import 'package:pma/module/task/bloc/task_bloc.dart';
 import 'package:pma/module/task/task_repository.dart';
+import 'package:pma/utils/dio_client.dart';
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({
@@ -23,7 +24,9 @@ class _TaskScreenState extends State<TaskScreen> {
   Widget build(BuildContext context) {
     return BlocProvider<TaskBloc>(
       create: (BuildContext context) => TaskBloc(
-        taskRepository: TaskRepository(),
+        taskRepository: TaskRepository(
+          dioClient: context.read<DioClient>(),
+        ),
       ),
       child: BlocConsumer<TaskBloc, TaskState>(
         listener: (BuildContext context, TaskState state) {

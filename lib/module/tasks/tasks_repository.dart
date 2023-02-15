@@ -1,32 +1,31 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/task.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 class TasksRepository {
-  static const String _baseUrl = 'http://10.0.2.2:8000/';
-  final String _tasksUrl = '${_baseUrl}tasks';
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  TasksRepository({
+    required this.dioClient,
+  });
+  final DioClient dioClient;
 
-  Future<List<Task>?> fetchTasks() async {
-    final String? token = await _storage.read(key: 'token');
-    final http.Response response = await http.get(
-      Uri.parse(_tasksUrl),
-      headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-      },
-    );
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse =
-          jsonDecode(response.body) as List<dynamic>;
-      final List<Task> tasks = jsonResponse
-          .map((dynamic task) => Task.fromJson(task as Map<String, dynamic>))
+  Future<ApiResult<List<Task>?>> fetchTasks() async {
+    try {
+      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
+        url: tasksEndpoint,
+        httpMethod: HttpMethod.get,
+      );
+      final List<Task>? tasks = data
+          ?.map((dynamic task) => Task.fromJson(task as Map<String, dynamic>))
           .toList();
-      return tasks;
-    } else {
-      return null;
+      return ApiResult<List<Task>?>.success(
+        data: tasks,
+      );
+    } on Exception catch (e) {
+      return ApiResult<List<Task>?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
     }
   }
 }

@@ -4,6 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/module/document/document_repository.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 part 'document_state.dart';
 part 'document_event.dart';
@@ -22,12 +24,19 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   FutureOr<void> _onFetchDocument(
       _FetchDocument event, Emitter<DocumentState> emit) async {
     emit(const _LoadInProgress());
-    final Document? result =
+    final ApiResult<Document?> apiResult =
         await _documentRepository.fetchDocument(documentId: event.documentId);
-    if (result == null) {
-      emit(const _FetchDocumentFailure());
-    } else {
-      emit(_FetchDocumentSuccess(document: result));
-    }
+    apiResult.when(
+      success: (Document? document) {
+        if (document == null) {
+          emit(const _FetchDocumentFailure());
+        } else {
+          emit(_FetchDocumentSuccess(document: document));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _FetchDocumentFailure());
+      },
+    );
   }
 }

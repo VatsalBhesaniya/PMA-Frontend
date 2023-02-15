@@ -1,90 +1,84 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 class TaskRepository {
-  static const String _baseUrl = 'http://10.0.2.2:8000/';
-  final String _tasksUrl = '${_baseUrl}tasks';
-  final String _notesUrl = '${_baseUrl}notes';
-  final String _documentsUrl = '${_baseUrl}documents';
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  TaskRepository({
+    required this.dioClient,
+  });
+  final DioClient dioClient;
 
-  Future<Task?> fetchTask({
+  Future<ApiResult<Task?>> fetchTask({
     required int taskId,
   }) async {
-    final String? token = await _storage.read(key: 'token');
-    final http.Response response = await http.get(
-      Uri.parse('$_tasksUrl/$taskId'),
-      headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-      },
-    );
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse =
-          jsonDecode(response.body) as Map<String, dynamic>;
-      final Task task = Task.fromJson(jsonResponse);
-      return task;
-    } else {
-      return null;
+    try {
+      final Map<String, dynamic>? data =
+          await dioClient.request<Map<String, dynamic>?>(
+        url: '$tasksEndpoint/$taskId',
+        httpMethod: HttpMethod.get,
+      );
+      return ApiResult<Task?>.success(
+        data: Task.fromJson(data!),
+      );
+    } on Exception catch (e) {
+      return ApiResult<Task?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
     }
   }
 
-  Future<List<Note>?> fetchAttachedNotes({
+  Future<ApiResult<List<Note>?>> fetchAttachedNotes({
     required List<int> noteIds,
   }) async {
-    final String? token = await _storage.read(key: 'token');
-    String queryParams = noteIds.isEmpty ? '' : '?';
-    for (final int id in noteIds) {
-      queryParams += 'noteId=$id&';
-    }
-    final http.Response response = await http.get(
-      Uri.parse('$_notesUrl/attached$queryParams'),
-      headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-      },
-    );
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse =
-          jsonDecode(response.body) as List<dynamic>;
-      final List<Note> notes = jsonResponse
-          .map((dynamic note) => Note.fromJson(note as Map<String, dynamic>))
+    try {
+      String queryParams = noteIds.isEmpty ? '' : '?';
+      for (final int id in noteIds) {
+        queryParams += 'noteId=$id&';
+      }
+      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
+        url: '$notesEndpoint/attached$queryParams',
+        httpMethod: HttpMethod.get,
+      );
+      final List<Note>? notes = data
+          ?.map((dynamic note) => Note.fromJson(note as Map<String, dynamic>))
           .toList();
-      return notes;
-    } else {
-      return null;
+      return ApiResult<List<Note>?>.success(
+        data: notes,
+      );
+    } on Exception catch (e) {
+      return ApiResult<List<Note>?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
     }
   }
 
-  Future<List<Document>?> fetchAttachedDocuments({
+  Future<ApiResult<List<Document>?>> fetchAttachedDocuments({
     required List<int> documentIds,
   }) async {
-    final String? token = await _storage.read(key: 'token');
-    String queryParams = documentIds.isEmpty ? '' : '?';
-    for (final int id in documentIds) {
-      queryParams += 'documentId=$id&';
-    }
-
-    final http.Response response = await http.get(
-      Uri.parse('$_documentsUrl/attached$queryParams'),
-      headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-      },
-    );
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse =
-          jsonDecode(response.body) as List<dynamic>;
-      final List<Document> documents = jsonResponse
-          .map((dynamic document) =>
+    try {
+      String queryParams = documentIds.isEmpty ? '' : '?';
+      for (final int id in documentIds) {
+        queryParams += 'documentId=$id&';
+      }
+      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
+        url: '$documentsEndpoint/attached$queryParams',
+        httpMethod: HttpMethod.get,
+      );
+      final List<Document>? documents = data
+          ?.map((dynamic document) =>
               Document.fromJson(document as Map<String, dynamic>))
           .toList();
-      return documents;
-    } else {
-      return null;
+      return ApiResult<List<Document>?>.success(
+        data: documents,
+      );
+    } on Exception catch (e) {
+      return ApiResult<List<Document>?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
     }
   }
 }
