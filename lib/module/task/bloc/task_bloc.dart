@@ -6,6 +6,8 @@ import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
 import 'package:pma/module/task/task_repository.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 part 'task_state.dart';
 part 'task_event.dart';
@@ -27,24 +29,39 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   FutureOr<void> _onFetchTask(_FetchTask event, Emitter<TaskState> emit) async {
     emit(const _LoadInProgress());
-    final Task? task = await _taskRepository.fetchTask(taskId: event.taskId);
-    if (task == null) {
-      emit(const _FetchTaskFailure());
-    } else {
-      emit(_FetchTaskSuccess(task: task));
-    }
+    final ApiResult<Task?> apiResult =
+        await _taskRepository.fetchTask(taskId: event.taskId);
+    apiResult.when(
+      success: (Task? task) {
+        if (task == null) {
+          emit(const _FetchTaskFailure());
+        } else {
+          emit(_FetchTaskSuccess(task: task));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _FetchTaskFailure());
+      },
+    );
   }
 
   FutureOr<void> _onFetchAttachedNotes(
       _FetchAttachedNotes event, Emitter<TaskState> emit) async {
     emit(const _FetchAttachedNotesLoading());
-    final List<Note>? notes =
+    final ApiResult<List<Note>?> apiResult =
         await _taskRepository.fetchAttachedNotes(noteIds: event.noteIds);
-    if (notes == null) {
-      emit(const _FetchAttachedNotesFailure());
-    } else {
-      emit(_FetchAttachedNotesSuccess(notes: notes));
-    }
+    apiResult.when(
+      success: (List<Note>? notes) {
+        if (notes == null) {
+          emit(const _FetchAttachedNotesFailure());
+        } else {
+          emit(_FetchAttachedNotesSuccess(notes: notes));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _FetchAttachedNotesFailure());
+      },
+    );
   }
 
   void _onExpandTask(_ExpandTask event, Emitter<TaskState> emit) {
@@ -59,13 +76,20 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   FutureOr<void> _onFetchAttachedDocuments(
       _FetchAttachedDocuments event, Emitter<TaskState> emit) async {
     emit(const _FetchAttachedDocumentsLoading());
-    final List<Document>? documents = await _taskRepository
+    final ApiResult<List<Document>?> apiResult = await _taskRepository
         .fetchAttachedDocuments(documentIds: event.documentIds);
-    if (documents == null) {
-      emit(const _FetchAttachedDocumentsFailure());
-    } else {
-      emit(_FetchAttachedDocumentsSuccess(documents: documents));
-    }
+    apiResult.when(
+      success: (List<Document>? documents) {
+        if (documents == null) {
+          emit(const _FetchAttachedDocumentsFailure());
+        } else {
+          emit(_FetchAttachedDocumentsSuccess(documents: documents));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _FetchAttachedDocumentsFailure());
+      },
+    );
   }
 
   void _onExpandDocument(_ExpandDocument event, Emitter<TaskState> emit) {

@@ -12,6 +12,7 @@ import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 import 'package:pma/module/tasks/tasks_repository.dart';
 import 'package:pma/module/tasks/tasks_screen.dart';
+import 'package:pma/utils/dio_client.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({
@@ -30,7 +31,9 @@ class _ProjectScreenState extends State<ProjectScreen> {
   Widget build(BuildContext context) {
     return BlocProvider<ProjectBloc>(
       create: (BuildContext context) => ProjectBloc(
-        projectRepository: ProjectRepository(),
+        projectRepository: ProjectRepository(
+          dioClient: context.read<DioClient>(),
+        ),
       ),
       child: BlocBuilder<ProjectBloc, ProjectState>(
         builder: (BuildContext context, ProjectState state) {
@@ -64,19 +67,25 @@ class _ProjectScreenState extends State<ProjectScreen> {
                     children: <Widget>[
                       BlocProvider<TasksBloc>(
                         create: (BuildContext context) => TasksBloc(
-                          tasksRepository: TasksRepository(),
+                          tasksRepository: TasksRepository(
+                            dioClient: context.read<DioClient>(),
+                          ),
                         ),
                         child: const TasksScreen(),
                       ),
                       BlocProvider<NotesBloc>(
                         create: (BuildContext context) => NotesBloc(
-                          notesRepository: NotesRepository(),
+                          notesRepository: NotesRepository(
+                            dioClient: context.read<DioClient>(),
+                          ),
                         ),
                         child: const NotesScreen(),
                       ),
                       BlocProvider<DocumentsBloc>(
                         create: (BuildContext context) => DocumentsBloc(
-                          documentsRepository: DocumentsRepository(),
+                          documentsRepository: DocumentsRepository(
+                            dioClient: context.read<DioClient>(),
+                          ),
                         ),
                         child: const DocumentsScreen(),
                       ),

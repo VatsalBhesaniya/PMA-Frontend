@@ -4,6 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/project/project_repository.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 part 'project_state.dart';
 part 'project_event.dart';
@@ -22,12 +24,19 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   FutureOr<void> _onFetchProject(
       _FetchProject event, Emitter<ProjectState> emit) async {
     emit(const _LoadInProgress());
-    final Project? result =
+    final ApiResult<Project?> apiResult =
         await _projectRepository.fetchProject(projectId: event.projectId);
-    if (result == null) {
-      emit(const _FetchProjectFailure());
-    } else {
-      emit(_FetchProjectSuccess(project: result));
-    }
+    apiResult.when(
+      success: (Project? project) {
+        if (project == null) {
+          emit(const _FetchProjectFailure());
+        } else {
+          emit(_FetchProjectSuccess(project: project));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _FetchProjectFailure());
+      },
+    );
   }
 }

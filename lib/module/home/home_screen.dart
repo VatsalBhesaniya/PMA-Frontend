@@ -5,6 +5,7 @@ import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/home/bloc/home_bloc.dart';
 import 'package:pma/module/home/projects_repository.dart';
+import 'package:pma/utils/dio_client.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,7 +14,9 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<HomeBloc>(
       create: (BuildContext context) => HomeBloc(
-        projectsRepository: ProjectsRepository(),
+        projectsRepository: ProjectsRepository(
+          dioClient: context.read<DioClient>(),
+        ),
       ),
       child: Scaffold(
         appBar: AppBar(

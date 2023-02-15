@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pma/constants/route_constants.dart';
+import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/module/login/bloc/login_bloc.dart';
 import 'package:pma/router/go_router.dart';
+import 'package:pma/utils/dio_client.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -32,6 +34,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 router.goNamed(RouteConstants.login);
                 break;
               case AuthStatus.authenticated:
+                context.read<AppStorageManager>().getUserToken().then(
+                  (String? token) {
+                    context.read<DioClient>().addAccessTokenToHeader(
+                          value: token!,
+                        );
+                  },
+                );
                 router.goNamed(RouteConstants.home);
                 break;
               case AuthStatus.unauthenticated:

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:intl/intl.dart';
+import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/module/note/bloc/note_bloc.dart';
 import 'package:pma/module/note/note_repository.dart';
+import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/text_editor.dart';
 
 class NoteScreen extends StatefulWidget {
@@ -27,7 +29,10 @@ class _NoteScreenState extends State<NoteScreen> {
     final ThemeData theme = Theme.of(context);
     return BlocProvider<NoteBloc>(
       create: (BuildContext context) => NoteBloc(
-        noteRepository: NoteRepository(),
+        noteRepository: NoteRepository(
+          dioClient: context.read<DioClient>(),
+          httpClient: context.read<HttpClientConfig>(),
+        ),
       ),
       child: BlocConsumer<NoteBloc, NoteState>(
         listener: (BuildContext context, NoteState state) {

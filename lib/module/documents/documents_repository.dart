@@ -1,33 +1,32 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/document.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 class DocumentsRepository {
-  static const String _baseUrl = 'http://10.0.2.2:8000/';
-  final String _documentsUrl = '${_baseUrl}documents';
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  DocumentsRepository({
+    required this.dioClient,
+  });
+  final DioClient dioClient;
 
-  Future<List<Document>?> fetchDocuments() async {
-    final String? token = await _storage.read(key: 'token');
-    final http.Response response = await http.get(
-      Uri.parse(_documentsUrl),
-      headers: <String, String>{
-        HttpHeaders.authorizationHeader: 'Bearer $token',
-      },
-    );
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse =
-          jsonDecode(response.body) as List<dynamic>;
-      final List<Document> documents = jsonResponse
-          .map(
-              (dynamic task) => Document.fromJson(task as Map<String, dynamic>))
+  Future<ApiResult<List<Document>?>> fetchDocuments() async {
+    try {
+      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
+        url: documentsEndpoint,
+        httpMethod: HttpMethod.get,
+      );
+      final List<Document>? documents = data
+          ?.map((dynamic document) =>
+              Document.fromJson(document as Map<String, dynamic>))
           .toList();
-      return documents;
-    } else {
-      return null;
+      return ApiResult<List<Document>?>.success(
+        data: documents,
+      );
+    } on Exception catch (e) {
+      return ApiResult<List<Document>?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
     }
   }
 }

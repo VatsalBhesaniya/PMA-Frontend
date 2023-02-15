@@ -4,6 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/module/note/note_repository.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 part 'note_state.dart';
 part 'note_event.dart';
@@ -23,12 +25,20 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
 
   FutureOr<void> _onFetchNote(_FetchNote event, Emitter<NoteState> emit) async {
     emit(const _LoadInProgress());
-    final Note? result = await _noteRepository.fetchNote(noteId: event.noteId);
-    if (result == null) {
-      emit(const _FetchNoteFailure());
-    } else {
-      emit(_FetchNoteSuccess(note: result));
-    }
+    final ApiResult<Note?> apiResult =
+        await _noteRepository.fetchNote(noteId: event.noteId);
+    apiResult.when(
+      success: (Note? note) {
+        if (note == null) {
+          emit(const _FetchNoteFailure());
+        } else {
+          emit(_FetchNoteSuccess(note: note));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _FetchNoteFailure());
+      },
+    );
   }
 
   void _onEditNote(_EditNote event, Emitter<NoteState> emit) {
@@ -39,11 +49,19 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   FutureOr<void> _onUpdateNote(
       _UpdateNote event, Emitter<NoteState> emit) async {
     emit(const _LoadInProgress());
-    final Note? result = await _noteRepository.updateNote(note: event.note);
-    if (result == null) {
-      emit(const _UpdateNoteFailure());
-    } else {
-      emit(_FetchNoteSuccess(note: result));
-    }
+    final ApiResult<Note?> apiResult =
+        await _noteRepository.updateNote(note: event.note);
+    apiResult.when(
+      success: (Note? note) {
+        if (note == null) {
+          emit(const _UpdateNoteFailure());
+        } else {
+          emit(_FetchNoteSuccess(note: note));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _UpdateNoteFailure());
+      },
+    );
   }
 }
