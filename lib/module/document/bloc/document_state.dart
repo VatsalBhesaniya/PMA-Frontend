@@ -8,4 +8,5 @@ class DocumentState with _$DocumentState {
     required Document document,
   }) = _FetchDocumentSuccess;
   const factory DocumentState.fetchDocumentFailure() = _FetchDocumentFailure;
+  const factory DocumentState.updateDocumentFailure() = _UpdateDocumentFailure;
 }

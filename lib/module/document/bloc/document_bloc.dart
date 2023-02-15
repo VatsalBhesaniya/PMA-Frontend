@@ -17,6 +17,8 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   })  : _documentRepository = documentRepository,
         super(const DocumentState.initial()) {
     on<_FetchDocument>(_onFetchDocument);
+    on<_EditDocument>(_onEditDocument);
+    on<_UpdateDocument>(_onUpdateDocument);
   }
 
   final DocumentRepository _documentRepository;
@@ -36,6 +38,30 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       },
       failure: (NetworkExceptions error) {
         emit(const _FetchDocumentFailure());
+      },
+    );
+  }
+
+  void _onEditDocument(_EditDocument event, Emitter<DocumentState> emit) {
+    emit(const _LoadInProgress());
+    emit(_FetchDocumentSuccess(document: event.document));
+  }
+
+  FutureOr<void> _onUpdateDocument(
+      _UpdateDocument event, Emitter<DocumentState> emit) async {
+    emit(const _LoadInProgress());
+    final ApiResult<Document?> apiResult =
+        await _documentRepository.updateDocument(document: event.document);
+    apiResult.when(
+      success: (Document? document) {
+        if (document == null) {
+          emit(const _UpdateDocumentFailure());
+        } else {
+          emit(_FetchDocumentSuccess(document: document));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _UpdateDocumentFailure());
       },
     );
   }
