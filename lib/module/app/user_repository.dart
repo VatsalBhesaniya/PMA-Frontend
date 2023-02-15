@@ -1,48 +1,56 @@
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:pma/constants/api_constants.dart';
+import 'package:pma/manager/app_storage_manager.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 class UserRepository {
-  static const String _baseUrl = 'http://10.0.2.2:8000/';
-  final String _loginUrl = '${_baseUrl}login';
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  UserRepository({
+    required this.dioClient,
+    required this.appStorageManager,
+  });
+  final DioClient dioClient;
+  final AppStorageManager appStorageManager;
 
   // getUser
 
   // hasToken
   Future<bool> hasToken() async {
-    final String? token = await _storage.read(key: 'token');
+    final String? token = await appStorageManager.getUserToken();
     return token != null;
   }
 
   // persistToken
   Future<void> persistToken(String token) async {
-    _storage.write(key: 'token', value: token);
+    appStorageManager.setUserToken(token);
   }
 
   // deleteToken
   Future<void> deleteToken() async {
-    _storage.delete(key: 'token');
-    _storage.deleteAll();
+    appStorageManager.clearStorage();
   }
 
   //login
-  Future<String?> login(
-      {required String email, required String password}) async {
-    final http.Response response = await http.post(
-      Uri.parse(_loginUrl),
-      body: <String, dynamic>{
-        'username': 'bhesaniyavatsal@gmail.com',
-        'password': '1234',
-      },
-    );
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> jsonResponse =
-          jsonDecode(response.body) as Map<String, dynamic>;
-      final String token = jsonResponse['access_token'] as String;
-      return token;
-    } else {
-      return null;
+  Future<ApiResult<String?>> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final Map<String, dynamic>? data = await dioClient.request(
+        url: loginEndpoint,
+        httpMethod: HttpMethod.post,
+        data: FormData.fromMap(<String, dynamic>{
+          'username': email,
+          'password': password,
+        }),
+      );
+      return ApiResult<String?>.success(
+        data: data != null ? data['access_token'] as String : null,
+      );
+    } on Exception catch (e) {
+      return ApiResult<String?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
     }
   }
 }

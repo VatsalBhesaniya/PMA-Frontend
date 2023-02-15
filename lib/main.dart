@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:pma/config/http_client_config.dart';
+import 'package:pma/constants/api_constants.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/module/app/pma_app.dart';
@@ -12,6 +15,7 @@ import 'package:pma/module/login/bloc/login_bloc.dart';
 import 'package:pma/router/go_router.dart';
 import 'package:pma/theme/app_theme.dart';
 import 'package:pma/theme/pma_theme.dart';
+import 'package:pma/utils/dio_client.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,7 +31,13 @@ void main() {
       sharedPreferences: sharedPreferences,
       flutterSecureStorage: const FlutterSecureStorage(),
     );
-    final UserRepository userRepository = UserRepository();
+    final DioClient dioClient = DioClient(
+      baseURL: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
+    );
+    final UserRepository userRepository = UserRepository(
+      dioClient: dioClient,
+      appStorageManager: appStorageManager,
+    );
     runApp(
       MultiProvider(
         providers: <SingleChildWidget>[
@@ -35,6 +45,14 @@ void main() {
             value: AppTheme(
               lightTheme: buildLightTheme(),
               darkTheme: buildDarkTheme(),
+            ),
+          ),
+          Provider<DioClient>.value(
+            value: dioClient,
+          ),
+          Provider<HttpClientConfig>.value(
+            value: HttpClientConfig(
+              baseUrl: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
             ),
           ),
           Provider<AppStorageManager>.value(value: appStorageManager),
@@ -52,6 +70,13 @@ void main() {
         child: BlocConsumer<AuthenticationBloc, AuthenticationState>(
           listener: (BuildContext context, AuthenticationState state) {
             if (state is Authenticated) {
+              context.read<AppStorageManager>().getUserToken().then(
+                (String? token) {
+                  context.read<DioClient>().addAccessTokenToHeader(
+                        value: token!,
+                      );
+                },
+              );
               router.goNamed(RouteConstants.home);
             }
             if (state is Unauthenticated || state is Unknown) {

@@ -20,12 +20,24 @@ class AppStorageManager {
     }
   }
 
+  void clearStorage() {
+    flutterSecureStorage.deleteAll();
+  }
+
   void toggleThemeMode(AppThemeMode mode) {
     sharedPreferences.setString(themeMode, mode.title);
   }
 
   String getThemeMode() {
     return sharedPreferences.getString(themeMode) ?? AppThemeMode.system.title;
+  }
+
+  Future<String?> getUserToken() async {
+    return flutterSecureStorage.read(key: 'token');
+  }
+
+  Future<void> setUserToken(String token) async {
+    return flutterSecureStorage.write(key: 'token', value: token);
   }
 }
 
