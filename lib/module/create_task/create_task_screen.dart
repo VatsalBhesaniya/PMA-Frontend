@@ -1,64 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:go_router/go_router.dart';
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
-import 'package:pma/models/create_document.dart';
-import 'package:pma/module/create_document/bloc/create_document_bloc.dart';
-import 'package:pma/module/create_document/create_document_repository.dart';
+import 'package:pma/models/create_task.dart';
+import 'package:pma/module/create_task/bloc/create_task_bloc.dart';
+import 'package:pma/module/create_task/create_task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/utils/text_editor.dart';
 import 'package:pma/widgets/input_field.dart';
 
-class CreateDocumentScreen extends StatefulWidget {
-  const CreateDocumentScreen({super.key});
+class CreateTaskScreen extends StatefulWidget {
+  const CreateTaskScreen({super.key});
 
   @override
-  State<CreateDocumentScreen> createState() => _CreateDocumentScreenState();
+  State<CreateTaskScreen> createState() => _CreateTaskScreenState();
 }
 
-class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
+class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _documentTitleController =
-      TextEditingController();
-  final quill.QuillController _contentController =
-      quill.QuillController.basic();
+  final TextEditingController _taskTitleController = TextEditingController();
+  final QuillController _contentController = QuillController.basic();
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Document'),
+        title: const Text('Create Task'),
       ),
       body: SafeArea(
-        child: BlocProvider<CreateDocumentBloc>(
-          create: (BuildContext context) => CreateDocumentBloc(
-            createDocumentRepository: CreateDocumentRepository(
+        child: BlocProvider<CreateTaskBloc>(
+          create: (BuildContext context) => CreateTaskBloc(
+            createTaskRepository: CreateTaskRepository(
               httpClient: context.read<HttpClientConfig>(),
             ),
           ),
-          child: BlocConsumer<CreateDocumentBloc, CreateDocumentState>(
-            listener: (BuildContext context, CreateDocumentState state) {
+          child: BlocConsumer<CreateTaskBloc, CreateTaskState>(
+            listener: (BuildContext context, CreateTaskState state) {
               state.maybeWhen(
-                createDocumentSuccess: (int documentId) {
+                createTaskSuccess: (int taskId) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Document successfully created.'),
+                      content: Text('Task successfully created.'),
                     ),
                   );
                   context.pop();
                   context.goNamed(
-                    RouteConstants.document,
+                    RouteConstants.task,
                     params: <String, String>{
-                      'id': documentId.toString(),
+                      'id': taskId.toString(),
                     },
                   );
                 },
-                createDocumentFailure: (NetworkExceptions error) {
-                  _buildCreateDocumentFailureAlert(
+                createTaskFailure: (NetworkExceptions error) {
+                  _buildCreateTaskFailureAlert(
                     context: context,
                     theme: theme,
                   );
@@ -66,14 +64,13 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
                 orElse: () => null,
               );
             },
-            buildWhen:
-                (CreateDocumentState previous, CreateDocumentState current) {
+            buildWhen: (CreateTaskState previous, CreateTaskState current) {
               return current.maybeWhen(
                 initial: () => true,
                 orElse: () => false,
               );
             },
-            builder: (BuildContext context, CreateDocumentState state) {
+            builder: (BuildContext context, CreateTaskState state) {
               return state.maybeWhen(
                 loadInProgress: () {
                   return const CircularProgressIndicator();
@@ -87,7 +84,7 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
                         children: <Widget>[
                           InputField(
                             onChanged: (String value) {},
-                            controller: _documentTitleController,
+                            controller: _taskTitleController,
                             hintText: 'Title',
                             borderType:
                                 InputFieldBorderType.underlineInputBorder,
@@ -104,17 +101,18 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
                           ElevatedButton(
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
-                                context.read<CreateDocumentBloc>().add(
-                                      CreateDocumentEvent.createDocument(
-                                        document: CreateDocument(
-                                          title: _documentTitleController.text
-                                              .trim(),
-                                          content: _contentController.document
+                                context.read<CreateTaskBloc>().add(
+                                      CreateTaskEvent.createTask(
+                                        task: CreateTask(
+                                          title:
+                                              _taskTitleController.text.trim(),
+                                          description: _contentController
+                                              .document
                                               .toDelta()
                                               .toJson(),
-                                          contentPlainText: _contentController
-                                              .document
-                                              .toPlainText(),
+                                          descriptionPlainText:
+                                              _contentController.document
+                                                  .toPlainText(),
                                         ),
                                       ),
                                     );
@@ -152,7 +150,7 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
     );
   }
 
-  void _buildCreateDocumentFailureAlert({
+  void _buildCreateTaskFailureAlert({
     required BuildContext context,
     required ThemeData theme,
   }) {

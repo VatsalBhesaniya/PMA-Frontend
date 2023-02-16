@@ -12,7 +12,8 @@ class Task with _$Task {
   factory Task({
     @JsonKey() required int id,
     @JsonKey() required String title,
-    @JsonKey() String? description,
+    @JsonKey() List<dynamic>? description,
+    @JsonKey(name: 'description_plain_text') String? descriptionPlainText,
     @JsonKey(name: 'created_by') int? createdBy,
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey(name: 'updated_at') String? updatedAt,
