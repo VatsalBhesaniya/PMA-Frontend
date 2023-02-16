@@ -5,6 +5,12 @@ class TaskEvent with _$TaskEvent {
   const factory TaskEvent.fetchTask({
     required int taskId,
   }) = _FetchTask;
+  const factory TaskEvent.editTask({
+    required Task task,
+  }) = _EditTask;
+  const factory TaskEvent.updateTask({
+    required Task task,
+  }) = _UpdateTask;
   const factory TaskEvent.fetchAttachedNotes({
     required List<int> noteIds,
   }) = _FetchAttachedNotes;

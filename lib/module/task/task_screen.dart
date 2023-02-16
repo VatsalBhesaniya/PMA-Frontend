@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
@@ -31,6 +32,7 @@ class _TaskScreenState extends State<TaskScreen> {
       create: (BuildContext context) => TaskBloc(
         taskRepository: TaskRepository(
           dioClient: context.read<DioClient>(),
+          httpClient: context.read<HttpClientConfig>(),
         ),
       ),
       child: BlocConsumer<TaskBloc, TaskState>(
@@ -81,6 +83,12 @@ class _TaskScreenState extends State<TaskScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Task Detail'),
+                  actions: <Widget>[
+                    _buildActionButton(
+                      context: context,
+                      task: task,
+                    ),
+                  ],
                 ),
                 body: SafeArea(
                   child: SingleChildScrollView(
@@ -125,6 +133,66 @@ class _TaskScreenState extends State<TaskScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required Task task,
+  }) {
+    if (task.isEdit) {
+      return Row(
+        children: <Widget>[
+          TextButton(
+            onPressed: () {
+              context.read<TaskBloc>().add(
+                    TaskEvent.updateTask(
+                      task: task.copyWith(
+                        description: _controller.document.toDelta().toJson(),
+                        descriptionPlainText:
+                            _controller.document.toPlainText(),
+                      ),
+                    ),
+                  );
+            },
+            child: const Text(
+              'Save',
+              style: TextStyle(
+                color: Colors.lime,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<TaskBloc>().add(
+                    TaskEvent.editTask(
+                      task: task.copyWith(
+                        isEdit: false,
+                      ),
+                    ),
+                  );
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: Colors.lime,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return IconButton(
+      onPressed: () {
+        context.read<TaskBloc>().add(
+              TaskEvent.editTask(
+                task: task.copyWith(
+                  isEdit: true,
+                ),
+              ),
+            );
+      },
+      icon: const Icon(Icons.edit_note_rounded),
     );
   }
 

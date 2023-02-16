@@ -8,6 +8,7 @@ class TaskState with _$TaskState {
     required Task task,
   }) = _FetchTaskSuccess;
   const factory TaskState.fetchTaskFailure() = _FetchTaskFailure;
+  const factory TaskState.updateTaskFailure() = _UpdateTaskFailure;
   const factory TaskState.fetchAttachedNotesLoading() =
       _FetchAttachedNotesLoading;
   const factory TaskState.fetchAttachedNotesSuccess({

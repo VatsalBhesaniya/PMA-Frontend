@@ -22,6 +22,7 @@ class Task with _$Task {
     @JsonKey() required List<int> notes,
     @JsonKey() required List<int> documents,
     @JsonKey() User? owner,
+    @JsonKey(ignore: true) @Default(false) bool isEdit,
   }) = _Task;
 
   factory Task.fromJson(Map<String, dynamic> json) => _$TaskFromJson(json);

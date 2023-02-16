@@ -1,3 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
@@ -9,8 +14,10 @@ import 'package:pma/utils/network_exceptions.dart';
 class TaskRepository {
   TaskRepository({
     required this.dioClient,
+    required this.httpClient,
   });
   final DioClient dioClient;
+  final HttpClientConfig httpClient;
 
   Future<ApiResult<Task?>> fetchTask({
     required int taskId,
@@ -24,6 +31,58 @@ class TaskRepository {
       return ApiResult<Task?>.success(
         data: Task.fromJson(data!),
       );
+    } on Exception catch (e) {
+      return ApiResult<Task?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
+  Future<ApiResult<Task?>> updateTask({
+    required Task task,
+  }) async {
+    try {
+      final String body = jsonEncode(task.toJson()
+        ..remove('id')
+        ..remove('created_by'));
+      final String? token =
+          await const FlutterSecureStorage().read(key: 'token');
+      final http.Response response = await http.put(
+        Uri.parse('${httpClient.baseUrl}$tasksEndpoint/${task.id}'),
+        headers: <String, String>{
+          HttpHeaders.authorizationHeader: token!,
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse =
+            jsonDecode(response.body) as Map<String, dynamic>;
+        return ApiResult<Task?>.success(
+          data: Task.fromJson(jsonResponse),
+        );
+      } else {
+        return ApiResult<Task?>.failure(
+          error: NetworkExceptions.dioException(
+            Exception('Something went wrong!'),
+          ),
+        );
+      }
+
+      // final Map<String, dynamic>? data =
+      //     await dioClient.request<Map<String, dynamic>?>(
+      //   url: '$tasksEndpoint/${task.id}',
+      //   httpMethod: HttpMethod.put,
+      //   data: FormData.fromMap(
+      //     task.toJson()
+      //       ..remove('id')
+      //       ..remove('created_by'),
+      //   ),
+      // );
+      // return ApiResult<Task?>.success(
+      //   data: Task.fromJson(data!),
+      // );
     } on Exception catch (e) {
       return ApiResult<Task?>.failure(
         error: NetworkExceptions.dioException(e),
