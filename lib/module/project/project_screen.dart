@@ -111,8 +111,9 @@ class _ProjectScreenState extends State<ProjectScreen>
             );
             break;
           case 2:
-            // ignore: avoid_print
-            print('Create Document');
+            context.goNamed(
+              RouteConstants.createDocument,
+            );
             break;
           default:
         }
