@@ -8,5 +8,6 @@ class RouteConstants {
   static String project = 'project';
   static String task = 'task';
   static String note = 'note';
+  static String createNote = 'createNote';
   static String document = 'document';
 }

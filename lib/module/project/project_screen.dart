@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/Documents/bloc/documents_bloc.dart';
 import 'package:pma/module/Documents/documents_repository.dart';
@@ -26,9 +28,28 @@ class ProjectScreen extends StatefulWidget {
   State<ProjectScreen> createState() => _ProjectScreenState();
 }
 
-class _ProjectScreenState extends State<ProjectScreen> {
+class _ProjectScreenState extends State<ProjectScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return BlocProvider<ProjectBloc>(
       create: (BuildContext context) => ProjectBloc(
         projectRepository: ProjectRepository(
@@ -50,47 +71,18 @@ class _ProjectScreenState extends State<ProjectScreen> {
               return const CircularProgressIndicator();
             },
             fetchProjectSuccess: (Project project) {
-              return DefaultTabController(
-                length: 3,
-                child: Scaffold(
-                  appBar: AppBar(
-                    title: Text(project.title),
-                    bottom: const TabBar(
-                      tabs: <Tab>[
-                        Tab(text: 'Tasks'),
-                        Tab(text: 'Notes'),
-                        Tab(text: 'Documents'),
-                      ],
-                    ),
-                  ),
-                  body: TabBarView(
-                    children: <Widget>[
-                      BlocProvider<TasksBloc>(
-                        create: (BuildContext context) => TasksBloc(
-                          tasksRepository: TasksRepository(
-                            dioClient: context.read<DioClient>(),
-                          ),
-                        ),
-                        child: const TasksScreen(),
-                      ),
-                      BlocProvider<NotesBloc>(
-                        create: (BuildContext context) => NotesBloc(
-                          notesRepository: NotesRepository(
-                            dioClient: context.read<DioClient>(),
-                          ),
-                        ),
-                        child: const NotesScreen(),
-                      ),
-                      BlocProvider<DocumentsBloc>(
-                        create: (BuildContext context) => DocumentsBloc(
-                          documentsRepository: DocumentsRepository(
-                            dioClient: context.read<DioClient>(),
-                          ),
-                        ),
-                        child: const DocumentsScreen(),
-                      ),
-                    ],
-                  ),
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text(project.title),
+                ),
+                floatingActionButton: _buildFloatingActionButton(),
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.centerDocked,
+                body: Column(
+                  children: <Widget>[
+                    _buildTabBar(theme: theme),
+                    _buildTabBarView(theme: theme),
+                  ],
                 ),
               );
             },
@@ -101,6 +93,106 @@ class _ProjectScreenState extends State<ProjectScreen> {
             },
           );
         },
+      ),
+    );
+  }
+
+  FloatingActionButton _buildFloatingActionButton() {
+    return FloatingActionButton(
+      onPressed: () {
+        switch (_tabController.index) {
+          case 0:
+            // ignore: avoid_print
+            print('Create Task');
+            break;
+          case 1:
+            context.goNamed(
+              RouteConstants.createNote,
+            );
+            break;
+          case 2:
+            // ignore: avoid_print
+            print('Create Document');
+            break;
+          default:
+        }
+      },
+      child: const Icon(Icons.add),
+    );
+  }
+
+  TabBar _buildTabBar({
+    required ThemeData theme,
+  }) {
+    return TabBar(
+      controller: _tabController,
+      onTap: (int index) {
+        _tabController.index = index;
+        setState(() {});
+      },
+      tabs: <Tab>[
+        _buildTab(
+          theme: theme,
+          title: 'Tasks',
+        ),
+        _buildTab(
+          theme: theme,
+          title: 'Notes',
+        ),
+        _buildTab(
+          theme: theme,
+          title: 'Documents',
+        ),
+      ],
+    );
+  }
+
+  Tab _buildTab({
+    required ThemeData theme,
+    required String title,
+  }) {
+    return Tab(
+      child: Text(
+        title,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onPrimary,
+        ),
+      ),
+    );
+  }
+
+  Expanded _buildTabBarView({
+    required ThemeData theme,
+  }) {
+    return Expanded(
+      child: TabBarView(
+        controller: _tabController,
+        children: <Widget>[
+          BlocProvider<TasksBloc>(
+            create: (BuildContext context) => TasksBloc(
+              tasksRepository: TasksRepository(
+                dioClient: context.read<DioClient>(),
+              ),
+            ),
+            child: const TasksScreen(),
+          ),
+          BlocProvider<NotesBloc>(
+            create: (BuildContext context) => NotesBloc(
+              notesRepository: NotesRepository(
+                dioClient: context.read<DioClient>(),
+              ),
+            ),
+            child: const NotesScreen(),
+          ),
+          BlocProvider<DocumentsBloc>(
+            create: (BuildContext context) => DocumentsBloc(
+              documentsRepository: DocumentsRepository(
+                dioClient: context.read<DioClient>(),
+              ),
+            ),
+            child: const DocumentsScreen(),
+          ),
+        ],
       ),
     );
   }
