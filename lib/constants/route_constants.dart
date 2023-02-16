@@ -10,4 +10,5 @@ class RouteConstants {
   static String note = 'note';
   static String createNote = 'createNote';
   static String document = 'document';
+  static String createDocument = 'createDocument';
 }
