@@ -102,8 +102,9 @@ class _ProjectScreenState extends State<ProjectScreen>
       onPressed: () {
         switch (_tabController.index) {
           case 0:
-            // ignore: avoid_print
-            print('Create Task');
+            context.goNamed(
+              RouteConstants.createTask,
+            );
             break;
           case 1:
             context.goNamed(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:intl/intl.dart';
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/note.dart';
@@ -22,7 +22,7 @@ class NoteScreen extends StatefulWidget {
 }
 
 class _NoteScreenState extends State<NoteScreen> {
-  final QuillController _controller = QuillController.basic();
+  final quill.QuillController _controller = quill.QuillController.basic();
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +97,7 @@ class _NoteScreenState extends State<NoteScreen> {
             fetchNoteSuccess: (Note note) {
               if (note.content != null) {
                 _controller.document =
-                    Document.fromJson(note.content ?? <dynamic>[]);
+                    quill.Document.fromJson(note.content ?? <dynamic>[]);
               }
               return Scaffold(
                 appBar: AppBar(

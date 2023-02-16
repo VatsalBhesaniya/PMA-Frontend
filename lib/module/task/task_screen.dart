@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
 import 'package:pma/module/task/bloc/task_bloc.dart';
 import 'package:pma/module/task/task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/text_editor.dart';
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({
@@ -20,8 +22,11 @@ class TaskScreen extends StatefulWidget {
 }
 
 class _TaskScreenState extends State<TaskScreen> {
+  final quill.QuillController _controller = quill.QuillController.basic();
+
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return BlocProvider<TaskBloc>(
       create: (BuildContext context) => TaskBloc(
         taskRepository: TaskRepository(
@@ -69,25 +74,41 @@ class _TaskScreenState extends State<TaskScreen> {
               return const CircularProgressIndicator();
             },
             fetchTaskSuccess: (Task task) {
+              if (task.description != null) {
+                _controller.document =
+                    quill.Document.fromJson(task.description ?? <dynamic>[]);
+              }
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Task Detail'),
                 ),
                 body: SafeArea(
                   child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text('task id: ${task.id}'),
-                        Text(task.title),
-                        const Text('Created At'),
-                        Text(task.createdAt),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        _buildNotesAttached(),
-                        _buildDocumentsAttached(),
-                      ],
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const SizedBox(height: 16),
+                          Text('task id: ${task.id}'),
+                          const SizedBox(height: 16),
+                          Text(task.title),
+                          const SizedBox(height: 16),
+                          _buildDescription(
+                            theme: theme,
+                            isEdit: false,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text('Created At'),
+                          const SizedBox(height: 16),
+                          Text(task.createdAt),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          _buildNotesAttached(),
+                          _buildDocumentsAttached(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -103,6 +124,25 @@ class _TaskScreenState extends State<TaskScreen> {
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDescription({
+    required ThemeData theme,
+    required bool isEdit,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outline),
+        borderRadius: const BorderRadius.all(
+          Radius.circular(8),
+        ),
+      ),
+      child: TextEditor(
+        controller: _controller,
+        readOnly: !isEdit,
+        showCursor: isEdit,
       ),
     );
   }
