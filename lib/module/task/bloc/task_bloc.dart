@@ -19,6 +19,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   })  : _taskRepository = taskRepository,
         super(const TaskState.initial()) {
     on<_FetchTask>(_onFetchTask);
+    on<_EditTask>(_onEditTask);
+    on<_UpdateTask>(_onUpdateTask);
     on<_FetchAttachedNotes>(_onFetchAttachedNotes);
     on<_ExpandTask>(_onExpandTask);
     on<_FetchAttachedDocuments>(_onFetchAttachedDocuments);
@@ -41,6 +43,30 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       },
       failure: (NetworkExceptions error) {
         emit(const _FetchTaskFailure());
+      },
+    );
+  }
+
+  void _onEditTask(_EditTask event, Emitter<TaskState> emit) {
+    emit(const _LoadInProgress());
+    emit(_FetchTaskSuccess(task: event.task));
+  }
+
+  FutureOr<void> _onUpdateTask(
+      _UpdateTask event, Emitter<TaskState> emit) async {
+    emit(const _LoadInProgress());
+    final ApiResult<Task?> apiResult =
+        await _taskRepository.updateTask(task: event.task);
+    apiResult.when(
+      success: (Task? task) {
+        if (task == null) {
+          emit(const _UpdateTaskFailure());
+        } else {
+          emit(_FetchTaskSuccess(task: task));
+        }
+      },
+      failure: (NetworkExceptions error) {
+        emit(const _UpdateTaskFailure());
       },
     );
   }
