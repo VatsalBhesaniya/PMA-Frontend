@@ -71,7 +71,7 @@ abstract class NetworkExceptions with _$NetworkExceptions {
   const factory NetworkExceptions.internalServerError() = InternalServerError;
   const factory NetworkExceptions.notImplemented() = NotImplemented;
   const factory NetworkExceptions.serviceUnavailable() = ServiceUnavailable;
-  const factory NetworkExceptions.defaultError(String error) = DefaultError;
+  const factory NetworkExceptions.defaultError({String? error}) = DefaultError;
 
   factory NetworkExceptions.handleResponse(DioError e) {
     switch (e.response?.statusCode) {
@@ -102,7 +102,7 @@ abstract class NetworkExceptions with _$NetworkExceptions {
       default:
         final int? responseCode = e.response?.statusCode;
         return NetworkExceptions.defaultError(
-          'Received invalid status code: $responseCode',
+          error: 'Received invalid status code: $responseCode',
         );
     }
   }
@@ -171,8 +171,8 @@ abstract class NetworkExceptions with _$NetworkExceptions {
       serviceUnavailable: () {
         errorMessage = 'Service unavailable';
       },
-      defaultError: (String error) {
-        errorMessage = error;
+      defaultError: (String? error) {
+        errorMessage = error ?? 'Something went wrong!';
       },
     );
     return errorMessage;

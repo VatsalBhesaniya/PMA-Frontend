@@ -22,13 +22,13 @@ ThemeData buildLightTheme() {
 ThemeData buildDarkTheme() {
   final ThemeData base = ThemeData.light();
   return base.copyWith(
-    colorScheme: _dartColorScheme,
+    colorScheme: _darkColorScheme,
     primaryColor: pink100,
     scaffoldBackgroundColor: backgroundWhite,
     cardColor: backgroundWhite,
     textSelectionTheme: const TextSelectionThemeData(selectionColor: pink100),
     buttonTheme: const ButtonThemeData(
-      colorScheme: _dartColorScheme,
+      colorScheme: _darkColorScheme,
     ),
     primaryIconTheme: _buildIconTheme(base.iconTheme),
     textTheme: _buildTextTheme(base.textTheme),
@@ -54,7 +54,7 @@ const ColorScheme _lightColorScheme = ColorScheme(
   brightness: Brightness.light,
 );
 
-const ColorScheme _dartColorScheme = ColorScheme(
+const ColorScheme _darkColorScheme = ColorScheme(
   primary: Colors.yellow,
   primaryContainer: Colors.red,
   secondary: Colors.redAccent,
