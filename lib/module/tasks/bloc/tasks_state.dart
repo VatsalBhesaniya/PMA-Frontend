@@ -8,4 +8,8 @@ class TasksState with _$TasksState {
     required List<Task> tasks,
   }) = _FetchTasksSuccess;
   const factory TasksState.fetchTasksFailure() = _FetchTasksFailure;
+  const factory TasksState.deleteTaskSuccess() = _DeleteTaskSuccess;
+  const factory TasksState.deleteTaskFailure({
+    required NetworkExceptions error,
+  }) = _DeleteTaskFailure;
 }

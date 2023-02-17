@@ -28,4 +28,22 @@ class TasksRepository {
       );
     }
   }
+
+  Future<ApiResult<bool>> deleteTask({
+    required int taskId,
+  }) async {
+    try {
+      await dioClient.request<void>(
+        url: '$tasksEndpoint/$taskId',
+        httpMethod: HttpMethod.delete,
+      );
+      return const ApiResult<bool>.success(
+        data: true,
+      );
+    } on Exception catch (e) {
+      return ApiResult<bool>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
 }
