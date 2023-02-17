@@ -11,6 +11,9 @@ class TaskEvent with _$TaskEvent {
   const factory TaskEvent.updateTask({
     required Task task,
   }) = _UpdateTask;
+  const factory TaskEvent.deleteTask({
+    required int taskId,
+  }) = _DeleteTask;
   const factory TaskEvent.fetchAttachedNotes({
     required List<int> noteIds,
   }) = _FetchAttachedNotes;

@@ -9,6 +9,10 @@ class TaskState with _$TaskState {
   }) = _FetchTaskSuccess;
   const factory TaskState.fetchTaskFailure() = _FetchTaskFailure;
   const factory TaskState.updateTaskFailure() = _UpdateTaskFailure;
+  const factory TaskState.deleteTaskSuccess() = _DeleteTaskSuccess;
+  const factory TaskState.deleteTaskFailure({
+    required NetworkExceptions error,
+  }) = _DeleteTaskFailure;
   const factory TaskState.fetchAttachedNotesLoading() =
       _FetchAttachedNotesLoading;
   const factory TaskState.fetchAttachedNotesSuccess({

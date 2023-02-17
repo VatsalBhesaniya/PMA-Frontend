@@ -17,6 +17,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   })  : _tasksRepository = tasksRepository,
         super(const TasksState.initial()) {
     on<_FetchTasks>(_onFetchTasks);
+    on<_DeleteTask>(_onDeleteTask);
   }
 
   final TasksRepository _tasksRepository;
@@ -32,6 +33,22 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
       },
       failure: (NetworkExceptions error) {
         emit(const _FetchTasksFailure());
+      },
+    );
+  }
+
+  FutureOr<void> _onDeleteTask(
+      _DeleteTask event, Emitter<TasksState> emit) async {
+    emit(const _LoadInProgress());
+    final ApiResult<bool> apiResult = await _tasksRepository.deleteTask(
+      taskId: event.taskId,
+    );
+    apiResult.when(
+      success: (bool isDeleted) {
+        emit(const _DeleteTaskSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(_DeleteTaskFailure(error: error));
       },
     );
   }

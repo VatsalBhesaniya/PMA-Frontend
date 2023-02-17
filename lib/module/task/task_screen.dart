@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:go_router/go_router.dart';
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
@@ -8,6 +9,7 @@ import 'package:pma/models/task.dart';
 import 'package:pma/module/task/bloc/task_bloc.dart';
 import 'package:pma/module/task/task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/utils/text_editor.dart';
 
 class TaskScreen extends StatefulWidget {
@@ -50,6 +52,19 @@ class _TaskScreenState extends State<TaskScreen> {
                     ),
                   );
             },
+            updateTaskFailure: () async {
+              _showUpdateTaskFailureAlert(context, theme);
+            },
+            deleteTaskSuccess: () {
+              context.pop();
+              _showSnackBar(context: context, theme: theme);
+            },
+            deleteTaskFailure: (NetworkExceptions error) {
+              _buildDeleteTaskFailureAlert(
+                context: context,
+                theme: theme,
+              );
+            },
             orElse: () => null,
           );
         },
@@ -86,6 +101,7 @@ class _TaskScreenState extends State<TaskScreen> {
                   actions: <Widget>[
                     _buildActionButton(
                       context: context,
+                      theme: theme,
                       task: task,
                     ),
                   ],
@@ -136,8 +152,44 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
+  Future<String?> _showUpdateTaskFailureAlert(
+      BuildContext context, ThemeData theme) {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              'Alert',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+          content: const Text(
+            'Someth ing went wrong!. Please try again.',
+          ),
+          actions: <Widget>[
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: Text(
+                  'OK',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildActionButton({
     required BuildContext context,
+    required ThemeData theme,
     required Task task,
   }) {
     if (task.isEdit) {
@@ -182,17 +234,33 @@ class _TaskScreenState extends State<TaskScreen> {
         ],
       );
     }
-    return IconButton(
-      onPressed: () {
-        context.read<TaskBloc>().add(
-              TaskEvent.editTask(
-                task: task.copyWith(
-                  isEdit: true,
-                ),
-              ),
+    return Row(
+      children: <Widget>[
+        IconButton(
+          onPressed: () {
+            _showDeleteTaskConfirmDialog(
+              context: context,
+              theme: theme,
+              taskId: task.id,
             );
-      },
-      icon: const Icon(Icons.edit_note_rounded),
+          },
+          icon: const Icon(
+            Icons.delete_rounded,
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            context.read<TaskBloc>().add(
+                  TaskEvent.editTask(
+                    task: task.copyWith(
+                      isEdit: true,
+                    ),
+                  ),
+                );
+          },
+          icon: const Icon(Icons.edit_note_rounded),
+        ),
+      ],
     );
   }
 
@@ -398,6 +466,116 @@ class _TaskScreenState extends State<TaskScreen> {
         onTap: () {},
       ),
       isExpanded: document.isExpanded,
+    );
+  }
+
+  void _showSnackBar({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: const EdgeInsets.all(16),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        backgroundColor: theme.colorScheme.surface,
+        content: Text(
+          'Task successfully deleted',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _buildDeleteTaskFailureAlert({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              'Alert',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+          content: const Text(
+            'Could not delete a task successfully. Please try again.',
+          ),
+          actions: <Widget>[
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: Text(
+                  'OK',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteTaskConfirmDialog({
+    required BuildContext context,
+    required ThemeData theme,
+    required int taskId,
+  }) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              'Confirm',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+          content: const Text(
+            'Are you sure you want to delete this task?',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                context.read<TaskBloc>().add(
+                      TaskEvent.deleteTask(taskId: taskId),
+                    );
+                Navigator.pop(ctx);
+              },
+              child: Text(
+                'OK',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'Cancel',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
