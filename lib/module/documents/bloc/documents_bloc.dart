@@ -16,12 +16,13 @@ class DocumentsBloc extends Bloc<DocumentsEvent, DocumentsState> {
     required DocumentsRepository documentsRepository,
   })  : _documentsRepository = documentsRepository,
         super(const DocumentsState.initial()) {
-    on<_FetchDocuments>(_onFetchNotes);
+    on<_FetchDocuments>(_onFetchDocuments);
+    on<_DeleteDocument>(_onDeleteDocument);
   }
 
   final DocumentsRepository _documentsRepository;
 
-  FutureOr<void> _onFetchNotes(
+  FutureOr<void> _onFetchDocuments(
       _FetchDocuments event, Emitter<DocumentsState> emit) async {
     emit(const _LoadInProgress());
     final ApiResult<List<Document>?> apiResult =
@@ -36,6 +37,22 @@ class DocumentsBloc extends Bloc<DocumentsEvent, DocumentsState> {
       },
       failure: (NetworkExceptions error) {
         emit(const _FetchDocumentsFailure());
+      },
+    );
+  }
+
+  FutureOr<void> _onDeleteDocument(
+      _DeleteDocument event, Emitter<DocumentsState> emit) async {
+    emit(const _LoadInProgress());
+    final ApiResult<bool> apiResult = await _documentsRepository.deleteDocument(
+      documentId: event.documentId,
+    );
+    apiResult.when(
+      success: (bool isDeleted) {
+        emit(const _DeleteDocumentSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(_DeleteDocumentFailure(error: error));
       },
     );
   }

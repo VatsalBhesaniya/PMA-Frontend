@@ -11,4 +11,7 @@ class DocumentEvent with _$DocumentEvent {
   const factory DocumentEvent.updateDocument({
     required Document document,
   }) = _UpdateDocument;
+  const factory DocumentEvent.deleteDocument({
+    required int documentId,
+  }) = _DeleteDocument;
 }

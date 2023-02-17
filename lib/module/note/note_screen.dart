@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/module/note/bloc/note_bloc.dart';
 import 'package:pma/module/note/note_repository.dart';
 import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/utils/text_editor.dart';
 
 class NoteScreen extends StatefulWidget {
@@ -38,39 +40,27 @@ class _NoteScreenState extends State<NoteScreen> {
         listener: (BuildContext context, NoteState state) {
           state.maybeWhen(
             updateNoteFailure: () async {
-              showDialog<String>(
+              _showUpdateNoteFailureAlert(context, theme);
+            },
+            deleteNoteSuccess: () {
+              context.pop();
+              _showSnackBar(context: context, theme: theme);
+            },
+            deleteNoteFailure: (NetworkExceptions error) {
+              _buildDeleteNoteFailureAlert(
                 context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Center(
-                      child: Text(
-                        'Alert',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                    ),
-                    content: const Text(
-                      'Someth ing went wrong!. Please try again.',
-                    ),
-                    actions: <Widget>[
-                      Center(
-                        child: TextButton(
-                          onPressed: () => Navigator.pop(context, 'OK'),
-                          child: Text(
-                            'OK',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
+                theme: theme,
               );
             },
             orElse: () => null,
+          );
+        },
+        buildWhen: (NoteState previous, NoteState current) {
+          return current.maybeWhen(
+            updateNoteFailure: () => false,
+            deleteNoteSuccess: () => false,
+            deleteNoteFailure: (NetworkExceptions error) => false,
+            orElse: () => true,
           );
         },
         builder: (BuildContext context, NoteState state) {
@@ -105,6 +95,7 @@ class _NoteScreenState extends State<NoteScreen> {
                   actions: <Widget>[
                     _buildActionButton(
                       context: context,
+                      theme: theme,
                       note: note,
                     ),
                   ],
@@ -160,8 +151,44 @@ class _NoteScreenState extends State<NoteScreen> {
     );
   }
 
+  Future<String?> _showUpdateNoteFailureAlert(
+      BuildContext context, ThemeData theme) {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              'Alert',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+          content: const Text(
+            'Someth ing went wrong!. Please try again.',
+          ),
+          actions: <Widget>[
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: Text(
+                  'OK',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildActionButton({
     required BuildContext context,
+    required ThemeData theme,
     required Note note,
   }) {
     if (note.isEdit) {
@@ -205,17 +232,33 @@ class _NoteScreenState extends State<NoteScreen> {
         ],
       );
     }
-    return IconButton(
-      onPressed: () {
-        context.read<NoteBloc>().add(
-              NoteEvent.editNote(
-                note: note.copyWith(
-                  isEdit: true,
-                ),
-              ),
+    return Row(
+      children: <Widget>[
+        IconButton(
+          onPressed: () {
+            _showDeleteNoteConfirmDialog(
+              context: context,
+              theme: theme,
+              noteId: note.id,
             );
-      },
-      icon: const Icon(Icons.edit_note_rounded),
+          },
+          icon: const Icon(
+            Icons.delete_rounded,
+          ),
+        ),
+        IconButton(
+          onPressed: () {
+            context.read<NoteBloc>().add(
+                  NoteEvent.editNote(
+                    note: note.copyWith(
+                      isEdit: true,
+                    ),
+                  ),
+                );
+          },
+          icon: const Icon(Icons.edit_note_rounded),
+        ),
+      ],
     );
   }
 
@@ -291,6 +334,116 @@ class _NoteScreenState extends State<NoteScreen> {
         readOnly: !isEdit,
         showCursor: isEdit,
       ),
+    );
+  }
+
+  void _showSnackBar({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        margin: const EdgeInsets.all(16),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        backgroundColor: theme.colorScheme.surface,
+        content: Text(
+          'Note successfully deleted',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onPrimary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _buildDeleteNoteFailureAlert({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              'Alert',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+          content: const Text(
+            'Could not delete a note successfully. Please try again.',
+          ),
+          actions: <Widget>[
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: Text(
+                  'OK',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteNoteConfirmDialog({
+    required BuildContext context,
+    required ThemeData theme,
+    required int noteId,
+  }) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              'Confirm',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+          content: const Text(
+            'Are you sure you want to delete this note?',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                context.read<NoteBloc>().add(
+                      NoteEvent.deleteNote(noteId: noteId),
+                    );
+                Navigator.pop(ctx);
+              },
+              child: Text(
+                'OK',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'Cancel',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

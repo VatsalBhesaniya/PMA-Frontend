@@ -11,4 +11,7 @@ class NoteEvent with _$NoteEvent {
   const factory NoteEvent.updateNote({
     required Note note,
   }) = _UpdateNote;
+  const factory NoteEvent.deleteNote({
+    required int noteId,
+  }) = _DeleteNote;
 }
