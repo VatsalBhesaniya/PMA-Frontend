@@ -8,4 +8,8 @@ class NotesState with _$NotesState {
     required List<Note> notes,
   }) = _FetchNotesSuccess;
   const factory NotesState.fetchNotesFailure() = _FetchNotesFailure;
+  const factory NotesState.deleteNoteSuccess() = _DeleteNoteSuccess;
+  const factory NotesState.deleteNoteFailure({
+    required NetworkExceptions error,
+  }) = _DeleteNoteFailure;
 }
