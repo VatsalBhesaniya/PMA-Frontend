@@ -88,4 +88,22 @@ class DocumentRepository {
       );
     }
   }
+
+  Future<ApiResult<bool>> deleteDocument({
+    required int documentId,
+  }) async {
+    try {
+      await dioClient.request<void>(
+        url: '$documentsEndpoint/$documentId',
+        httpMethod: HttpMethod.delete,
+      );
+      return const ApiResult<bool>.success(
+        data: true,
+      );
+    } on Exception catch (e) {
+      return ApiResult<bool>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
 }

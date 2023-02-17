@@ -9,4 +9,8 @@ class DocumentState with _$DocumentState {
   }) = _FetchDocumentSuccess;
   const factory DocumentState.fetchDocumentFailure() = _FetchDocumentFailure;
   const factory DocumentState.updateDocumentFailure() = _UpdateDocumentFailure;
+  const factory DocumentState.deleteDocumentSuccess() = _DeleteDocumentSuccess;
+  const factory DocumentState.deleteDocumentFailure({
+    required NetworkExceptions error,
+  }) = _DeleteDocumentFailure;
 }

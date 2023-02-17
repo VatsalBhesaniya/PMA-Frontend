@@ -19,6 +19,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     on<_FetchDocument>(_onFetchDocument);
     on<_EditDocument>(_onEditDocument);
     on<_UpdateDocument>(_onUpdateDocument);
+    on<_DeleteDocument>(_onDeleteDocument);
   }
 
   final DocumentRepository _documentRepository;
@@ -62,6 +63,22 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
       },
       failure: (NetworkExceptions error) {
         emit(const _UpdateDocumentFailure());
+      },
+    );
+  }
+
+  FutureOr<void> _onDeleteDocument(
+      _DeleteDocument event, Emitter<DocumentState> emit) async {
+    emit(const _LoadInProgress());
+    final ApiResult<bool> apiResult = await _documentRepository.deleteDocument(
+      documentId: event.documentId,
+    );
+    apiResult.when(
+      success: (bool isDeleted) {
+        emit(const _DeleteDocumentSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(_DeleteDocumentFailure(error: error));
       },
     );
   }
