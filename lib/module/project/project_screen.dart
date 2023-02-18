@@ -250,8 +250,16 @@ class _ProjectScreenState extends State<ProjectScreen>
           ),
         ),
         IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.mode_edit_outlined),
+          onPressed: () {
+            context.goNamed(
+              RouteConstants.projectDetail,
+              params: <String, String>{
+                'id': widget.projectId,
+                'projectId': widget.projectId,
+              },
+            );
+          },
+          icon: const Icon(Icons.settings),
         ),
       ],
     );
@@ -335,7 +343,7 @@ class _ProjectScreenState extends State<ProjectScreen>
             ),
           ),
           content: const Text(
-            'Are you sure you want to delete this note?',
+            'Are you sure you want to delete this project?',
           ),
           actions: <Widget>[
             TextButton(

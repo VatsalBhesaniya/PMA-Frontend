@@ -9,6 +9,7 @@ import 'package:pma/module/home/home_screen.dart';
 import 'package:pma/module/login/login_screen.dart';
 import 'package:pma/module/note/note_screen.dart';
 import 'package:pma/module/project/project_screen.dart';
+import 'package:pma/module/project_detail/project_detail_screen.dart.dart';
 import 'package:pma/module/settings/settings_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
 import 'package:pma/profile/profile_screen.dart';
@@ -41,6 +42,17 @@ final GoRouter router = GoRouter(
               projectId: state.params['id']!,
             );
           },
+          routes: <RouteBase>[
+            GoRoute(
+              path: '${RouteConstants.projectDetail}/:projectId',
+              name: RouteConstants.projectDetail,
+              builder: (BuildContext context, GoRouterState state) {
+                return ProjectDetailScreen(
+                  projectId: state.params['projectId']!,
+                );
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: '${RouteConstants.task}/:id',
