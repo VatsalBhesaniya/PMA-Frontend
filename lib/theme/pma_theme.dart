@@ -38,7 +38,7 @@ ThemeData buildDarkTheme() {
 }
 
 const ColorScheme _lightColorScheme = ColorScheme(
-  primary: pink100,
+  primary: Colors.amber,
   primaryContainer: brown900,
   secondary: pink50,
   secondaryContainer: brown900,
