@@ -17,6 +17,7 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   })  : _projectRepository = projectRepository,
         super(const ProjectState.initial()) {
     on<_FetchProject>(_onFetchProject);
+    on<_DeleteProject>(_onDeleteProject);
   }
 
   final ProjectRepository _projectRepository;
@@ -36,6 +37,22 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       },
       failure: (NetworkExceptions error) {
         emit(const _FetchProjectFailure());
+      },
+    );
+  }
+
+  FutureOr<void> _onDeleteProject(
+      _DeleteProject event, Emitter<ProjectState> emit) async {
+    emit(const _LoadInProgress());
+    final ApiResult<bool> apiResult = await _projectRepository.deleteProject(
+      projectId: event.projectId,
+    );
+    apiResult.when(
+      success: (bool isDeleted) {
+        emit(const _DeleteProjectSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(_DeleteProjectFailure(error: error));
       },
     );
   }

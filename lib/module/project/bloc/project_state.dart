@@ -8,4 +8,8 @@ class ProjectState with _$ProjectState {
     required Project project,
   }) = _FetchProjectSuccess;
   const factory ProjectState.fetchProjectFailure() = _FetchProjectFailure;
+  const factory ProjectState.deleteProjectSuccess() = _DeleteProjectSuccess;
+  const factory ProjectState.deleteProjectFailure({
+    required NetworkExceptions error,
+  }) = _DeleteProjectFailure;
 }
