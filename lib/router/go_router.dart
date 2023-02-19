@@ -35,6 +35,20 @@ final GoRouter router = GoRouter(
       },
       routes: <RouteBase>[
         GoRoute(
+          path: RouteConstants.settings,
+          name: RouteConstants.settings,
+          builder: (BuildContext context, GoRouterState state) {
+            return const SettingsScreen();
+          },
+        ),
+        GoRoute(
+          path: RouteConstants.profile,
+          name: RouteConstants.profile,
+          builder: (BuildContext context, GoRouterState state) {
+            return const ProfileScreen();
+          },
+        ),
+        GoRoute(
           path: '${RouteConstants.project}/:id',
           name: RouteConstants.project,
           builder: (BuildContext context, GoRouterState state) {
@@ -103,20 +117,6 @@ final GoRouter router = GoRouter(
           },
         ),
       ],
-    ),
-    GoRoute(
-      path: '/${RouteConstants.settings}',
-      name: RouteConstants.settings,
-      builder: (BuildContext context, GoRouterState state) {
-        return const SettingsScreen();
-      },
-    ),
-    GoRoute(
-      path: '/${RouteConstants.profile}',
-      name: RouteConstants.profile,
-      builder: (BuildContext context, GoRouterState state) {
-        return const ProfileScreen();
-      },
     ),
   ],
 );
