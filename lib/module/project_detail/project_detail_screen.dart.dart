@@ -11,7 +11,7 @@ import 'package:pma/module/project_detail/project_detail_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/floating_action_button_animator.dart';
-import 'package:pma/widgets/floating_button_extended.dart';
+import 'package:pma/widgets/floating_action_button_extended.dart';
 import 'package:pma/widgets/input_field.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
@@ -101,7 +101,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
                 floatingActionButtonAnimator: NoScalingAnimation(),
-                floatingActionButton: FloatingButtonExtended(
+                floatingActionButton: FloatingActionButtonExtended(
                   onPressed: () {
                     _showDeleteNoteConfirmDialog(
                       context: context,
