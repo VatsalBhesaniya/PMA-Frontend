@@ -10,6 +10,8 @@ import 'package:pma/module/project_detail/bloc/project_detail_bloc.dart';
 import 'package:pma/module/project_detail/project_detail_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/floating_action_button_animator.dart';
+import 'package:pma/widgets/floating_button_extended.dart';
 import 'package:pma/widgets/input_field.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
@@ -42,6 +44,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           state.maybeWhen(
             fetchProjectDetailFailure: (NetworkExceptions error) {},
             deleteProjectSuccess: () {
+              context.pop();
               context.pop();
               _showSnackBar(context: context, theme: theme);
             },
@@ -97,7 +100,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
-                floatingActionButton: MaterialButton(
+                floatingActionButtonAnimator: NoScalingAnimation(),
+                floatingActionButton: FloatingButtonExtended(
                   onPressed: () {
                     _showDeleteNoteConfirmDialog(
                       context: context,
@@ -105,21 +109,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       projectId: projectDetail.id,
                     );
                   },
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-                  color: theme.colorScheme.error,
-                  elevation: 8,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(4),
-                    ),
-                  ),
-                  child: Text(
-                    'Delete Project',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.background,
-                    ),
-                  ),
+                  backgroundColor: theme.colorScheme.error,
+                  labelText: 'Delete Project',
                 ),
                 body: SafeArea(
                   child: SingleChildScrollView(
