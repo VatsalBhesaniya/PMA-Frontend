@@ -15,7 +15,6 @@ import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 import 'package:pma/module/tasks/tasks_repository.dart';
 import 'package:pma/module/tasks/tasks_screen.dart';
 import 'package:pma/utils/dio_client.dart';
-import 'package:pma/utils/network_exceptions.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({
@@ -57,29 +56,7 @@ class _ProjectScreenState extends State<ProjectScreen>
           dioClient: context.read<DioClient>(),
         ),
       ),
-      child: BlocConsumer<ProjectBloc, ProjectState>(
-        listener: (BuildContext context, ProjectState state) {
-          state.maybeWhen(
-            deleteProjectSuccess: () {
-              context.pop();
-              _showSnackBar(context: context, theme: theme);
-            },
-            deleteProjectFailure: (NetworkExceptions error) {
-              _buildDeleteProjectFailureAlert(
-                context: context,
-                theme: theme,
-              );
-            },
-            orElse: () => null,
-          );
-        },
-        buildWhen: (ProjectState previous, ProjectState current) {
-          return current.maybeWhen(
-            deleteProjectSuccess: () => false,
-            deleteProjectFailure: (NetworkExceptions error) => false,
-            orElse: () => true,
-          );
-        },
+      child: BlocBuilder<ProjectBloc, ProjectState>(
         builder: (BuildContext context, ProjectState state) {
           return state.maybeWhen(
             initial: () {
@@ -101,7 +78,6 @@ class _ProjectScreenState extends State<ProjectScreen>
                     _buildActionButton(
                       context: context,
                       theme: theme,
-                      project: project,
                     ),
                   ],
                 ),
@@ -233,145 +209,18 @@ class _ProjectScreenState extends State<ProjectScreen>
   Widget _buildActionButton({
     required BuildContext context,
     required ThemeData theme,
-    required Project project,
   }) {
-    return Row(
-      children: <Widget>[
-        IconButton(
-          onPressed: () {
-            _showDeleteNoteConfirmDialog(
-              context: context,
-              theme: theme,
-              projectId: project.id,
-            );
+    return IconButton(
+      onPressed: () {
+        context.goNamed(
+          RouteConstants.projectDetail,
+          params: <String, String>{
+            'id': widget.projectId,
+            'projectId': widget.projectId,
           },
-          icon: const Icon(
-            Icons.delete_rounded,
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            context.goNamed(
-              RouteConstants.projectDetail,
-              params: <String, String>{
-                'id': widget.projectId,
-                'projectId': widget.projectId,
-              },
-            );
-          },
-          icon: const Icon(Icons.settings),
-        ),
-      ],
-    );
-  }
-
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Project successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildDeleteProjectFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not delete a project successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
         );
       },
-    );
-  }
-
-  void _showDeleteNoteConfirmDialog({
-    required BuildContext context,
-    required ThemeData theme,
-    required int projectId,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext ctx) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Confirm',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Are you sure you want to delete this project?',
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                context.read<ProjectBloc>().add(
-                      ProjectEvent.deleteProject(projectId: projectId),
-                    );
-                Navigator.pop(ctx);
-              },
-              child: Text(
-                'OK',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(
-                'Cancel',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      icon: const Icon(Icons.settings),
     );
   }
 }
