@@ -9,7 +9,7 @@ import 'package:pma/module/document/bloc/document_bloc.dart';
 import 'package:pma/module/document/document_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
-import 'package:pma/utils/text_editor.dart';
+import 'package:pma/widgets/text_editor.dart';
 
 class DocumentScreen extends StatefulWidget {
   const DocumentScreen({

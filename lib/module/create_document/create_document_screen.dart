@@ -9,8 +9,8 @@ import 'package:pma/module/create_document/bloc/create_document_bloc.dart';
 import 'package:pma/module/create_document/create_document_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
-import 'package:pma/utils/text_editor.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/text_editor.dart';
 
 class CreateDocumentScreen extends StatefulWidget {
   const CreateDocumentScreen({super.key});

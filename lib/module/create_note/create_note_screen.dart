@@ -9,8 +9,8 @@ import 'package:pma/module/create_note/bloc/create_note_bloc.dart';
 import 'package:pma/module/create_note/create_note_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
-import 'package:pma/utils/text_editor.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/text_editor.dart';
 
 class CreateNoteScreen extends StatefulWidget {
   const CreateNoteScreen({super.key});

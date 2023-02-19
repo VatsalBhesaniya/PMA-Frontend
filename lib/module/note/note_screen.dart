@@ -9,7 +9,7 @@ import 'package:pma/module/note/bloc/note_bloc.dart';
 import 'package:pma/module/note/note_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
-import 'package:pma/utils/text_editor.dart';
+import 'package:pma/widgets/text_editor.dart';
 
 class NoteScreen extends StatefulWidget {
   const NoteScreen({

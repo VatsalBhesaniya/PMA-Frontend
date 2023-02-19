@@ -9,8 +9,8 @@ import 'package:pma/module/create_task/bloc/create_task_bloc.dart';
 import 'package:pma/module/create_task/create_task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
-import 'package:pma/utils/text_editor.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/text_editor.dart';
 
 class CreateTaskScreen extends StatefulWidget {
   const CreateTaskScreen({super.key});
