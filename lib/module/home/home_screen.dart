@@ -26,7 +26,11 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 context.goNamed(RouteConstants.settings);
               },
-              icon: const Icon(Icons.settings),
+              icon: const CircleAvatar(
+                child: Icon(
+                  Icons.person_outline_rounded,
+                ),
+              ),
             ),
           ],
         ),

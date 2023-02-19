@@ -58,7 +58,7 @@ class _ProjectScreenState extends State<ProjectScreen>
       ),
       child: BlocBuilder<ProjectBloc, ProjectState>(
         builder: (BuildContext context, ProjectState state) {
-          return state.when(
+          return state.maybeWhen(
             initial: () {
               context.read<ProjectBloc>().add(
                     ProjectEvent.fetchProject(
@@ -74,6 +74,12 @@ class _ProjectScreenState extends State<ProjectScreen>
               return Scaffold(
                 appBar: AppBar(
                   title: Text(project.title),
+                  actions: <Widget>[
+                    _buildActionButton(
+                      context: context,
+                      theme: theme,
+                    ),
+                  ],
                 ),
                 floatingActionButton: _buildFloatingActionButton(),
                 floatingActionButtonLocation:
@@ -91,6 +97,7 @@ class _ProjectScreenState extends State<ProjectScreen>
                 child: Text('Something went wrong.'),
               );
             },
+            orElse: () => const SizedBox(),
           );
         },
       ),
@@ -196,6 +203,24 @@ class _ProjectScreenState extends State<ProjectScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    return IconButton(
+      onPressed: () {
+        context.goNamed(
+          RouteConstants.projectDetail,
+          params: <String, String>{
+            'id': widget.projectId,
+            'projectId': widget.projectId,
+          },
+        );
+      },
+      icon: const Icon(Icons.settings),
     );
   }
 }

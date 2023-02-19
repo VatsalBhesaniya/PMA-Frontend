@@ -6,6 +6,14 @@ enum InputFieldHeight {
 }
 
 enum InputFieldBorderType {
+  none,
   outlineInputBorder,
   underlineInputBorder,
+}
+
+enum MemberRole {
+  owner,
+  admin,
+  member,
+  guest,
 }

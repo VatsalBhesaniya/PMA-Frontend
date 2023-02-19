@@ -12,11 +12,14 @@ class InputField extends StatelessWidget {
     this.isEnabled = true,
     this.borderRadius = const BorderRadius.all(Radius.circular(4)),
     required this.hintText,
+    this.label,
     this.descriptionText,
     this.textInputType = TextInputType.text,
     this.textCapitalization = TextCapitalization.none,
+    this.style,
     this.validator,
     this.focusNode,
+    this.horizontalContentPadding = 16,
     this.scrollPadding = const EdgeInsets.all(20),
     this.onFieldSubmitted,
     this.suffixIcon,
@@ -32,11 +35,14 @@ class InputField extends StatelessWidget {
   final bool isEnabled;
   final BorderRadius borderRadius;
   final String hintText;
+  final Widget? label;
   final String? descriptionText;
   final TextInputType textInputType;
   final TextCapitalization textCapitalization;
+  final TextStyle? style;
   final FormFieldValidator<String>? validator;
   final FocusNode? focusNode;
+  final double horizontalContentPadding;
   final EdgeInsets scrollPadding;
   final Function(String)? onFieldSubmitted;
   final Widget? suffixIcon;
@@ -56,9 +62,10 @@ class InputField extends StatelessWidget {
       focusNode: focusNode,
       scrollPadding: scrollPadding,
       decoration: _inputDecoration(context, currentTheme),
-      style: currentTheme.textTheme.bodyMedium?.copyWith(
-        color: currentTheme.colorScheme.primary,
-      ),
+      style: style ??
+          currentTheme.textTheme.bodyMedium?.copyWith(
+            color: currentTheme.colorScheme.primary,
+          ),
       keyboardType: textInputType,
       textCapitalization: textCapitalization,
       validator: validator,
@@ -91,11 +98,12 @@ class InputField extends StatelessWidget {
         currentTheme: currentTheme,
       ),
       contentPadding: EdgeInsets.symmetric(
-        horizontal: 16,
+        horizontal: horizontalContentPadding,
         vertical: inputFieldHeight.verticalPadding,
       ),
       hintText: hintText,
-      hintStyle: _labelStyle(context, currentTheme),
+      hintStyle: _hintStyle(context, currentTheme),
+      label: label,
       helperText: descriptionText,
       helperStyle: _helperStyle(currentTheme),
       errorStyle: _errorStyle(currentTheme),
@@ -126,6 +134,8 @@ class InputField extends StatelessWidget {
           color: _borderColor(currentTheme, color),
         ),
       );
+    } else if (borderType == InputFieldBorderType.none) {
+      return InputBorder.none;
     } else {
       return UnderlineInputBorder(
         borderSide: BorderSide(
@@ -142,7 +152,7 @@ class InputField extends StatelessWidget {
     return color ?? currentTheme.colorScheme.primary;
   }
 
-  TextStyle _labelStyle(BuildContext context, ThemeData currentTheme) {
+  TextStyle _hintStyle(BuildContext context, ThemeData currentTheme) {
     return currentTheme.textTheme.bodyMedium!.copyWith(
       color: currentTheme.colorScheme.primary,
     );

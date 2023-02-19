@@ -6,6 +6,7 @@ class RouteConstants {
   static String profile = 'profile';
   static String home = 'home';
   static String project = 'project';
+  static String projectDetail = 'projectDetail';
   static String task = 'task';
   static String createTask = 'createTask';
   static String note = 'note';
