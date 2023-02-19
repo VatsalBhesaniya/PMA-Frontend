@@ -27,7 +27,7 @@ class ProjectDetailScreen extends StatefulWidget {
 }
 
 class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
-  final TextEditingController _noteTitleController = TextEditingController();
+  final TextEditingController _projectTitleController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +148,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   InputField _buildProjectTitle(ProjectDetail projectDetail, ThemeData theme) {
     return InputField(
       onChanged: (String value) {},
-      controller: _noteTitleController..text = projectDetail.title,
+      controller: _projectTitleController..text = projectDetail.title,
       isEnabled: projectDetail.isEdit,
       hintText: 'Title',
       borderType: projectDetail.isEdit

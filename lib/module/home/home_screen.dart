@@ -6,6 +6,7 @@ import 'package:pma/models/project.dart';
 import 'package:pma/module/home/bloc/home_bloc.dart';
 import 'package:pma/module/home/projects_repository.dart';
 import 'package:pma/utils/dio_client.dart';
+import 'package:pma/widgets/floating_action_button_extended.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -34,9 +35,12 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: const Icon(Icons.add),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: FloatingActionButtonExtended(
+          onPressed: () {
+            context.goNamed(RouteConstants.createProject);
+          },
+          labelText: 'Create Project',
         ),
         body: SafeArea(
           child: BlocBuilder<HomeBloc, HomeState>(
