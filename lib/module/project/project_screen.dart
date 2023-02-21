@@ -216,7 +216,6 @@ class _ProjectScreenState extends State<ProjectScreen>
           RouteConstants.projectDetail,
           params: <String, String>{
             'id': widget.projectId,
-            'projectId': widget.projectId,
           },
         );
       },

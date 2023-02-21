@@ -2,32 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/config/http_client_config.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/search_user.dart';
-import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/invite_members/bloc/invite_members_bloc.dart';
 import 'package:pma/module/invite_members/invite_members_repository.dart';
+import 'package:pma/module/select_users/select_users_screen.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
-import 'package:pma/widgets/search_bar.dart';
 
 class InviteMembersScreen extends StatefulWidget {
-  const InviteMembersScreen({super.key});
+  const InviteMembersScreen({
+    super.key,
+    required this.id,
+  });
+
+  final String id;
 
   @override
   State<InviteMembersScreen> createState() => _InviteMembersScreenState();
 }
 
 class _InviteMembersScreenState extends State<InviteMembersScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    _searchFocusNode.requestFocus();
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -35,10 +29,6 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
       body: SafeArea(
         child: BlocProvider<InviteMembersBloc>(
           create: (BuildContext context) => InviteMembersBloc(
-            userRepository: UserRepository(
-              dioClient: context.read<DioClient>(),
-              appStorageManager: context.read<AppStorageManager>(),
-            ),
             inviteMembersRepository: InviteMembersRepository(
               dioClient: context.read<DioClient>(),
               httpClient: context.read<HttpClientConfig>(),
@@ -47,14 +37,6 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
           child: BlocConsumer<InviteMembersBloc, InviteMembersState>(
             listener: (BuildContext context, InviteMembersState state) {
               state.maybeWhen(
-                searchUsersFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
-                    context: context,
-                    theme: theme,
-                    error:
-                        'Could not search user successfully. Please try again.',
-                  );
-                },
                 inviteMembersSuccess: () {
                   context.pop();
                 },
@@ -72,7 +54,6 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
             buildWhen:
                 (InviteMembersState previous, InviteMembersState current) {
               return current.maybeWhen(
-                searchUsersFailure: (NetworkExceptions error) => false,
                 inviteMembersSuccess: () => false,
                 inviteMembersFailure: (NetworkExceptions error) => false,
                 orElse: () => true,
@@ -81,13 +62,25 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
             builder: (BuildContext context, InviteMembersState state) {
               return state.maybeWhen(
                 initial: () {
-                  context.read<InviteMembersBloc>().add(
-                        InviteMembersEvent.searchUsers(
-                          searchText: _searchController.text.trim(),
+                  return Column(
+                    children: <Widget>[
+                      Expanded(
+                        child: SelectUsersScreen(
+                          buttonText: 'Invite',
+                          onSelectUsers: (List<SearchUser> users) {
+                            context.read<InviteMembersBloc>().add(
+                                  InviteMembersEvent.inviteMembers(
+                                    users: users
+                                        .where((SearchUser user) =>
+                                            user.isSelected == true)
+                                        .toList(),
+                                    projectId: int.parse(widget.id),
+                                  ),
+                                );
+                          },
                         ),
-                      );
-                  return const Center(
-                    child: CircularProgressIndicator(),
+                      ),
+                    ],
                   );
                 },
                 loadInProgress: () {
@@ -95,118 +88,10 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
                     child: CircularProgressIndicator(),
                   );
                 },
-                searchUsersSuccess: (List<SearchUser> users) {
-                  return GestureDetector(
-                    onTap: () {
-                      // FocusManager.instance.primaryFocus?.unfocus();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: <Widget>[
-                          _buildSearchBar(context: context),
-                          const SizedBox(height: 16),
-                          _buildUsers(users: users),
-                          _buildInviteButton(
-                            context: context,
-                            theme: theme,
-                            users: users,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
                 orElse: () => const SizedBox(),
               );
             },
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchBar({required BuildContext context}) {
-    return SearchBar(
-      controller: _searchController,
-      focusNode: _searchFocusNode,
-      hintText: 'username',
-      onCancel: () {
-        context.read<InviteMembersBloc>().add(
-              InviteMembersEvent.searchUsers(
-                searchText: _searchController.text.trim(),
-              ),
-            );
-      },
-      onChanged: (String searchText) {
-        context.read<InviteMembersBloc>().add(
-              InviteMembersEvent.searchUsers(
-                searchText: searchText.trim(),
-              ),
-            );
-      },
-    );
-  }
-
-  Widget _buildUsers({required List<SearchUser> users}) {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: users.length,
-        itemBuilder: (BuildContext context, int index) {
-          final SearchUser user = users[index];
-          return ListTile(
-            title: Text(user.username),
-            subtitle: Text(user.email),
-            trailing: IconButton(
-              onPressed: () {
-                context
-                    .read<InviteMembersBloc>()
-                    .add(InviteMembersEvent.selectUser(
-                      index: index,
-                      users: users,
-                    ));
-              },
-              icon: Icon(
-                Icons.check_circle_outline_outlined,
-                color: user.isSelected ? Colors.amber : Colors.grey,
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildInviteButton({
-    required BuildContext context,
-    required ThemeData theme,
-    required List<SearchUser> users,
-  }) {
-    return MaterialButton(
-      onPressed: () {
-        context.read<InviteMembersBloc>().add(
-              InviteMembersEvent.inviteMembers(
-                users: users
-                    .where((SearchUser user) => user.isSelected == true)
-                    .toList(),
-              ),
-            );
-      },
-      elevation: 8,
-      color: theme.colorScheme.secondary,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 32,
-        vertical: 8,
-      ),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(8),
-        ),
-      ),
-      child: Text(
-        'Invite',
-        style: theme.textTheme.bodyLarge?.copyWith(
-          color: theme.colorScheme.background,
         ),
       ),
     );

@@ -11,9 +11,11 @@ import 'package:pma/widgets/search_bar.dart';
 class SelectUsersScreen extends StatefulWidget {
   const SelectUsersScreen({
     super.key,
+    required this.buttonText,
     required this.onSelectUsers,
   });
 
+  final String buttonText;
   final Function(List<SearchUser>) onSelectUsers;
 
   @override
@@ -182,7 +184,7 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
         ),
       ),
       child: Text(
-        'Select',
+        widget.buttonText,
         style: theme.textTheme.bodyLarge?.copyWith(
           color: theme.colorScheme.background,
         ),
