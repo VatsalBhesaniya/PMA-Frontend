@@ -244,7 +244,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             child: Icon(Icons.person_outline_rounded),
           ),
           title: Text(member.user.email),
-          subtitle: Text(MemberRole.values[member.role].title),
+          subtitle: Text(MemberRole.values[member.role - 1].title),
           trailing: projectDetail.isEdit && member.role != 1
               ? IconButton(
                   onPressed: () {

@@ -25,3 +25,14 @@ extension MemberRoleExtension on MemberRole {
     }
   }
 }
+
+extension MemberStatusExtension on MemberStatus {
+  String get title {
+    switch (this) {
+      case MemberStatus.accepted:
+        return 'Accepted';
+      case MemberStatus.invited:
+        return 'Invited';
+    }
+  }
+}

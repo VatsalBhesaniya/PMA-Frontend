@@ -1,5 +1,6 @@
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
+import 'package:pma/models/search_user.dart';
 import 'package:pma/utils/api_result.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
@@ -49,6 +50,28 @@ class UserRepository {
       );
     } on Exception catch (e) {
       return ApiResult<String?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
+  Future<ApiResult<List<SearchUser>?>> fetchUsers({
+    required String searchText,
+  }) async {
+    try {
+      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
+        url: '$usersEndpoint?search=$searchText',
+        httpMethod: HttpMethod.get,
+      );
+      final List<SearchUser>? users = data
+          ?.map((dynamic user) =>
+              SearchUser.fromJson(user as Map<String, dynamic>))
+          .toList();
+      return ApiResult<List<SearchUser>?>.success(
+        data: users,
+      );
+    } on Exception catch (e) {
+      return ApiResult<List<SearchUser>?>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

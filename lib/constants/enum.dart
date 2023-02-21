@@ -17,3 +17,8 @@ enum MemberRole {
   member,
   guest,
 }
+
+enum MemberStatus {
+  accepted,
+  invited,
+}

@@ -1,23 +1,20 @@
 // ignore_for_file: invalid_annotation_target
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:pma/models/user.dart';
 
-part 'member.freezed.dart';
-part 'member.g.dart';
+part 'invite_member.freezed.dart';
+part 'invite_member.g.dart';
 
 @freezed
-class Member with _$Member {
+class InviteMember with _$InviteMember {
   @JsonSerializable(explicitToJson: true)
-  factory Member({
+  factory InviteMember({
     @JsonKey(name: 'user_id') required int userId,
     @JsonKey(name: 'project_id') required int projectId,
     @JsonKey() required int role,
-    @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey() required int status,
-    @JsonKey() required User user,
+  }) = _InviteMember;
 
-  }) = _Member;
-
-  factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
+  factory InviteMember.fromJson(Map<String, dynamic> json) =>
+      _$InviteMemberFromJson(json);
 }
