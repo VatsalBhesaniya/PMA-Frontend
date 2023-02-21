@@ -63,10 +63,8 @@ class TaskRepository {
           data: Task.fromJson(jsonResponse),
         );
       } else {
-        return ApiResult<Task?>.failure(
-          error: NetworkExceptions.dioException(
-            Exception('Something went wrong!'),
-          ),
+        return const ApiResult<Task?>.failure(
+          error: NetworkExceptions.defaultError(),
         );
       }
 
