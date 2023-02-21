@@ -51,13 +51,6 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
-          path: RouteConstants.inviteMembers,
-          name: RouteConstants.inviteMembers,
-          builder: (BuildContext context, GoRouterState state) {
-            return const InviteMembersScreen();
-          },
-        ),
-        GoRoute(
           path: '${RouteConstants.project}/:id',
           name: RouteConstants.project,
           builder: (BuildContext context, GoRouterState state) {
@@ -67,14 +60,24 @@ final GoRouter router = GoRouter(
           },
           routes: <RouteBase>[
             GoRoute(
-              path: '${RouteConstants.projectDetail}/:projectId',
-              name: RouteConstants.projectDetail,
-              builder: (BuildContext context, GoRouterState state) {
-                return ProjectDetailScreen(
-                  projectId: state.params['projectId']!,
-                );
-              },
-            ),
+                path: RouteConstants.projectDetail,
+                name: RouteConstants.projectDetail,
+                builder: (BuildContext context, GoRouterState state) {
+                  return ProjectDetailScreen(
+                    id: state.params['id']!,
+                  );
+                },
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: RouteConstants.inviteMembers,
+                    name: RouteConstants.inviteMembers,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return InviteMembersScreen(
+                        id: state.params['id']!,
+                      );
+                    },
+                  ),
+                ]),
           ],
         ),
         GoRoute(

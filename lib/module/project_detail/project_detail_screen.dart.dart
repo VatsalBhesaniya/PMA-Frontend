@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/config/http_client_config.dart';
+import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/member.dart';
 import 'package:pma/models/project_detail.dart';
@@ -16,11 +17,11 @@ import 'package:pma/widgets/input_field.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   const ProjectDetailScreen({
-    required this.projectId,
+    required this.id,
     super.key,
   });
 
-  final String projectId;
+  final String id;
 
   @override
   State<ProjectDetailScreen> createState() => _ProjectDetailScreenState();
@@ -70,7 +71,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             initial: () {
               context.read<ProjectDetailBloc>().add(
                     ProjectDetailEvent.fetchProjectDetail(
-                      projectId: int.parse(widget.projectId),
+                      projectId: int.parse(widget.id),
                     ),
                   );
               return const Scaffold(
@@ -123,12 +124,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           const SizedBox(height: 16),
                           Text(_dateTime(projectDetail.createdAt)),
                           const SizedBox(height: 16),
-                          Text(
-                            'Members',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
+                          _buildMembersTitle(theme, context),
                           _buildMembers(projectDetail),
                           const SizedBox(height: 48),
                         ],
@@ -142,28 +138,6 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           );
         },
       ),
-    );
-  }
-
-  InputField _buildProjectTitle(ProjectDetail projectDetail, ThemeData theme) {
-    return InputField(
-      onChanged: (String value) {},
-      controller: _projectTitleController..text = projectDetail.title,
-      isEnabled: projectDetail.isEdit,
-      hintText: 'Title',
-      borderType: projectDetail.isEdit
-          ? InputFieldBorderType.underlineInputBorder
-          : InputFieldBorderType.none,
-      style: theme.textTheme.headlineSmall?.copyWith(
-        color: theme.colorScheme.primary,
-      ),
-      horizontalContentPadding: 0,
-      validator: (String? value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter title';
-        }
-        return null;
-      },
     );
   }
 
@@ -230,6 +204,57 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     final DateTime datetime = DateTime.parse(timestamp).toLocal();
     return DateFormat('EEEE MMM d, y h:mm a ').format(datetime) +
         datetime.timeZoneName;
+  }
+
+  InputField _buildProjectTitle(ProjectDetail projectDetail, ThemeData theme) {
+    return InputField(
+      onChanged: (String value) {},
+      controller: _projectTitleController..text = projectDetail.title,
+      isEnabled: projectDetail.isEdit,
+      hintText: 'Title',
+      borderType: projectDetail.isEdit
+          ? InputFieldBorderType.underlineInputBorder
+          : InputFieldBorderType.none,
+      style: theme.textTheme.headlineSmall?.copyWith(
+        color: theme.colorScheme.primary,
+      ),
+      horizontalContentPadding: 0,
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter title';
+        }
+        return null;
+      },
+    );
+  }
+
+  Row _buildMembersTitle(ThemeData theme, BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Text(
+            'Members',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        TextButton.icon(
+          onPressed: () {
+            context.goNamed(
+              RouteConstants.inviteMembers,
+              params: <String, String>{
+                'id': widget.id,
+              },
+            );
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('Invite'),
+        ),
+      ],
+    );
   }
 
   Widget _buildMembers(ProjectDetail projectDetail) {
