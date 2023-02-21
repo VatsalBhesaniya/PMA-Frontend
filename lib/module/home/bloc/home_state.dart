@@ -8,4 +8,8 @@ class HomeState with _$HomeState {
     required List<Project> projects,
   }) = _FetchProjectsSuccess;
   const factory HomeState.fetchProjectsFailure() = _FetchProjectsFailure;
+  const factory HomeState.createProjectSuccess() = _CreateProjectSuccess;
+  const factory HomeState.createProjectFailure({
+    required NetworkExceptions error,
+  }) = _CreateProjectFailure;
 }

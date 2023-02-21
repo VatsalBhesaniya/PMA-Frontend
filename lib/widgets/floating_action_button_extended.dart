@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class FloatingButtonExtended extends StatelessWidget {
-  const FloatingButtonExtended({
+class FloatingActionButtonExtended extends StatelessWidget {
+  const FloatingActionButtonExtended({
     super.key,
     this.onPressed,
     this.backgroundColor,
