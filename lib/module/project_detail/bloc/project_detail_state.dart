@@ -12,6 +12,10 @@ class ProjectDetailState with _$ProjectDetailState {
   }) = _FetchProjectDetailFailure;
   const factory ProjectDetailState.updateProjectDetailFailure() =
       _UpdateProjectDetailFailure;
+  const factory ProjectDetailState.removeMemberSuccess() = _RemoveMemberSuccess;
+  const factory ProjectDetailState.removeMemberFailure({
+    required NetworkExceptions error,
+  }) = _RemoveMemberFailure;
   const factory ProjectDetailState.deleteProjectSuccess() =
       _DeleteProjectSuccess;
   const factory ProjectDetailState.deleteProjectFailure({

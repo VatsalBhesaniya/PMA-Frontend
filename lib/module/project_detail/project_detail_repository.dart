@@ -71,6 +71,25 @@ class ProjectDetailRepository {
     }
   }
 
+  Future<ApiResult<bool>> removeMember({
+    required int projectId,
+    required int userId,
+  }) async {
+    try {
+      await dioClient.request<void>(
+        url: '$membersEndpoint/$projectId/$userId',
+        httpMethod: HttpMethod.delete,
+      );
+      return const ApiResult<bool>.success(
+        data: true,
+      );
+    } on Exception catch (e) {
+      return ApiResult<bool>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
   Future<ApiResult<bool>> deleteProject({
     required int projectId,
   }) async {

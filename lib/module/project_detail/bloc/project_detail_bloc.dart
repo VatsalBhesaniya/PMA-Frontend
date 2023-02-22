@@ -20,6 +20,7 @@ class ProjectDetailBloc extends Bloc<ProjectDetailEvent, ProjectDetailState> {
     on<_FetchProjectDetail>(_onFetchProjectDetail);
     on<_EditProjectDetail>(_onEditProjectDetail);
     on<_UpdateProjectDetail>(_onUpdateProjectDetail);
+    on<_RemoveMember>(_onRemoveMember);
     on<_DeleteProject>(_onDeleteProject);
   }
 
@@ -77,6 +78,24 @@ class ProjectDetailBloc extends Bloc<ProjectDetailEvent, ProjectDetailState> {
       },
       failure: (NetworkExceptions error) {
         emit(const _UpdateProjectDetailFailure());
+      },
+    );
+  }
+
+  FutureOr<void> _onRemoveMember(
+      _RemoveMember event, Emitter<ProjectDetailState> emit) async {
+    emit(const _LoadInProgress());
+    final ApiResult<bool> apiResult =
+        await _projectDetailRepository.removeMember(
+      projectId: event.projectId,
+      userId: event.userId,
+    );
+    apiResult.when(
+      success: (bool isRemoved) {
+        emit(const _RemoveMemberSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(_RemoveMemberFailure(error: error));
       },
     );
   }
