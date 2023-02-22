@@ -43,7 +43,29 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       child: BlocConsumer<ProjectDetailBloc, ProjectDetailState>(
         listener: (BuildContext context, ProjectDetailState state) {
           state.maybeWhen(
-            fetchProjectDetailFailure: (NetworkExceptions error) {},
+            fetchProjectDetailFailure: (NetworkExceptions error) {
+              _buildApiFailureAlert(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not delete project successfully. Please try again.',
+              );
+            },
+            removeMemberSuccess: () {
+              context.read<ProjectDetailBloc>().add(
+                    ProjectDetailEvent.fetchProjectDetail(
+                      projectId: int.parse(widget.id),
+                    ),
+                  );
+            },
+            removeMemberFailure: (NetworkExceptions error) {
+              _buildApiFailureAlert(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not remove member successfully. Please try again.',
+              );
+            },
             deleteProjectSuccess: () {
               context.pop();
               context.pop();
@@ -61,6 +83,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         buildWhen: (ProjectDetailState previous, ProjectDetailState current) {
           return current.maybeWhen(
             fetchProjectDetailSuccess: (ProjectDetail projectDetail) => true,
+            removeMemberSuccess: () => false,
+            removeMemberFailure: (NetworkExceptions error) => false,
             deleteProjectSuccess: () => false,
             deleteProjectFailure: (NetworkExceptions error) => false,
             orElse: () => true,
@@ -91,20 +115,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Project Detail'),
-                  actions: <Widget>[
-                    _buildActionButton(
-                      context: context,
-                      theme: theme,
-                      projectDetail: projectDetail,
-                    ),
-                  ],
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
                 floatingActionButtonAnimator: NoScalingAnimation(),
                 floatingActionButton: FloatingActionButtonExtended(
                   onPressed: () {
-                    _showDeleteNoteConfirmDialog(
+                    _showDeleteProjectConfirmDialog(
                       context: context,
                       theme: theme,
                       projectId: projectDetail.id,
@@ -120,12 +137,19 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          _buildProjectTitle(projectDetail, theme),
+                          _buildProjectTitle(
+                            context: context,
+                            theme: theme,
+                            projectDetail: projectDetail,
+                          ),
                           const SizedBox(height: 16),
                           Text(_dateTime(projectDetail.createdAt)),
                           const SizedBox(height: 16),
                           _buildMembersTitle(theme, context),
-                          _buildMembers(projectDetail),
+                          _buildMembers(
+                            theme: theme,
+                            projectDetail: projectDetail,
+                          ),
                           const SizedBox(height: 48),
                         ],
                       ),
@@ -149,7 +173,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     if (projectDetail.isEdit) {
       return Row(
         children: <Widget>[
-          TextButton(
+          IconButton(
             onPressed: () {
               context.read<ProjectDetailBloc>().add(
                     ProjectDetailEvent.updateProjectDetail(
@@ -159,14 +183,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                     ),
                   );
             },
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                color: Colors.lime,
-              ),
-            ),
+            icon: const Icon(Icons.done_rounded),
           ),
-          TextButton(
+          IconButton(
             onPressed: () {
               context.read<ProjectDetailBloc>().add(
                     ProjectDetailEvent.editProjectDetail(
@@ -176,12 +195,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                     ),
                   );
             },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.lime,
-              ),
-            ),
+            icon: const Icon(Icons.close_rounded),
           ),
         ],
       );
@@ -206,25 +220,41 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         datetime.timeZoneName;
   }
 
-  InputField _buildProjectTitle(ProjectDetail projectDetail, ThemeData theme) {
-    return InputField(
-      onChanged: (String value) {},
-      controller: _projectTitleController..text = projectDetail.title,
-      isEnabled: projectDetail.isEdit,
-      hintText: 'Title',
-      borderType: projectDetail.isEdit
-          ? InputFieldBorderType.underlineInputBorder
-          : InputFieldBorderType.none,
-      style: theme.textTheme.headlineSmall?.copyWith(
-        color: theme.colorScheme.primary,
-      ),
-      horizontalContentPadding: 0,
-      validator: (String? value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter title';
-        }
-        return null;
-      },
+  Widget _buildProjectTitle({
+    required BuildContext context,
+    required ThemeData theme,
+    required ProjectDetail projectDetail,
+  }) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: InputField(
+            onChanged: (String value) {},
+            controller: _projectTitleController..text = projectDetail.title,
+            isEnabled: projectDetail.isEdit,
+            hintText: 'Title',
+            borderType: projectDetail.isEdit
+                ? InputFieldBorderType.underlineInputBorder
+                : InputFieldBorderType.none,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
+            horizontalContentPadding: 0,
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter title';
+              }
+              return null;
+            },
+          ),
+        ),
+        const SizedBox(width: 16),
+        _buildActionButton(
+          context: context,
+          theme: theme,
+          projectDetail: projectDetail,
+        ),
+      ],
     );
   }
 
@@ -257,7 +287,10 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     );
   }
 
-  Widget _buildMembers(ProjectDetail projectDetail) {
+  Widget _buildMembers({
+    required ThemeData theme,
+    required ProjectDetail projectDetail,
+  }) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -270,12 +303,20 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           ),
           title: Text(member.user.email),
           subtitle: Text(MemberRole.values[member.role - 1].title),
-          trailing: projectDetail.isEdit && member.role != 1
+          trailing: member.role != 1
               ? IconButton(
                   onPressed: () {
-                    // TODO(Vatsal): Remove member
+                    context.read<ProjectDetailBloc>().add(
+                          ProjectDetailEvent.removeMember(
+                            projectId: member.projectId,
+                            userId: member.userId,
+                          ),
+                        );
                   },
-                  icon: const Icon(Icons.delete_rounded),
+                  icon: Icon(
+                    Icons.cancel_rounded,
+                    color: theme.colorScheme.error,
+                  ),
                 )
               : null,
         );
@@ -283,7 +324,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     );
   }
 
-  void _showDeleteNoteConfirmDialog({
+  void _showDeleteProjectConfirmDialog({
     required BuildContext context,
     required ThemeData theme,
     required int projectId,
@@ -375,6 +416,42 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           content: const Text(
             'Could not delete a project successfully. Please try again.',
           ),
+          actions: <Widget>[
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: Text(
+                  'OK',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _buildApiFailureAlert({
+    required BuildContext context,
+    required ThemeData theme,
+    required String error,
+  }) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              'Alert',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+          content: Text(error),
           actions: <Widget>[
             Center(
               child: TextButton(
