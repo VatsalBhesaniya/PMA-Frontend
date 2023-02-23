@@ -11,6 +11,7 @@ class Task with _$Task {
   @JsonSerializable(explicitToJson: true)
   factory Task({
     @JsonKey() required int id,
+    @JsonKey(name: 'project_id') required int projectId,
     @JsonKey() required String title,
     @JsonKey() List<dynamic>? description,
     @JsonKey(name: 'description_plain_text') String? descriptionPlainText,
