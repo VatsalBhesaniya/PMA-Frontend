@@ -8,6 +8,7 @@ import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
+import 'package:pma/models/user.dart';
 import 'package:pma/module/app/pma_app.dart';
 import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
@@ -38,6 +39,7 @@ void main() {
       dioClient: dioClient,
       appStorageManager: appStorageManager,
     );
+    late User currentUser;
     runApp(
       MultiProvider(
         providers: <SingleChildWidget>[
@@ -50,16 +52,11 @@ void main() {
           Provider<DioClient>.value(
             value: dioClient,
           ),
-          Provider<HttpClientConfig>.value(
-            value: HttpClientConfig(
-              baseUrl: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
-            ),
-          ),
           Provider<AppStorageManager>.value(value: appStorageManager),
           BlocProvider<AuthenticationBloc>(
             create: (BuildContext context) =>
                 AuthenticationBloc(userRepository: userRepository)
-                  ..add(AppStarted()),
+                  ..add(const AuthenticationEvent.appStarted()),
           ),
           BlocProvider<LoginBloc>(
             create: (BuildContext context) => LoginBloc(
@@ -69,22 +66,66 @@ void main() {
         ],
         child: BlocConsumer<AuthenticationBloc, AuthenticationState>(
           listener: (BuildContext context, AuthenticationState state) {
-            if (state is Authenticated) {
-              context.read<AppStorageManager>().getUserToken().then(
-                (String? token) {
-                  context.read<DioClient>().addAccessTokenToHeader(
-                        value: token!,
-                      );
-                },
-              );
-              router.goNamed(RouteConstants.home);
-            }
-            if (state is Unauthenticated || state is Unknown) {
-              router.goNamed(RouteConstants.login);
-            }
+            state.maybeWhen(
+              unauthenticated: () {
+                router.goNamed(RouteConstants.login);
+              },
+              authenticated: (String token, User user) {
+                context.read<DioClient>().addAccessTokenToHeader(
+                      value: token,
+                    );
+                currentUser = user;
+                router.goNamed(RouteConstants.home);
+              },
+              orElse: () => null,
+            );
+          },
+          buildWhen:
+              (AuthenticationState previous, AuthenticationState current) {
+            return current.maybeWhen(
+              loadInProgress: () => true,
+              authenticated: (String token, User user) => true,
+              unauthenticated: () => true,
+              orElse: () => false,
+            );
           },
           builder: (BuildContext context, AuthenticationState state) {
-            return const PmaApp();
+            return state.when(
+              initial: () {
+                return const Material(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+              loadInProgress: () {
+                return const Material(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+              authenticated: (String token, User user) {
+                return MultiProvider(
+                  providers: <SingleChildWidget>[
+                    Provider<User>.value(
+                      value: currentUser,
+                    ),
+                    Provider<HttpClientConfig>.value(
+                      value: HttpClientConfig(
+                        baseUrl:
+                            Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
+                        token: token,
+                      ),
+                    ),
+                  ],
+                  child: const PmaApp(),
+                );
+              },
+              unauthenticated: () {
+                return const PmaApp();
+              },
+            );
           },
         ),
       ),

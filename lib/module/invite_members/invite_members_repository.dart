@@ -22,12 +22,10 @@ class InviteMembersRepository {
     required List<Map<String, dynamic>> membersData,
   }) async {
     try {
-      final String? token =
-          await const FlutterSecureStorage().read(key: 'token');
       final http.Response response = await http.post(
         Uri.parse('${httpClient.baseUrl}$inviteMembersEndpoint'),
         headers: <String, String>{
-          HttpHeaders.authorizationHeader: token!,
+          HttpHeaders.authorizationHeader: httpClient.token,
           HttpHeaders.contentTypeHeader: 'application/json',
         },
         body: jsonEncode(membersData),

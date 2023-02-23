@@ -1,9 +1,11 @@
 class HttpClientConfig {
   HttpClientConfig({
     required this.baseUrl,
+    required this.token,
   });
 
   final String baseUrl;
+  final String token;
 }
 
 // import 'dart:convert';

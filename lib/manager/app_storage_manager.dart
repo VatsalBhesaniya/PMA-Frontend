@@ -12,6 +12,8 @@ class AppStorageManager {
   SharedPreferences sharedPreferences;
   FlutterSecureStorage flutterSecureStorage;
   final String themeMode = 'themeMode';
+  final String token = 'token';
+  final String tokenString = 'tokenString';
 
   void initStorage() {
     final bool isThemeModeSelected = sharedPreferences.containsKey(themeMode);
@@ -33,11 +35,19 @@ class AppStorageManager {
   }
 
   Future<String?> getUserToken() async {
-    return flutterSecureStorage.read(key: 'token');
+    return flutterSecureStorage.read(key: token);
   }
 
-  Future<void> setUserToken(String token) async {
-    return flutterSecureStorage.write(key: 'token', value: token);
+  Future<void> setUserToken(String value) async {
+    return flutterSecureStorage.write(key: token, value: value);
+  }
+
+  Future<String?> getUserTokenString() async {
+    return flutterSecureStorage.read(key: tokenString);
+  }
+
+  Future<void> setUserTokenString(String value) async {
+    return flutterSecureStorage.write(key: tokenString, value: value);
   }
 }
 

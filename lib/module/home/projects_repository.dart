@@ -41,12 +41,10 @@ class ProjectsRepository {
     required Map<String, dynamic> projectJson,
   }) async {
     try {
-      final String? token =
-          await const FlutterSecureStorage().read(key: 'token');
       final http.Response response = await http.post(
         Uri.parse('${httpClient.baseUrl}$createProjectEndpoint'),
         headers: <String, String>{
-          HttpHeaders.authorizationHeader: token!,
+          HttpHeaders.authorizationHeader: httpClient.token,
           HttpHeaders.contentTypeHeader: 'application/json',
         },
         body: jsonEncode(projectJson),

@@ -20,12 +20,10 @@ class CreateTaskRepository {
     required Map<String, dynamic> taskData,
   }) async {
     try {
-      final String? token =
-          await const FlutterSecureStorage().read(key: 'token');
       final http.Response response = await http.post(
         Uri.parse('${httpClient.baseUrl}$tasksEndpoint/create'),
         headers: <String, String>{
-          HttpHeaders.authorizationHeader: token!,
+          HttpHeaders.authorizationHeader: httpClient.token,
           HttpHeaders.contentTypeHeader: 'application/json',
         },
         body: jsonEncode(taskData),

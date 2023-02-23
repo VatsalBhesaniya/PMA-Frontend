@@ -7,6 +7,7 @@ import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/member.dart';
 import 'package:pma/models/project_detail.dart';
+import 'package:pma/models/user.dart';
 import 'package:pma/module/project_detail/bloc/project_detail_bloc.dart';
 import 'package:pma/module/project_detail/project_detail_repository.dart';
 import 'package:pma/utils/dio_client.dart';
@@ -145,8 +146,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           const SizedBox(height: 16),
                           Text(_dateTime(projectDetail.createdAt)),
                           const SizedBox(height: 16),
-                          _buildMembersTitle(theme, context),
                           _buildMembers(
+                            context: context,
                             theme: theme,
                             projectDetail: projectDetail,
                           ),
@@ -258,7 +259,38 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     );
   }
 
-  Row _buildMembersTitle(ThemeData theme, BuildContext context) {
+  Widget _buildMembers({
+    required BuildContext context,
+    required ThemeData theme,
+    required ProjectDetail projectDetail,
+  }) {
+    final User currentUser = context.read<User>();
+    final Member owner = projectDetail.members
+        .where((Member member) => member.role == MemberRole.owner.index + 1)
+        .first;
+    final bool isOwner = currentUser.id == owner.userId;
+    return Column(
+      children: <Widget>[
+        _buildMembersTitle(
+          theme: theme,
+          context: context,
+          isOwner: isOwner,
+        ),
+        _buildMembersList(
+          context: context,
+          theme: theme,
+          projectDetail: projectDetail,
+          isOwner: isOwner,
+        ),
+      ],
+    );
+  }
+
+  Row _buildMembersTitle({
+    required ThemeData theme,
+    required BuildContext context,
+    required bool isOwner,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -271,25 +303,28 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             ),
           ),
         ),
-        TextButton.icon(
-          onPressed: () {
-            context.goNamed(
-              RouteConstants.inviteMembers,
-              params: <String, String>{
-                'id': widget.id,
-              },
-            );
-          },
-          icon: const Icon(Icons.add),
-          label: const Text('Invite'),
-        ),
+        if (isOwner)
+          TextButton.icon(
+            onPressed: () {
+              context.goNamed(
+                RouteConstants.inviteMembers,
+                params: <String, String>{
+                  'id': widget.id,
+                },
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Invite'),
+          ),
       ],
     );
   }
 
-  Widget _buildMembers({
+  Widget _buildMembersList({
+    required BuildContext context,
     required ThemeData theme,
     required ProjectDetail projectDetail,
+    required bool isOwner,
   }) {
     return ListView.builder(
       shrinkWrap: true,
@@ -303,7 +338,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           ),
           title: Text(member.user.email),
           subtitle: Text(MemberRole.values[member.role - 1].title),
-          trailing: member.role != 1
+          trailing: isOwner && member.role != 1
               ? IconButton(
                   onPressed: () {
                     context.read<ProjectDetailBloc>().add(

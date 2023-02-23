@@ -91,9 +91,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   context.read<HomeBloc>().add(
                         const HomeEvent.fetchProjects(),
                       );
-                  return const CircularProgressIndicator();
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 },
-                loadInProgress: () => const CircularProgressIndicator(),
+                loadInProgress: () {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
                 fetchProjectsSuccess: (List<Project> projects) {
                   return ListView.builder(
                     itemCount: projects.length,

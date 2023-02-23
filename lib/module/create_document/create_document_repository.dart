@@ -20,12 +20,10 @@ class CreateDocumentRepository {
     required Map<String, dynamic> documentData,
   }) async {
     try {
-      final String? token =
-          await const FlutterSecureStorage().read(key: 'token');
       final http.Response response = await http.post(
         Uri.parse('${httpClient.baseUrl}$documentsEndpoint/create'),
         headers: <String, String>{
-          HttpHeaders.authorizationHeader: token!,
+          HttpHeaders.authorizationHeader: httpClient.token,
           HttpHeaders.contentTypeHeader: 'application/json',
         },
         body: jsonEncode(documentData),

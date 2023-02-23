@@ -1,37 +1,53 @@
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pma/models/user.dart';
 import 'package:pma/module/app/user_repository.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
+part 'authentication_bloc.freezed.dart';
 
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   AuthenticationBloc({
     required UserRepository userRepository,
   })  : _userRepository = userRepository,
-        super(const Unknown()) {
-    on<AppStarted>(_onAppStarted);
-    on<Logout>(_onLogout);
+        super(const _Initial()) {
+    on<_AppStarted>(_onAppStarted);
+    on<_Logout>(_onLogout);
   }
 
   final UserRepository _userRepository;
 
   Future<void> _onAppStarted(
-      AppStarted event, Emitter<AuthenticationState> emit) async {
-    emit(AuthenticationLoading());
-    final bool hasToken = await _userRepository.hasToken();
-    if (hasToken) {
-      emit(const Authenticated());
+      _AppStarted event, Emitter<AuthenticationState> emit) async {
+    emit(const _LoadInProgress());
+    final String? token = await _userRepository.getToken();
+    final String? tokenString = await _userRepository.getTokenString();
+    if (token != null && tokenString != null) {
+      final ApiResult<User> apiResult =
+          await _userRepository.fetchCurrentUser(token: tokenString);
+      apiResult.when(
+        success: (User user) {
+          emit(_Authenticated(
+            token: token,
+            user: user,
+          ));
+        },
+        failure: (NetworkExceptions error) {
+          emit(const _Unauthenticated());
+        },
+      );
     } else {
-      emit(const Unauthenticated());
+      emit(const _Unauthenticated());
     }
   }
 
-  void _onLogout(Logout event, Emitter<AuthenticationState> emit) {
-    emit(AuthenticationLoading());
+  void _onLogout(_Logout event, Emitter<AuthenticationState> emit) {
+    emit(const _LoadInProgress());
     _userRepository.deleteToken();
-    emit(const Unauthenticated());
+    emit(const _Unauthenticated());
   }
 }

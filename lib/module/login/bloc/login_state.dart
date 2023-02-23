@@ -1,23 +1,11 @@
 part of 'login_bloc.dart';
 
-enum AuthStatus { unknown, authenticated, unauthenticated }
-
-@immutable
-class LoginState extends Equatable {
-  const LoginState._({
-    this.status = AuthStatus.unknown,
-  });
-
-  const LoginState.authenticated()
-      : this._(
-          status: AuthStatus.authenticated,
-        );
-
-  const LoginState.unauthenticated()
-      : this._(status: AuthStatus.unauthenticated);
-
-  final AuthStatus status;
-
-  @override
-  List<Object> get props => <Object>[status];
+@freezed
+class LoginState with _$LoginState {
+  const factory LoginState.initial() = _Initial;
+  const factory LoginState.loadInProgress() = _LoadInProgress;
+  const factory LoginState.loginSuccess() = _LoginSuccess;
+  const factory LoginState.loginFailure({
+    required NetworkExceptions error,
+  }) = _LoginFailure;
 }

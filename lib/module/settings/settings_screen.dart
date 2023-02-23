@@ -36,7 +36,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                context.read<AuthenticationBloc>().add(Logout());
+                context.read<AuthenticationBloc>().add(
+                      const AuthenticationEvent.logout(),
+                    );
               },
               child: const Text('Logout'),
             ),
