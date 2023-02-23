@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/api_constants.dart';
@@ -21,6 +20,26 @@ class ProjectsRepository {
     try {
       final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
         url: projectsEndpoint,
+        httpMethod: HttpMethod.get,
+      );
+      final List<Project>? projects = data
+          ?.map((dynamic project) =>
+              Project.fromJson(project as Map<String, dynamic>))
+          .toList();
+      return ApiResult<List<Project>?>.success(
+        data: projects,
+      );
+    } on Exception catch (e) {
+      return ApiResult<List<Project>?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
+  Future<ApiResult<List<Project>?>> fetchInvitedProjects() async {
+    try {
+      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
+        url: invitedProjectsEndpoint,
         httpMethod: HttpMethod.get,
       );
       final List<Project>? projects = data

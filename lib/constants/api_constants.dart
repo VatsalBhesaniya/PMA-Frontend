@@ -5,6 +5,7 @@ const String usersEndpoint = 'users';
 const String membersEndpoint = 'members';
 const String inviteMembersEndpoint = 'members/invite';
 const String projectsEndpoint = 'projects';
+const String invitedProjectsEndpoint = 'projects/invited';
 const String createProjectEndpoint = 'projects/create';
 const String projectDetailEndpoint = 'projects/detail';
 const String tasksEndpoint = 'tasks';
