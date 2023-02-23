@@ -36,6 +36,26 @@ class ProjectsRepository {
     }
   }
 
+  Future<ApiResult<List<Project>?>> fetchInvitedProjects() async {
+    try {
+      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
+        url: invitedProjectsEndpoint,
+        httpMethod: HttpMethod.get,
+      );
+      final List<Project>? projects = data
+          ?.map((dynamic project) =>
+              Project.fromJson(project as Map<String, dynamic>))
+          .toList();
+      return ApiResult<List<Project>?>.success(
+        data: projects,
+      );
+    } on Exception catch (e) {
+      return ApiResult<List<Project>?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
   Future<ApiResult<bool>> createProject({
     required Map<String, dynamic> projectJson,
   }) async {
