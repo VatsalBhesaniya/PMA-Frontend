@@ -59,7 +59,7 @@ void main() {
           BlocProvider<AuthenticationBloc>(
             create: (BuildContext context) =>
                 AuthenticationBloc(userRepository: userRepository)
-                  ..add(AppStarted()),
+                  ..add(const AuthenticationEvent.appStarted()),
           ),
           BlocProvider<LoginBloc>(
             create: (BuildContext context) => LoginBloc(
@@ -69,22 +69,55 @@ void main() {
         ],
         child: BlocConsumer<AuthenticationBloc, AuthenticationState>(
           listener: (BuildContext context, AuthenticationState state) {
-            if (state is Authenticated) {
-              context.read<AppStorageManager>().getUserToken().then(
-                (String? token) {
-                  context.read<DioClient>().addAccessTokenToHeader(
-                        value: token!,
-                      );
-                },
-              );
-              router.goNamed(RouteConstants.home);
-            }
-            if (state is Unauthenticated || state is Unknown) {
-              router.goNamed(RouteConstants.login);
-            }
+            state.maybeWhen(
+              unknown: () {
+                router.goNamed(RouteConstants.login);
+              },
+              unauthenticated: () {
+                router.goNamed(RouteConstants.login);
+              },
+              authenticated: () {
+                context.read<AppStorageManager>().getUserToken().then(
+                  (String? token) {
+                    context.read<DioClient>().addAccessTokenToHeader(
+                          value: token!,
+                        );
+                  },
+                );
+                router.goNamed(RouteConstants.home);
+              },
+              orElse: () => null,
+            );
+          },
+          buildWhen:
+              (AuthenticationState previous, AuthenticationState current) {
+            return current.maybeWhen(
+              loadInProgress: () => true,
+              authenticated: () => true,
+              unauthenticated: () => true,
+              orElse: () => false,
+            );
           },
           builder: (BuildContext context, AuthenticationState state) {
-            return const PmaApp();
+            return state.maybeWhen(
+              initial: () {
+                return const Material(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+              loadInProgress: () {
+                return const Material(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              },
+              orElse: () {
+                return const PmaApp();
+              },
+            );
           },
         ),
       ),

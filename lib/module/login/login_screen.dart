@@ -19,7 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    context.read<AuthenticationBloc>().add(AppStarted());
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
@@ -29,7 +28,9 @@ class _LoginScreenState extends State<LoginScreen> {
           listener: (BuildContext context, LoginState state) {
             state.maybeWhen(
               loginSuccess: () {
-                context.read<AuthenticationBloc>().add(AppStarted());
+                context.read<AuthenticationBloc>().add(
+                      const AuthenticationEvent.appStarted(),
+                    );
               },
               loginFailure: (NetworkExceptions error) {
                 _buildApiFailureAlert(
@@ -43,6 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
           },
           buildWhen: (LoginState previous, LoginState current) {
             return current.maybeWhen(
+              loginSuccess: () => false,
               loginFailure: (NetworkExceptions error) => false,
               orElse: () => true,
             );
@@ -54,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: CircularProgressIndicator(),
                 );
               },
-              initial: () {
+              orElse: () {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -142,7 +144,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 );
               },
-              orElse: () => const SizedBox(),
             );
           },
         ),
