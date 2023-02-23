@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pma/constants/route_constants.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/module/login/bloc/login_bloc.dart';
-import 'package:pma/router/go_router.dart';
-import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     context.read<AuthenticationBloc>().add(AppStarted());
     return Scaffold(
       appBar: AppBar(
@@ -29,113 +27,162 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: BlocConsumer<LoginBloc, LoginState>(
           listener: (BuildContext context, LoginState state) {
-            switch (state.status) {
-              case AuthStatus.unknown:
-                router.goNamed(RouteConstants.login);
-                break;
-              case AuthStatus.authenticated:
-                context.read<AppStorageManager>().getUserToken().then(
-                  (String? token) {
-                    context.read<DioClient>().addAccessTokenToHeader(
-                          value: token!,
-                        );
-                  },
+            state.maybeWhen(
+              loginSuccess: () {
+                context.read<AuthenticationBloc>().add(AppStarted());
+              },
+              loginFailure: (NetworkExceptions error) {
+                _buildApiFailureAlert(
+                  context: context,
+                  theme: theme,
+                  error: 'Could not login successfully. Please try again.',
                 );
-                router.goNamed(RouteConstants.home);
-                break;
-              case AuthStatus.unauthenticated:
-                router.goNamed(RouteConstants.login);
-                break;
-            }
+              },
+              orElse: () => null,
+            );
+          },
+          buildWhen: (LoginState previous, LoginState current) {
+            return current.maybeWhen(
+              loginFailure: (NetworkExceptions error) => false,
+              orElse: () => true,
+            );
           },
           builder: (BuildContext context, LoginState state) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          hintText: 'Email address',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(50),
+            return state.maybeWhen(
+              loadInProgress: () {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+              initial: () {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          TextFormField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
+                              hintText: 'Email address',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(50),
+                                ),
+                              ),
+                              contentPadding: EdgeInsets.all(20),
+                              constraints: BoxConstraints(
+                                maxWidth: 400,
+                              ),
                             ),
+                            validator: (String? value) {
+                              if (value != null && value.trim().isEmpty) {
+                                return 'Please enter email address';
+                              }
+                              return null;
+                            },
                           ),
-                          contentPadding: EdgeInsets.all(20),
-                          constraints: BoxConstraints(
-                            maxWidth: 400,
+                          const SizedBox(
+                            height: 16,
                           ),
-                        ),
-                        validator: (String? value) {
-                          if (value != null && value.trim().isEmpty) {
-                            return 'Please enter email address';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                          hintText: 'Password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(50),
+                          TextFormField(
+                            controller: _passwordController,
+                            decoration: const InputDecoration(
+                              hintText: 'Password',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(50),
+                                ),
+                              ),
+                              contentPadding: EdgeInsets.all(20),
+                              constraints: BoxConstraints(
+                                maxWidth: 400,
+                              ),
                             ),
+                            validator: (String? value) {
+                              if (value != null && value.trim().isEmpty) {
+                                return 'Please enter password';
+                              }
+                              return null;
+                            },
                           ),
-                          contentPadding: EdgeInsets.all(20),
-                          constraints: BoxConstraints(
-                            maxWidth: 400,
+                          const SizedBox(
+                            height: 32,
                           ),
-                        ),
-                        validator: (String? value) {
-                          if (value != null && value.trim().isEmpty) {
-                            return 'Please enter password';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(
-                        height: 32,
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          final FormState? formState = _formKey.currentState;
-                          if (formState != null && formState.validate()) {
-                            context.read<LoginBloc>().add(
-                                  LoginSubmitted(
-                                    email: _emailController.text.trim(),
-                                    password: _passwordController.text.trim(),
-                                  ),
-                                );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          fixedSize: const Size(100, 40),
-                          textStyle: const TextStyle(fontSize: 16),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(50),
+                          ElevatedButton(
+                            onPressed: () {
+                              final FormState? formState =
+                                  _formKey.currentState;
+                              if (formState != null && formState.validate()) {
+                                context.read<LoginBloc>().add(
+                                      LoginEvent.loginSubmitted(
+                                        email: _emailController.text.trim(),
+                                        password:
+                                            _passwordController.text.trim(),
+                                      ),
+                                    );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              fixedSize: const Size(100, 40),
+                              textStyle: const TextStyle(fontSize: 16),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(50),
+                                ),
+                              ),
                             ),
+                            child: const Text('Login'),
                           ),
-                        ),
-                        child: const Text('Login'),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
+              orElse: () => const SizedBox(),
             );
           },
         ),
       ),
+    );
+  }
+
+  void _buildApiFailureAlert({
+    required BuildContext context,
+    required ThemeData theme,
+    required String error,
+  }) {
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Center(
+            child: Text(
+              'Alert',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+          content: Text(error),
+          actions: <Widget>[
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: Text(
+                  'OK',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
