@@ -17,21 +17,24 @@ class FloatingActionButtonExtended extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return FloatingActionButton.extended(
-      onPressed: onPressed,
-      elevation: 8,
-      backgroundColor: backgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(8),
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: FloatingActionButton.extended(
+        onPressed: onPressed,
+        elevation: 8,
+        backgroundColor: backgroundColor,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(8),
+          ),
         ),
-      ),
-      label: Text(
-        labelText,
-        style: labelStyle ??
-            theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.background,
-            ),
+        label: Text(
+          labelText,
+          style: labelStyle ??
+              theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.background,
+              ),
+        ),
       ),
     );
   }
