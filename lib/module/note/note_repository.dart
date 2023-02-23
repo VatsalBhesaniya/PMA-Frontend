@@ -43,12 +43,10 @@ class NoteRepository {
       final String body = jsonEncode(note.toJson()
         ..remove('id')
         ..remove('created_by'));
-      final String? token =
-          await const FlutterSecureStorage().read(key: 'token');
       final http.Response response = await http.put(
         Uri.parse('${httpClient.baseUrl}$notesEndpoint/${note.id}'),
         headers: <String, String>{
-          HttpHeaders.authorizationHeader: token!,
+          HttpHeaders.authorizationHeader: httpClient.token,
           HttpHeaders.contentTypeHeader: 'application/json',
         },
         body: body,

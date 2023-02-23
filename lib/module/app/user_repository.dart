@@ -14,13 +14,12 @@ class UserRepository {
   final DioClient dioClient;
   final AppStorageManager appStorageManager;
 
-  // getUser
-
   // getToken
   Future<String?> getToken() async {
     final String? token = await appStorageManager.getUserToken();
     return token;
   }
+
   Future<String?> getTokenString() async {
     final String? tokenString = await appStorageManager.getUserTokenString();
     return tokenString;
@@ -61,6 +60,7 @@ class UserRepository {
     }
   }
 
+  // getUser
   Future<ApiResult<User>> fetchCurrentUser({
     required String token,
   }) async {

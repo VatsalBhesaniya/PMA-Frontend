@@ -20,12 +20,10 @@ class CreateNoteRepository {
     required Map<String, dynamic> noteData,
   }) async {
     try {
-      final String? token =
-          await const FlutterSecureStorage().read(key: 'token');
       final http.Response response = await http.post(
         Uri.parse('${httpClient.baseUrl}$notesEndpoint/create'),
         headers: <String, String>{
-          HttpHeaders.authorizationHeader: token!,
+          HttpHeaders.authorizationHeader: httpClient.token,
           HttpHeaders.contentTypeHeader: 'application/json',
         },
         body: jsonEncode(noteData),

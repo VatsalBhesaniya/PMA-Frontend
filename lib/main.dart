@@ -52,11 +52,6 @@ void main() {
           Provider<DioClient>.value(
             value: dioClient,
           ),
-          Provider<HttpClientConfig>.value(
-            value: HttpClientConfig(
-              baseUrl: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
-            ),
-          ),
           Provider<AppStorageManager>.value(value: appStorageManager),
           BlocProvider<AuthenticationBloc>(
             create: (BuildContext context) =>
@@ -111,8 +106,19 @@ void main() {
                 );
               },
               authenticated: (String token, User user) {
-                return Provider<User>.value(
-                  value: currentUser,
+                return MultiProvider(
+                  providers: <SingleChildWidget>[
+                    Provider<User>.value(
+                      value: currentUser,
+                    ),
+                    Provider<HttpClientConfig>.value(
+                      value: HttpClientConfig(
+                        baseUrl:
+                            Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
+                        token: token,
+                      ),
+                    ),
+                  ],
                   child: const PmaApp(),
                 );
               },
