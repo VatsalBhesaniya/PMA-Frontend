@@ -8,6 +8,7 @@ import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
+import 'package:pma/models/user.dart';
 import 'package:pma/module/app/pma_app.dart';
 import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
@@ -38,6 +39,7 @@ void main() {
       dioClient: dioClient,
       appStorageManager: appStorageManager,
     );
+    late User currentUser;
     runApp(
       MultiProvider(
         providers: <SingleChildWidget>[
@@ -70,20 +72,14 @@ void main() {
         child: BlocConsumer<AuthenticationBloc, AuthenticationState>(
           listener: (BuildContext context, AuthenticationState state) {
             state.maybeWhen(
-              unknown: () {
-                router.goNamed(RouteConstants.login);
-              },
               unauthenticated: () {
                 router.goNamed(RouteConstants.login);
               },
-              authenticated: () {
-                context.read<AppStorageManager>().getUserToken().then(
-                  (String? token) {
-                    context.read<DioClient>().addAccessTokenToHeader(
-                          value: token!,
-                        );
-                  },
-                );
+              authenticated: (String token, User user) {
+                context.read<DioClient>().addAccessTokenToHeader(
+                      value: token,
+                    );
+                currentUser = user;
                 router.goNamed(RouteConstants.home);
               },
               orElse: () => null,
@@ -93,13 +89,13 @@ void main() {
               (AuthenticationState previous, AuthenticationState current) {
             return current.maybeWhen(
               loadInProgress: () => true,
-              authenticated: () => true,
+              authenticated: (String token, User user) => true,
               unauthenticated: () => true,
               orElse: () => false,
             );
           },
           builder: (BuildContext context, AuthenticationState state) {
-            return state.maybeWhen(
+            return state.when(
               initial: () {
                 return const Material(
                   child: Center(
@@ -114,7 +110,13 @@ void main() {
                   ),
                 );
               },
-              orElse: () {
+              authenticated: (String token, User user) {
+                return Provider<User>.value(
+                  value: currentUser,
+                  child: const PmaApp(),
+                );
+              },
+              unauthenticated: () {
                 return const PmaApp();
               },
             );

@@ -1,6 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pma/models/user.dart';
 import 'package:pma/module/app/user_repository.dart';
+import 'package:pma/utils/api_result.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
@@ -11,7 +14,7 @@ class AuthenticationBloc
   AuthenticationBloc({
     required UserRepository userRepository,
   })  : _userRepository = userRepository,
-        super(const _Unknown()) {
+        super(const _Initial()) {
     on<_AppStarted>(_onAppStarted);
     on<_Logout>(_onLogout);
   }
@@ -21,9 +24,22 @@ class AuthenticationBloc
   Future<void> _onAppStarted(
       _AppStarted event, Emitter<AuthenticationState> emit) async {
     emit(const _LoadInProgress());
-    final bool hasToken = await _userRepository.hasToken();
-    if (hasToken) {
-      emit(const _Authenticated());
+    final String? token = await _userRepository.getToken();
+    final String? tokenString = await _userRepository.getTokenString();
+    if (token != null && tokenString != null) {
+      final ApiResult<User> apiResult =
+          await _userRepository.fetchCurrentUser(token: tokenString);
+      apiResult.when(
+        success: (User user) {
+          emit(_Authenticated(
+            token: token,
+            user: user,
+          ));
+        },
+        failure: (NetworkExceptions error) {
+          emit(const _Unauthenticated());
+        },
+      );
     } else {
       emit(const _Unauthenticated());
     }

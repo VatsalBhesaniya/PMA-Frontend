@@ -28,7 +28,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     apiResult.when(
       success: (String? token) {
         if (token != null) {
-          _userRepository.persistToken('Bearer $token');
+          _userRepository.persistToken(token);
           emit(const LoginState.loginSuccess());
         } else {
           emit(
