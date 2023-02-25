@@ -13,6 +13,8 @@ class CreateTask with _$CreateTask {
     @JsonKey() required String title,
     @JsonKey() List<dynamic>? description,
     @JsonKey(name: 'description_plain_text') String? descriptionPlainText,
+    @JsonKey(name: 'updated_at') String? updatedAt,
+    @JsonKey(name: 'last_updated_by') String? lastUpdatedBy,
   }) = _CreateTask;
 
   factory CreateTask.fromJson(Map<String, dynamic> json) =>
