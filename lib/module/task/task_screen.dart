@@ -14,10 +14,12 @@ import 'package:pma/widgets/text_editor.dart';
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({
+    required this.projectId,
     required this.taskId,
     super.key,
   });
 
+  final String projectId;
   final String taskId;
 
   @override
@@ -85,10 +87,18 @@ class _TaskScreenState extends State<TaskScreen> {
                       taskId: int.parse(widget.taskId),
                     ),
                   );
-              return const CircularProgressIndicator();
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
             },
             loadInProgress: () {
-              return const CircularProgressIndicator();
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
             },
             fetchTaskSuccess: (Task task) {
               if (task.description != null) {
@@ -120,7 +130,7 @@ class _TaskScreenState extends State<TaskScreen> {
                           const SizedBox(height: 16),
                           _buildDescription(
                             theme: theme,
-                            isEdit: false,
+                            isEdit: task.isEdit,
                           ),
                           const SizedBox(height: 16),
                           const Text('Created At'),
@@ -139,12 +149,16 @@ class _TaskScreenState extends State<TaskScreen> {
               );
             },
             fetchTaskFailure: () {
-              return const Center(
-                child: Text('Something went wrong.'),
+              return const Scaffold(
+                body: Center(
+                  child: Text('Something went wrong.'),
+                ),
               );
             },
             orElse: () {
-              return const SizedBox();
+              return const Scaffold(
+                body: SizedBox(),
+              );
             },
           );
         },

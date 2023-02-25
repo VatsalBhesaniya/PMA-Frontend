@@ -9,5 +9,6 @@ const String invitedProjectsEndpoint = 'projects/invited';
 const String createProjectEndpoint = 'projects/create';
 const String projectDetailEndpoint = 'projects/detail';
 const String tasksEndpoint = 'tasks';
+const String createTasksEndpoint = 'tasks/create';
 const String notesEndpoint = 'notes';
 const String documentsEndpoint = 'documents';

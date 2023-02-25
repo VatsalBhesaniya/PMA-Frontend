@@ -7,7 +7,12 @@ import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class TasksScreen extends StatefulWidget {
-  const TasksScreen({super.key});
+  const TasksScreen({
+    required this.projectId,
+    super.key,
+  });
+
+  final String projectId;
 
   @override
   State<TasksScreen> createState() => _TasksScreenState();
@@ -22,7 +27,9 @@ class _TasksScreenState extends State<TasksScreen> {
         state.maybeWhen(
           deleteTaskSuccess: () {
             context.read<TasksBloc>().add(
-                  const TasksEvent.fetchTasks(),
+                  TasksEvent.fetchTasks(
+                    projectId: int.parse(widget.projectId),
+                  ),
                 );
             _showSnackBar(context: context, theme: theme);
           },
@@ -46,7 +53,9 @@ class _TasksScreenState extends State<TasksScreen> {
         return state.maybeWhen(
           initial: () {
             context.read<TasksBloc>().add(
-                  const TasksEvent.fetchTasks(),
+                  TasksEvent.fetchTasks(
+                    projectId: int.parse(widget.projectId),
+                  ),
                 );
             return const CircularProgressIndicator();
           },
@@ -63,7 +72,8 @@ class _TasksScreenState extends State<TasksScreen> {
                     context.goNamed(
                       RouteConstants.task,
                       params: <String, String>{
-                        'id': task.id.toString(),
+                        'projectId': widget.projectId,
+                        'taskId': task.id.toString(),
                       },
                     );
                   },

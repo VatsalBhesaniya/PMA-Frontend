@@ -10,10 +10,12 @@ class TasksRepository {
   });
   final DioClient dioClient;
 
-  Future<ApiResult<List<Task>?>> fetchTasks() async {
+  Future<ApiResult<List<Task>?>> fetchTasks({
+    required int projectId,
+  }) async {
     try {
       final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: tasksEndpoint,
+        url: '$tasksEndpoint/project/$projectId',
         httpMethod: HttpMethod.get,
       );
       final List<Task>? tasks = data

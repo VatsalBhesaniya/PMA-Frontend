@@ -51,33 +51,53 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
-          path: '${RouteConstants.project}/:id',
+          path: '${RouteConstants.project}/:projectId',
           name: RouteConstants.project,
           builder: (BuildContext context, GoRouterState state) {
             return ProjectScreen(
-              projectId: state.params['id']!,
+              projectId: state.params['projectId']!,
             );
           },
           routes: <RouteBase>[
             GoRoute(
-                path: RouteConstants.projectDetail,
-                name: RouteConstants.projectDetail,
-                builder: (BuildContext context, GoRouterState state) {
-                  return ProjectDetailScreen(
-                    id: state.params['id']!,
-                  );
-                },
-                routes: <RouteBase>[
-                  GoRoute(
-                    path: RouteConstants.inviteMembers,
-                    name: RouteConstants.inviteMembers,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return InviteMembersScreen(
-                        id: state.params['id']!,
-                      );
-                    },
-                  ),
-                ]),
+              path: RouteConstants.projectDetail,
+              name: RouteConstants.projectDetail,
+              builder: (BuildContext context, GoRouterState state) {
+                return ProjectDetailScreen(
+                  projectId: state.params['projectId']!,
+                );
+              },
+              routes: <RouteBase>[
+                GoRoute(
+                  path: RouteConstants.inviteMembers,
+                  name: RouteConstants.inviteMembers,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return InviteMembersScreen(
+                      projectId: state.params['projectId']!,
+                    );
+                  },
+                ),
+              ],
+            ),
+            GoRoute(
+              path: '${RouteConstants.task}/:taskId',
+              name: RouteConstants.task,
+              builder: (BuildContext context, GoRouterState state) {
+                return TaskScreen(
+                  projectId: state.params['projectId']!,
+                  taskId: state.params['taskId']!,
+                );
+              },
+            ),
+            GoRoute(
+              path: RouteConstants.createTask,
+              name: RouteConstants.createTask,
+              builder: (BuildContext context, GoRouterState state) {
+                return CreateTaskScreen(
+                  projectId: state.params['projectId']!,
+                );
+              },
+            ),
           ],
         ),
         GoRoute(
@@ -85,22 +105,6 @@ final GoRouter router = GoRouter(
           name: RouteConstants.createProject,
           builder: (BuildContext context, GoRouterState state) {
             return const CreateProjectScreen();
-          },
-        ),
-        GoRoute(
-          path: '${RouteConstants.task}/:id',
-          name: RouteConstants.task,
-          builder: (BuildContext context, GoRouterState state) {
-            return TaskScreen(
-              taskId: state.params['id']!,
-            );
-          },
-        ),
-        GoRoute(
-          path: RouteConstants.createTask,
-          name: RouteConstants.createTask,
-          builder: (BuildContext context, GoRouterState state) {
-            return const CreateTaskScreen();
           },
         ),
         GoRoute(

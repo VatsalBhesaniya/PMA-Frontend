@@ -18,11 +18,11 @@ import 'package:pma/widgets/input_field.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   const ProjectDetailScreen({
-    required this.id,
+    required this.projectId,
     super.key,
   });
 
-  final String id;
+  final String projectId;
 
   @override
   State<ProjectDetailScreen> createState() => _ProjectDetailScreenState();
@@ -55,7 +55,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             removeMemberSuccess: () {
               context.read<ProjectDetailBloc>().add(
                     ProjectDetailEvent.fetchProjectDetail(
-                      projectId: int.parse(widget.id),
+                      projectId: int.parse(widget.projectId),
                     ),
                   );
             },
@@ -96,7 +96,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             initial: () {
               context.read<ProjectDetailBloc>().add(
                     ProjectDetailEvent.fetchProjectDetail(
-                      projectId: int.parse(widget.id),
+                      projectId: int.parse(widget.projectId),
                     ),
                   );
               return const Scaffold(
@@ -309,7 +309,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               context.goNamed(
                 RouteConstants.inviteMembers,
                 params: <String, String>{
-                  'id': widget.id,
+                  'projectId': widget.projectId,
                 },
               );
             },

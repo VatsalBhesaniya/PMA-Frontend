@@ -111,6 +111,9 @@ class _ProjectScreenState extends State<ProjectScreen>
           case 0:
             context.goNamed(
               RouteConstants.createTask,
+              params: <String, String>{
+                'projectId': widget.projectId,
+              },
             );
             break;
           case 1:
@@ -183,7 +186,9 @@ class _ProjectScreenState extends State<ProjectScreen>
                 dioClient: context.read<DioClient>(),
               ),
             ),
-            child: const TasksScreen(),
+            child: TasksScreen(
+              projectId: widget.projectId,
+            ),
           ),
           BlocProvider<NotesBloc>(
             create: (BuildContext context) => NotesBloc(
@@ -215,7 +220,7 @@ class _ProjectScreenState extends State<ProjectScreen>
         context.goNamed(
           RouteConstants.projectDetail,
           params: <String, String>{
-            'id': widget.projectId,
+            'projectId': widget.projectId,
           },
         );
       },

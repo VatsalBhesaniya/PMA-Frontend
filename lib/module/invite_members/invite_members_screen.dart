@@ -12,10 +12,10 @@ import 'package:pma/utils/network_exceptions.dart';
 class InviteMembersScreen extends StatefulWidget {
   const InviteMembersScreen({
     super.key,
-    required this.id,
+    required this.projectId,
   });
 
-  final String id;
+  final String projectId;
 
   @override
   State<InviteMembersScreen> createState() => _InviteMembersScreenState();
@@ -74,7 +74,7 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
                                         .where((SearchUser user) =>
                                             user.isSelected == true)
                                         .toList(),
-                                    projectId: int.parse(widget.id),
+                                    projectId: int.parse(widget.projectId),
                                   ),
                                 );
                           },
