@@ -128,6 +128,15 @@ class _TaskScreenState extends State<TaskScreen> {
                           const SizedBox(height: 16),
                           Text(task.title),
                           const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              const Text('Owner'),
+                              const SizedBox(width: 16),
+                              Text(task.owner.username),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
                           _buildDescription(
                             theme: theme,
                             isEdit: task.isEdit,
