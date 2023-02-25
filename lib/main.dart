@@ -58,6 +58,9 @@ void main() {
                 AuthenticationBloc(userRepository: userRepository)
                   ..add(const AuthenticationEvent.appStarted()),
           ),
+          RepositoryProvider<UserRepository>(
+            create: (BuildContext context) => userRepository,
+          ),
           BlocProvider<LoginBloc>(
             create: (BuildContext context) => LoginBloc(
               userRepository: userRepository,
