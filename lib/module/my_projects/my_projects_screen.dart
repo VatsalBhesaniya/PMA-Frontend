@@ -85,7 +85,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                         context.goNamed(
                           RouteConstants.project,
                           params: <String, String>{
-                            'id': project.id.toString(),
+                            'projectId': project.id.toString(),
                           },
                         );
                       },

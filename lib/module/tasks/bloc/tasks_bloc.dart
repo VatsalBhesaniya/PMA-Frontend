@@ -25,8 +25,9 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   FutureOr<void> _onFetchTasks(
       _FetchTasks event, Emitter<TasksState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<List<Task>?> apiResult =
-        await _tasksRepository.fetchTasks();
+    final ApiResult<List<Task>?> apiResult = await _tasksRepository.fetchTasks(
+      projectId: event.projectId,
+    );
     apiResult.when(
       success: (List<Task>? tasks) {
         emit(_FetchTasksSuccess(tasks: tasks ?? <Task>[]));

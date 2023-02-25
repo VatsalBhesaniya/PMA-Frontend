@@ -22,3 +22,10 @@ enum MemberStatus {
   accepted,
   invited,
 }
+
+enum TaskStatus {
+  todo,
+  inProgress,
+  completed,
+  qa,
+}

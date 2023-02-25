@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
+import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/task.dart';
 import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
+import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class TasksScreen extends StatefulWidget {
-  const TasksScreen({super.key});
+  const TasksScreen({
+    required this.projectId,
+    super.key,
+  });
+
+  final String projectId;
 
   @override
   State<TasksScreen> createState() => _TasksScreenState();
@@ -22,7 +29,9 @@ class _TasksScreenState extends State<TasksScreen> {
         state.maybeWhen(
           deleteTaskSuccess: () {
             context.read<TasksBloc>().add(
-                  const TasksEvent.fetchTasks(),
+                  TasksEvent.fetchTasks(
+                    projectId: int.parse(widget.projectId),
+                  ),
                 );
             _showSnackBar(context: context, theme: theme);
           },
@@ -46,7 +55,9 @@ class _TasksScreenState extends State<TasksScreen> {
         return state.maybeWhen(
           initial: () {
             context.read<TasksBloc>().add(
-                  const TasksEvent.fetchTasks(),
+                  TasksEvent.fetchTasks(
+                    projectId: int.parse(widget.projectId),
+                  ),
                 );
             return const CircularProgressIndicator();
           },
@@ -54,34 +65,51 @@ class _TasksScreenState extends State<TasksScreen> {
             return const CircularProgressIndicator();
           },
           fetchTasksSuccess: (List<Task> tasks) {
-            return ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (BuildContext context, int index) {
-                final Task task = tasks[index];
-                return ListTile(
-                  onTap: () {
-                    context.goNamed(
-                      RouteConstants.task,
-                      params: <String, String>{
-                        'id': task.id.toString(),
-                      },
-                    );
-                  },
-                  title: Text(task.title),
-                  trailing: IconButton(
-                    onPressed: () {
-                      _showDeleteTaskConfirmDialog(
-                        context: context,
-                        theme: theme,
-                        taskId: task.id,
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.delete_rounded,
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(TaskStatus.todo.title),
+                    _buildTasks(
+                      context: context,
+                      tasks: tasks
+                          .where((Task task) =>
+                              task.status - 1 == TaskStatus.todo.index)
+                          .toList(),
+                      theme: theme,
                     ),
-                  ),
-                );
-              },
+                    Text(TaskStatus.inProgress.title),
+                    _buildTasks(
+                      context: context,
+                      tasks: tasks
+                          .where((Task task) =>
+                              task.status - 1 == TaskStatus.inProgress.index)
+                          .toList(),
+                      theme: theme,
+                    ),
+                    Text(TaskStatus.completed.title),
+                    _buildTasks(
+                      context: context,
+                      tasks: tasks
+                          .where((Task task) =>
+                              task.status - 1 == TaskStatus.completed.index)
+                          .toList(),
+                      theme: theme,
+                    ),
+                    Text(TaskStatus.qa.title),
+                    _buildTasks(
+                      context: context,
+                      tasks: tasks
+                          .where((Task task) =>
+                              task.status - 1 == TaskStatus.qa.index)
+                          .toList(),
+                      theme: theme,
+                    ),
+                  ],
+                ),
+              ),
             );
           },
           fetchTasksFailure: () {
@@ -90,6 +118,45 @@ class _TasksScreenState extends State<TasksScreen> {
             );
           },
           orElse: () => const SizedBox(),
+        );
+      },
+    );
+  }
+
+  ListView _buildTasks({
+    required BuildContext context,
+    required List<Task> tasks,
+    required ThemeData theme,
+  }) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: tasks.length,
+      itemBuilder: (BuildContext context, int index) {
+        final Task task = tasks[index];
+        return ListTile(
+          onTap: () {
+            context.goNamed(
+              RouteConstants.task,
+              params: <String, String>{
+                'projectId': widget.projectId,
+                'taskId': task.id.toString(),
+              },
+            );
+          },
+          title: Text(task.title),
+          trailing: IconButton(
+            onPressed: () {
+              _showDeleteTaskConfirmDialog(
+                context: context,
+                theme: theme,
+                taskId: task.id,
+              );
+            },
+            icon: const Icon(
+              Icons.delete_rounded,
+            ),
+          ),
         );
       },
     );

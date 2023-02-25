@@ -20,7 +20,7 @@ class CreateTaskRepository {
   }) async {
     try {
       final http.Response response = await http.post(
-        Uri.parse('${httpClient.baseUrl}$tasksEndpoint/create'),
+        Uri.parse('${httpClient.baseUrl}$createTasksEndpoint'),
         headers: <String, String>{
           HttpHeaders.authorizationHeader: httpClient.token,
           HttpHeaders.contentTypeHeader: 'application/json',

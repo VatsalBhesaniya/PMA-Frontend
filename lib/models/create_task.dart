@@ -9,9 +9,12 @@ part 'create_task.g.dart';
 class CreateTask with _$CreateTask {
   @JsonSerializable(explicitToJson: true)
   factory CreateTask({
+    @JsonKey(name: 'project_id') required int projectId,
     @JsonKey() required String title,
     @JsonKey() List<dynamic>? description,
     @JsonKey(name: 'description_plain_text') String? descriptionPlainText,
+    @JsonKey(name: 'updated_at') String? updatedAt,
+    @JsonKey(name: 'last_updated_by') String? lastUpdatedBy,
   }) = _CreateTask;
 
   factory CreateTask.fromJson(Map<String, dynamic> json) =>

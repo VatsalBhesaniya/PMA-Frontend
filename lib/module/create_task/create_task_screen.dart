@@ -13,7 +13,12 @@ import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class CreateTaskScreen extends StatefulWidget {
-  const CreateTaskScreen({super.key});
+  const CreateTaskScreen({
+    required this.projectId,
+    super.key,
+  });
+
+  final String projectId;
 
   @override
   State<CreateTaskScreen> createState() => _CreateTaskScreenState();
@@ -104,6 +109,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 context.read<CreateTaskBloc>().add(
                                       CreateTaskEvent.createTask(
                                         task: CreateTask(
+                                          projectId:
+                                              int.parse(widget.projectId),
                                           title:
                                               _taskTitleController.text.trim(),
                                           description: _contentController
