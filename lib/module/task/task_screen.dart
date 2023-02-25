@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router/go_router.dart';
 import 'package:pma/config/http_client_config.dart';
+import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
@@ -127,6 +128,39 @@ class _TaskScreenState extends State<TaskScreen> {
                           Text('task id: ${task.id}'),
                           const SizedBox(height: 16),
                           Text(task.title),
+                          const SizedBox(height: 16),
+                          DropdownButton<TaskStatus>(
+                            value: TaskStatus.values[task.status - 1],
+                            onChanged: (TaskStatus? value) {
+                              if (value != null) {
+                                context.read<TaskBloc>().add(
+                                      TaskEvent.updateTask(
+                                        task: task.copyWith(
+                                          status: value.index + 1,
+                                        ),
+                                      ),
+                                    );
+                              }
+                            },
+                            items: <DropdownMenuItem<TaskStatus>>[
+                              DropdownMenuItem<TaskStatus>(
+                                value: TaskStatus.todo,
+                                child: Text(TaskStatus.todo.title),
+                              ),
+                              DropdownMenuItem<TaskStatus>(
+                                value: TaskStatus.inProgress,
+                                child: Text(TaskStatus.inProgress.title),
+                              ),
+                              DropdownMenuItem<TaskStatus>(
+                                value: TaskStatus.completed,
+                                child: Text(TaskStatus.completed.title),
+                              ),
+                              DropdownMenuItem<TaskStatus>(
+                                value: TaskStatus.qa,
+                                child: Text(TaskStatus.qa.title),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,

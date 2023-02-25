@@ -22,6 +22,7 @@ class Task with _$Task {
     @JsonKey() required List<int> members,
     @JsonKey() required List<int> notes,
     @JsonKey() required List<int> documents,
+    @JsonKey() required int status,
     @JsonKey() required User owner,
     @JsonKey(ignore: true) @Default(false) bool isEdit,
   }) = _Task;

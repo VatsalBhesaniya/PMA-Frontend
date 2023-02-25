@@ -36,3 +36,18 @@ extension MemberStatusExtension on MemberStatus {
     }
   }
 }
+
+extension TaskStatusExtension on TaskStatus {
+  String get title {
+    switch (this) {
+      case TaskStatus.todo:
+        return 'Todo';
+      case TaskStatus.inProgress:
+        return 'In Progress';
+      case TaskStatus.completed:
+        return 'Completed';
+      case TaskStatus.qa:
+        return 'QA';
+    }
+  }
+}
