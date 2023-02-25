@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/search_user.dart';
@@ -55,6 +58,34 @@ class UserRepository {
       );
     } on Exception catch (e) {
       return ApiResult<String?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
+  //signup
+  Future<ApiResult<void>> signup({
+    required Map<String, dynamic> userJson,
+  }) async {
+    try {
+      final http.Response response = await http.post(
+        Uri.parse('${dioClient.baseURL}$signupEndpoint'),
+        headers: <String, String>{
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: jsonEncode(userJson),
+      );
+      if (response.statusCode == 201) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      } else {
+        return const ApiResult<void>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+    } on Exception catch (e) {
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

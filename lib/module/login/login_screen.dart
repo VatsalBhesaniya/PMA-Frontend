@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pma/constants/route_constants.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/module/login/bloc/login_bloc.dart';
+import 'package:pma/router/go_router.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -137,6 +139,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             child: const Text('Login'),
+                          ),
+                          const SizedBox(height: 48),
+                          const Text("Don't have an account?"),
+                          TextButton(
+                            onPressed: () {
+                              router.goNamed(RouteConstants.signup);
+                            },
+                            child: const Text('Register'),
                           ),
                         ],
                       ),
