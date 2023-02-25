@@ -43,7 +43,7 @@ class _InvitedPorojectsScreenState extends State<InvitedPorojectsScreen> {
                         context.goNamed(
                           RouteConstants.project,
                           params: <String, String>{
-                            'id': project.id.toString(),
+                            'projectId': project.id.toString(),
                           },
                         );
                       },
