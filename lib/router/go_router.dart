@@ -11,7 +11,7 @@ import 'package:pma/module/invite_members/invite_members_screen.dart';
 import 'package:pma/module/login/login_screen.dart';
 import 'package:pma/module/note/note_screen.dart';
 import 'package:pma/module/project/project_screen.dart';
-import 'package:pma/module/project_detail/project_detail_screen.dart.dart';
+import 'package:pma/module/project_detail/project_detail_screen.dart';
 import 'package:pma/module/settings/settings_screen.dart';
 import 'package:pma/module/signup/signup_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
