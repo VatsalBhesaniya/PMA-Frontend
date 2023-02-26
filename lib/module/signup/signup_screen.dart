@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/create_user.dart';
-import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/login/bloc/login_bloc.dart';
 import 'package:pma/module/signup/signup/signup_bloc.dart';
 import 'package:pma/router/go_router.dart';
@@ -28,168 +27,160 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return BlocProvider<SignupBloc>(
-      create: (BuildContext context) => SignupBloc(
-        userRepository: RepositoryProvider.of<UserRepository>(context),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Signup'),
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Signup'),
-        ),
-        body: SafeArea(
-          child: BlocConsumer<SignupBloc, SignupState>(
-            listener: (BuildContext context, SignupState state) {
-              state.maybeWhen(
-                signupSuccess: (CreateUser user) {
-                  // router.goNamed(RouteConstants.login);
-                  context.read<LoginBloc>().add(
-                        LoginEvent.loginSubmitted(
-                          email: user.email,
-                          password: user.password,
-                        ),
-                      );
-                },
-                signupFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
-                    context: context,
-                    theme: theme,
-                    error: 'Could not login successfully. Please try again.',
-                  );
-                },
-                orElse: () => null,
-              );
-            },
-            buildWhen: (SignupState previous, SignupState current) {
-              return current.maybeWhen(
-                signupSuccess: (CreateUser user) => false,
-                signupFailure: (NetworkExceptions error) => false,
-                orElse: () => true,
-              );
-            },
-            builder: (BuildContext context, SignupState state) {
-              return state.maybeWhen(
-                loadInProgress: () {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                },
-                orElse: () {
-                  return SingleChildScrollView(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              const SizedBox(height: 16),
-                              _buildInputField(
-                                controller: _firstNameController,
-                                hintText: 'First Name',
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter First Name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              _buildInputField(
-                                controller: _lastNameController,
-                                hintText: 'Last Name',
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter Last Name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              _buildInputField(
-                                controller: _usernameController,
-                                hintText: 'Username',
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter Username';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              _buildInputField(
-                                controller: _emailController,
-                                hintText: 'Email Address',
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter Email Address';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              _buildInputField(
-                                controller: _passwordController,
-                                hintText: 'Password',
-                                isObscure: true,
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter Password';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 32),
-                              ElevatedButton(
-                                onPressed: () {
-                                  final FormState? formState =
-                                      _formKey.currentState;
-                                  if (formState != null &&
-                                      formState.validate()) {
-                                    context.read<SignupBloc>().add(
-                                          SignupEvent.signupSubmitted(
-                                            user: CreateUser(
-                                              firstName: _firstNameController
-                                                  .text
-                                                  .trim(),
-                                              lastName: _lastNameController.text
-                                                  .trim(),
-                                              username: _usernameController.text
-                                                  .trim(),
-                                              email:
-                                                  _emailController.text.trim(),
-                                              password: _passwordController.text
-                                                  .trim(),
-                                            ),
+      body: SafeArea(
+        child: BlocConsumer<SignupBloc, SignupState>(
+          listener: (BuildContext context, SignupState state) {
+            state.maybeWhen(
+              signupSuccess: (CreateUser user) {
+                // router.goNamed(RouteConstants.login);
+                context.read<LoginBloc>().add(
+                      LoginEvent.loginSubmitted(
+                        email: user.email,
+                        password: user.password,
+                      ),
+                    );
+              },
+              signupFailure: (NetworkExceptions error) {
+                _buildApiFailureAlert(
+                  context: context,
+                  theme: theme,
+                  error: 'Could not login successfully. Please try again.',
+                );
+              },
+              orElse: () => null,
+            );
+          },
+          buildWhen: (SignupState previous, SignupState current) {
+            return current.maybeWhen(
+              signupSuccess: (CreateUser user) => false,
+              signupFailure: (NetworkExceptions error) => false,
+              orElse: () => true,
+            );
+          },
+          builder: (BuildContext context, SignupState state) {
+            return state.maybeWhen(
+              loadInProgress: () {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+              orElse: () {
+                return SingleChildScrollView(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            const SizedBox(height: 16),
+                            _buildInputField(
+                              controller: _firstNameController,
+                              hintText: 'First Name',
+                              validator: (String? value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter First Name';
+                                }
+                                return null;
+                              },
+                            ),
+                            _buildInputField(
+                              controller: _lastNameController,
+                              hintText: 'Last Name',
+                              validator: (String? value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter Last Name';
+                                }
+                                return null;
+                              },
+                            ),
+                            _buildInputField(
+                              controller: _usernameController,
+                              hintText: 'Username',
+                              validator: (String? value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter Username';
+                                }
+                                return null;
+                              },
+                            ),
+                            _buildInputField(
+                              controller: _emailController,
+                              hintText: 'Email Address',
+                              validator: (String? value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter Email Address';
+                                }
+                                return null;
+                              },
+                            ),
+                            _buildInputField(
+                              controller: _passwordController,
+                              hintText: 'Password',
+                              isObscure: true,
+                              validator: (String? value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Please enter Password';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 32),
+                            ElevatedButton(
+                              onPressed: () {
+                                final FormState? formState =
+                                    _formKey.currentState;
+                                if (formState != null && formState.validate()) {
+                                  context.read<SignupBloc>().add(
+                                        SignupEvent.signupSubmitted(
+                                          user: CreateUser(
+                                            firstName: _firstNameController.text
+                                                .trim(),
+                                            lastName:
+                                                _lastNameController.text.trim(),
+                                            username:
+                                                _usernameController.text.trim(),
+                                            email: _emailController.text.trim(),
+                                            password:
+                                                _passwordController.text.trim(),
                                           ),
-                                        );
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  fixedSize: const Size(100, 40),
-                                  textStyle: const TextStyle(fontSize: 16),
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(50),
-                                    ),
+                                        ),
+                                      );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: const Size(100, 40),
+                                textStyle: const TextStyle(fontSize: 16),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(50),
                                   ),
                                 ),
-                                child: const Text('Signup'),
                               ),
-                              const SizedBox(height: 48),
-                              const Text('Already have an account?'),
-                              TextButton(
-                                onPressed: () {
-                                  router.goNamed(RouteConstants.login);
-                                },
-                                child: const Text('Login'),
-                              ),
-                            ],
-                          ),
+                              child: const Text('Signup'),
+                            ),
+                            const SizedBox(height: 48),
+                            const Text('Already have an account?'),
+                            TextButton(
+                              onPressed: () {
+                                router.goNamed(RouteConstants.login);
+                              },
+                              child: const Text('Login'),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  );
-                },
-              );
-            },
-          ),
+                  ),
+                );
+              },
+            );
+          },
         ),
       ),
     );

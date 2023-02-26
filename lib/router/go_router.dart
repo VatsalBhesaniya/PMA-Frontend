@@ -29,12 +29,14 @@ final GoRouter router = GoRouter(
       name: RouteConstants.login,
       builder: (BuildContext context, GoRouterState state) =>
           const LoginScreen(),
-    ),
-    GoRoute(
-      path: '/${RouteConstants.signup}',
-      name: RouteConstants.signup,
-      builder: (BuildContext context, GoRouterState state) =>
-          const SignupScreen(),
+      routes: <RouteBase>[
+        GoRoute(
+          path: RouteConstants.signup,
+          name: RouteConstants.signup,
+          builder: (BuildContext context, GoRouterState state) =>
+              const SignupScreen(),
+        ),
+      ],
     ),
     GoRoute(
       path: '/${RouteConstants.home}',
