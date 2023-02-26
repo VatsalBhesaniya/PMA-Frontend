@@ -13,7 +13,6 @@ import 'package:pma/module/app/pma_app.dart';
 import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/module/login/bloc/login_bloc.dart';
-import 'package:pma/module/signup/signup/signup_bloc.dart';
 import 'package:pma/router/go_router.dart';
 import 'package:pma/theme/app_theme.dart';
 import 'package:pma/theme/pma_theme.dart';
@@ -55,17 +54,15 @@ void main() {
           ),
           Provider<AppStorageManager>.value(value: appStorageManager),
           BlocProvider<AuthenticationBloc>(
-            create: (BuildContext context) =>
-                AuthenticationBloc(userRepository: userRepository)
-                  ..add(const AuthenticationEvent.appStarted()),
+            create: (BuildContext context) => AuthenticationBloc(
+              userRepository: userRepository,
+            )..add(const AuthenticationEvent.appStarted()),
+          ),
+          RepositoryProvider<UserRepository>(
+            create: (BuildContext context) => userRepository,
           ),
           BlocProvider<LoginBloc>(
             create: (BuildContext context) => LoginBloc(
-              userRepository: userRepository,
-            ),
-          ),
-          BlocProvider<SignupBloc>(
-            create: (BuildContext context) => SignupBloc(
               userRepository: userRepository,
             ),
           ),
