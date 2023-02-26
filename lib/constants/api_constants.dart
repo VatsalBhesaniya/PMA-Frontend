@@ -1,6 +1,7 @@
 const String androidBaseUrl = 'http://10.0.2.2:8000/';
 const String iosBaseUrl = 'http://127.0.0.1:8000/';
 const String loginEndpoint = 'login';
+const String signupEndpoint = 'users/create';
 const String usersEndpoint = 'users';
 const String membersEndpoint = 'members';
 const String inviteMembersEndpoint = 'members/invite';

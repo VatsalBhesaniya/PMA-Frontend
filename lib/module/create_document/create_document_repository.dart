@@ -15,7 +15,7 @@ class CreateDocumentRepository {
 
   final HttpClientConfig httpClient;
 
-  Future<ApiResult<int?>> createDocument({
+  Future<ApiResult<int>> createDocument({
     required Map<String, dynamic> documentData,
   }) async {
     try {
@@ -30,12 +30,12 @@ class CreateDocumentRepository {
       if (response.statusCode == 201) {
         final Map<String, dynamic> jsonResponse =
             jsonDecode(response.body) as Map<String, dynamic>;
-        return ApiResult<int?>.success(
+        return ApiResult<int>.success(
           data: Document.fromJson(jsonResponse).id,
         );
       } else {
-        return const ApiResult<int?>.success(
-          data: null,
+        return const ApiResult<int>.failure(
+          error: NetworkExceptions.defaultError(),
         );
       }
 
@@ -45,11 +45,11 @@ class CreateDocumentRepository {
       //   httpMethod: HttpMethod.post,
       //   data: FormData.fromMap(documentData),
       // );
-      // return ApiResult<int?>.success(
+      // return ApiResult<int>.success(
       //   data: data != null ? Document.fromJson(data).id : null,
       // );
     } on Exception catch (e) {
-      return ApiResult<int?>.failure(
+      return ApiResult<int>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

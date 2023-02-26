@@ -13,6 +13,7 @@ import 'package:pma/module/note/note_screen.dart';
 import 'package:pma/module/project/project_screen.dart';
 import 'package:pma/module/project_detail/project_detail_screen.dart.dart';
 import 'package:pma/module/settings/settings_screen.dart';
+import 'package:pma/module/signup/signup_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
 import 'package:pma/profile/profile_screen.dart';
 
@@ -28,6 +29,14 @@ final GoRouter router = GoRouter(
       name: RouteConstants.login,
       builder: (BuildContext context, GoRouterState state) =>
           const LoginScreen(),
+      routes: <RouteBase>[
+        GoRoute(
+          path: RouteConstants.signup,
+          name: RouteConstants.signup,
+          builder: (BuildContext context, GoRouterState state) =>
+              const SignupScreen(),
+        ),
+      ],
     ),
     GoRoute(
       path: '/${RouteConstants.home}',
