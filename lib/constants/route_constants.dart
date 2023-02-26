@@ -8,8 +8,9 @@ class RouteConstants {
   static String inviteMembers = 'inviteMembers';
   static String home = 'home';
   static String project = 'project';
-  static String projectDetail = 'projectDetail';
   static String createProject = 'createProject';
+  static String projectDetail = 'projectDetail';
+  static String milestones = 'milestones';
   static String task = 'task';
   static String createTask = 'createTask';
   static String note = 'note';
