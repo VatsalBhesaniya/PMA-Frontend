@@ -16,7 +16,7 @@ import 'package:pma/module/project_detail/project_detail_screen.dart';
 import 'package:pma/module/settings/settings_screen.dart';
 import 'package:pma/module/signup/signup_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
-import 'package:pma/profile/profile_screen.dart';
+import 'package:pma/module/profile/profile_screen.dart';
 
 // GoRouter configuration
 // The route configuration for the app.
