@@ -10,6 +10,7 @@ const String invitedProjectsEndpoint = 'projects/invited';
 const String createProjectEndpoint = 'projects/create';
 const String projectDetailEndpoint = 'projects/detail';
 const String milestonesEndpoint = 'milestones';
+const String createMilestonesEndpoint = 'milestones/create';
 const String projectMilestonesEndpoint = 'milestones/project';
 const String tasksEndpoint = 'tasks';
 const String createTasksEndpoint = 'tasks/create';

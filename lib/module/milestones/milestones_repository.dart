@@ -35,6 +35,10 @@ class MilestonesRepository {
           .map((dynamic project) =>
               Milestone.fromJson(project as Map<String, dynamic>))
           .toList();
+      milestones.sort(
+        (Milestone a, Milestone b) =>
+            a.completionDate.compareTo(b.completionDate),
+      );
       return ApiResult<List<Milestone>>.success(
         data: milestones,
       );
@@ -45,31 +49,31 @@ class MilestonesRepository {
     }
   }
 
-  // Future<ApiResult<List<Milestone>>> fetchMilestones({
-  //   required List<Map<String, dynamic>> membersData,
-  // }) async {
-  //   try {
-  //     final http.Response response = await http.post(
-  //       Uri.parse('${httpClient.baseUrl}$inviteMembersEndpoint'),
-  //       headers: <String, String>{
-  //         HttpHeaders.authorizationHeader: httpClient.token,
-  //         HttpHeaders.contentTypeHeader: 'application/json',
-  //       },
-  //       body: jsonEncode(membersData),
-  //     );
-  //     if (response.statusCode == 200) {
-  //       return const ApiResult<List<Milestone>>.success(
-  //         data: true,
-  //       );
-  //     } else {
-  //       return const ApiResult<List<Milestone>>.failure(
-  //         error: NetworkExceptions.defaultError(),
-  //       );
-  //     }
-  //   } on Exception catch (e) {
-  //     return ApiResult<List<Milestone>>.failure(
-  //       error: NetworkExceptions.dioException(e),
-  //     );
-  //   }
-  // }
+  Future<ApiResult<void>> createMilestone({
+    required Map<String, dynamic> milestonesData,
+  }) async {
+    try {
+      final http.Response response = await http.post(
+        Uri.parse('${httpClient.baseUrl}$createMilestonesEndpoint'),
+        headers: <String, String>{
+          HttpHeaders.authorizationHeader: httpClient.token,
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: jsonEncode(milestonesData),
+      );
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      } else {
+        return const ApiResult<void>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+    } on Exception catch (e) {
+      return ApiResult<void>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
 }

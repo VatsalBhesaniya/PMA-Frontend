@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/config/http_client_config.dart';
+import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/milestone.dart';
 import 'package:pma/module/milestones/bloc/milestones_bloc.dart';
 import 'package:pma/module/milestones/milestones_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/text_editor.dart';
 
 class MilestonesScreen extends StatefulWidget {
   const MilestonesScreen({
@@ -75,6 +79,11 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
                   );
                 },
                 fetchMilestoneSuccess: (List<Milestone> milestones) {
+                  if (milestones.isEmpty) {
+                    return const Center(
+                      child: Text('No milestones added yet.'),
+                    );
+                  }
                   return Stepper(
                     currentStep: _index,
                     onStepCancel: () {
@@ -100,6 +109,7 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
                     //   return Container();
                     // },
                     steps: _buildSteps(
+                      theme: theme,
                       milestones: milestones,
                     ),
                   );
@@ -122,16 +132,29 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
     required ThemeData theme,
   }) {
     return FloatingActionButton(
-      onPressed: () {},
+      onPressed: () {
+        context.goNamed(
+          RouteConstants.createMilestone,
+          params: <String, String>{
+            'projectId': widget.projectId,
+          },
+        );
+      },
       child: const Icon(Icons.add),
     );
   }
 
   List<Step> _buildSteps({
+    required ThemeData theme,
     required List<Milestone> milestones,
   }) {
     final List<Step> steps = <Step>[];
     for (final Milestone milestone in milestones) {
+      final quill.QuillController controller = quill.QuillController.basic();
+      if (milestone.description != null) {
+        controller.document =
+            quill.Document.fromJson(milestone.description ?? <dynamic>[]);
+      }
       steps.add(
         Step(
           isActive: true,
@@ -139,8 +162,17 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
           title: Text(milestone.title),
           subtitle: Text(_dateTime(milestone.completionDate)),
           content: Container(
-            alignment: Alignment.centerLeft,
-            child: Text(milestone.description),
+            decoration: BoxDecoration(
+              border: Border.all(color: theme.colorScheme.outline),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(8),
+              ),
+            ),
+            child: TextEditor(
+              controller: controller,
+              readOnly: true,
+              showCursor: false,
+            ),
           ),
         ),
       );

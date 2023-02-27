@@ -12,7 +12,9 @@ class Milestone with _$Milestone {
     @JsonKey() required int id,
     @JsonKey(name: 'project_id') required int projectId,
     @JsonKey() required String title,
-    @JsonKey() required String description,
+    @JsonKey() required List<dynamic>? description,
+    @JsonKey(name: 'description_plain_text')
+        required String? descriptionPlainText,
     @JsonKey(name: 'is_completed') required bool isCompleted,
     @JsonKey(name: 'completion_date') required String completionDate,
   }) = _Milestone;
