@@ -10,4 +10,12 @@ class ProfileState with _$ProfileState {
   const factory ProfileState.fetchUserFailure({
     required NetworkExceptions error,
   }) = _FetchUserFailure;
+  const factory ProfileState.updateUserSuccess() = _UpdateUserSuccess;
+  const factory ProfileState.updateUserFailure({
+    required NetworkExceptions error,
+  }) = _UpdateUserFailure;
+  const factory ProfileState.deleteUserSuccess() = _DeleteUserSuccess;
+  const factory ProfileState.deleteUserFailure({
+    required NetworkExceptions error,
+  }) = _DeleteUserFailure;
 }
