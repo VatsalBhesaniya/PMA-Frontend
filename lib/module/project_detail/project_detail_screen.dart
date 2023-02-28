@@ -146,6 +146,24 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                           const SizedBox(height: 16),
                           Text(_dateTime(projectDetail.createdAt)),
                           const SizedBox(height: 16),
+                          GestureDetector(
+                            onTap: () {
+                              context.goNamed(
+                                RouteConstants.milestones,
+                                params: <String, String>{
+                                  'projectId': widget.projectId,
+                                },
+                              );
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const <Widget>[
+                                Text('Milestones'),
+                                Icon(Icons.chevron_right_rounded),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                           _buildMembers(
                             context: context,
                             theme: theme,

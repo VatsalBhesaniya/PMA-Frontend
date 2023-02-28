@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:go_router/go_router.dart';
 import 'package:pma/config/http_client_config.dart';
-import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/create_task.dart';
 import 'package:pma/module/create_task/bloc/create_task_bloc.dart';
 import 'package:pma/module/create_task/create_task_repository.dart';
@@ -53,12 +52,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                   );
                   context.pop();
-                  context.goNamed(
-                    RouteConstants.task,
-                    params: <String, String>{
-                      'id': taskId.toString(),
-                    },
-                  );
                 },
                 createTaskFailure: (NetworkExceptions error) {
                   _buildCreateTaskFailureAlert(

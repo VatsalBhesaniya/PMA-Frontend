@@ -2,20 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/module/create_document/create_document_screen.dart';
+import 'package:pma/module/create_milestone/create_milestone_screen.dart';
 import 'package:pma/module/create_note/create_note_screen.dart';
 import 'package:pma/module/create_project/create_project_screen.dart';
 import 'package:pma/module/create_task/create_task_screen.dart';
 import 'package:pma/module/document/document_screen.dart';
+import 'package:pma/module/edit_milestone/edit_milestone_screen.dart';
 import 'package:pma/module/home/home_screen.dart';
 import 'package:pma/module/invite_members/invite_members_screen.dart';
 import 'package:pma/module/login/login_screen.dart';
+import 'package:pma/module/milestones/milestones_screen.dart';
 import 'package:pma/module/note/note_screen.dart';
+import 'package:pma/module/profile/profile_screen.dart';
 import 'package:pma/module/project/project_screen.dart';
-import 'package:pma/module/project_detail/project_detail_screen.dart.dart';
+import 'package:pma/module/project_detail/project_detail_screen.dart';
 import 'package:pma/module/settings/settings_screen.dart';
 import 'package:pma/module/signup/signup_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
-import 'package:pma/profile/profile_screen.dart';
 
 // GoRouter configuration
 // The route configuration for the app.
@@ -77,6 +80,35 @@ final GoRouter router = GoRouter(
                 );
               },
               routes: <RouteBase>[
+                GoRoute(
+                  path: RouteConstants.milestones,
+                  name: RouteConstants.milestones,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return MilestonesScreen(
+                      projectId: state.params['projectId']!,
+                    );
+                  },
+                  routes: <RouteBase>[
+                    GoRoute(
+                      path: RouteConstants.createMilestone,
+                      name: RouteConstants.createMilestone,
+                      builder: (BuildContext context, GoRouterState state) {
+                        return CreateMilestoneScreen(
+                          projectId: state.params['projectId']!,
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: '${RouteConstants.editMilestone}/:milestoneId',
+                      name: RouteConstants.editMilestone,
+                      builder: (BuildContext context, GoRouterState state) {
+                        return EditMilestoneScreen(
+                          milestoneId: state.params['milestoneId']!,
+                        );
+                      },
+                    ),
+                  ],
+                ),
                 GoRoute(
                   path: RouteConstants.inviteMembers,
                   name: RouteConstants.inviteMembers,
