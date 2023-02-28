@@ -86,28 +86,35 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
                   }
                   return Stepper(
                     currentStep: _index,
-                    onStepCancel: () {
-                      if (_index > 0) {
-                        setState(() {
-                          _index -= 1;
-                        });
-                      }
-                    },
-                    onStepContinue: () {
-                      if (_index <= 0) {
-                        setState(() {
-                          _index += 1;
-                        });
-                      }
-                    },
                     onStepTapped: (int index) {
                       setState(() {
                         _index = index;
                       });
                     },
-                    // controlsBuilder: (BuildContext context, ControlsDetails details) {
-                    //   return Container();
-                    // },
+                    controlsBuilder:
+                        (BuildContext context, ControlsDetails details) {
+                      return Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.goNamed(
+                                  RouteConstants.editMilestone,
+                                  params: <String, String>{
+                                    'projectId': widget.projectId,
+                                    'milestoneId': milestones[details.stepIndex]
+                                        .id
+                                        .toString(),
+                                  },
+                                );
+                              },
+                              child: const Text('Edit'),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                     steps: _buildSteps(
                       theme: theme,
                       milestones: milestones,
