@@ -332,7 +332,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               );
             },
             icon: const Icon(Icons.add),
-            label: const Text('Invite'),
+            label: const Text('Add'),
           ),
       ],
     );

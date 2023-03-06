@@ -14,9 +14,7 @@ class Member with _$Member {
     @JsonKey(name: 'project_id') required int projectId,
     @JsonKey() required int role,
     @JsonKey(name: 'created_at') required String createdAt,
-    @JsonKey() required int status,
     @JsonKey() required User user,
-
   }) = _Member;
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);

@@ -121,16 +121,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        const Center(
-                          child: CircleAvatar(
-                            radius: 50,
-                            child: Icon(
-                              Icons.person_rounded,
-                              size: 70,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
                         _buildProfileItems(
                           context: context,
                           theme: theme,
