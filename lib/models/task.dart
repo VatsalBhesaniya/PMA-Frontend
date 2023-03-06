@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_annotation_target
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pma/models/member.dart';
 import 'package:pma/models/user.dart';
 
 part 'task.freezed.dart';
@@ -19,7 +20,7 @@ class Task with _$Task {
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey(name: 'updated_at') String? updatedAt,
     @JsonKey(name: 'last_updated_by') int? lastUpdatedBy,
-    @JsonKey() required List<int> members,
+    @JsonKey() required List<Member> members,
     @JsonKey() required List<int> notes,
     @JsonKey() required List<int> documents,
     @JsonKey() required int status,

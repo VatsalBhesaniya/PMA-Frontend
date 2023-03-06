@@ -354,7 +354,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           leading: const CircleAvatar(
             child: Icon(Icons.person_outline_rounded),
           ),
-          title: Text(member.user.email),
+          title: Text(member.user.username),
           subtitle: Text(MemberRole.values[member.role - 1].title),
           trailing: isOwner && member.role != 1
               ? IconButton(

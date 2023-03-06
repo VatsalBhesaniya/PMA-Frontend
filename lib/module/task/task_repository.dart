@@ -153,4 +153,53 @@ class TaskRepository {
       );
     }
   }
+
+  Future<ApiResult<void>> assignTaskToMembers({
+    required int taskId,
+    required List<Map<String, dynamic>> membersData,
+  }) async {
+    try {
+      final http.Response response = await http.post(
+        Uri.parse('${httpClient.baseUrl}$assignTasksEndpoint/$taskId'),
+        headers: <String, String>{
+          HttpHeaders.authorizationHeader: httpClient.token,
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: jsonEncode(membersData),
+      );
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      } else {
+        return const ApiResult<void>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+    } on Exception catch (e) {
+      return ApiResult<void>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
+  Future<ApiResult<void>> removeAssignedMember({
+    required int taskId,
+    required int projectId,
+    required int userId,
+  }) async {
+    try {
+      await dioClient.request<Map<String, dynamic>?>(
+        url: '$assignTasksEndpoint/$taskId/$projectId/$userId',
+        httpMethod: HttpMethod.delete,
+      );
+      return const ApiResult<void>.success(
+        data: null,
+      );
+    } on Exception catch (e) {
+      return ApiResult<void>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
 }

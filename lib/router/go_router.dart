@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pma/constants/route_constants.dart';
+import 'package:pma/module/assign_task/assign_task_screen.dart';
 import 'package:pma/module/create_document/create_document_screen.dart';
 import 'package:pma/module/create_milestone/create_milestone_screen.dart';
 import 'package:pma/module/create_note/create_note_screen.dart';
@@ -121,15 +122,26 @@ final GoRouter router = GoRouter(
               ],
             ),
             GoRoute(
-              path: '${RouteConstants.task}/:taskId',
-              name: RouteConstants.task,
-              builder: (BuildContext context, GoRouterState state) {
-                return TaskScreen(
-                  projectId: state.params['projectId']!,
-                  taskId: state.params['taskId']!,
-                );
-              },
-            ),
+                path: '${RouteConstants.task}/:taskId',
+                name: RouteConstants.task,
+                builder: (BuildContext context, GoRouterState state) {
+                  return TaskScreen(
+                    projectId: state.params['projectId']!,
+                    taskId: state.params['taskId']!,
+                  );
+                },
+                routes: <RouteBase>[
+                  GoRoute(
+                    path: RouteConstants.assignMembers,
+                    name: RouteConstants.assignMembers,
+                    builder: (BuildContext context, GoRouterState state) {
+                      return AssignTaskScreen(
+                        taskId: state.params['taskId']!,
+                        projectId: state.params['projectId']!,
+                      );
+                    },
+                  ),
+                ]),
             GoRoute(
               path: RouteConstants.createTask,
               name: RouteConstants.createTask,

@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/search_user.dart';
-import 'package:pma/module/app/user_repository.dart';
-import 'package:pma/module/select_users/bloc/select_users_bloc.dart';
+import 'package:pma/module/project/project_repository.dart';
+import 'package:pma/module/select_members/bloc/select_members_bloc.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/search_bar.dart';
 
-class SelectUsersScreen extends StatefulWidget {
-  const SelectUsersScreen({
+class SelectMembersScreen extends StatefulWidget {
+  const SelectMembersScreen({
     super.key,
+    required this.projectId,
     required this.buttonText,
     required this.onSelectUsers,
   });
 
+  final int projectId;
   final String buttonText;
   final Function(List<SearchUser>) onSelectUsers;
 
   @override
-  State<SelectUsersScreen> createState() => _SelectUsersScreenState();
+  State<SelectMembersScreen> createState() => _SelectMembersScreenState();
 }
 
-class _SelectUsersScreenState extends State<SelectUsersScreen> {
+class _SelectMembersScreenState extends State<SelectMembersScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
@@ -37,15 +38,14 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
-        child: BlocProvider<SelectUsersBloc>(
-          create: (BuildContext context) => SelectUsersBloc(
-            userRepository: UserRepository(
+        child: BlocProvider<SelectMembersBloc>(
+          create: (BuildContext context) => SelectMembersBloc(
+            projectRepository: ProjectRepository(
               dioClient: context.read<DioClient>(),
-              appStorageManager: context.read<AppStorageManager>(),
             ),
           ),
-          child: BlocConsumer<SelectUsersBloc, SelectUsersState>(
-            listener: (BuildContext context, SelectUsersState state) {
+          child: BlocConsumer<SelectMembersBloc, SelectMembersState>(
+            listener: (BuildContext context, SelectMembersState state) {
               state.maybeWhen(
                 searchUsersFailure: (NetworkExceptions error) {
                   _buildApiFailureAlert(
@@ -58,18 +58,20 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
                 orElse: () => null,
               );
             },
-            buildWhen: (SelectUsersState previous, SelectUsersState current) {
+            buildWhen:
+                (SelectMembersState previous, SelectMembersState current) {
               return current.maybeWhen(
                 searchUsersFailure: (NetworkExceptions error) => false,
                 orElse: () => true,
               );
             },
-            builder: (BuildContext context, SelectUsersState state) {
+            builder: (BuildContext context, SelectMembersState state) {
               return state.maybeWhen(
                 initial: () {
-                  context.read<SelectUsersBloc>().add(
-                        SelectUsersEvent.searchUsers(
+                  context.read<SelectMembersBloc>().add(
+                        SelectMembersEvent.searchUsers(
                           searchText: _searchController.text.trim(),
+                          projectId: widget.projectId,
                         ),
                       );
                   return const Center(
@@ -118,16 +120,18 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
       focusNode: _searchFocusNode,
       hintText: 'username',
       onCancel: () {
-        context.read<SelectUsersBloc>().add(
-              SelectUsersEvent.searchUsers(
+        context.read<SelectMembersBloc>().add(
+              SelectMembersEvent.searchUsers(
                 searchText: _searchController.text.trim(),
+                projectId: widget.projectId,
               ),
             );
       },
       onChanged: (String searchText) {
-        context.read<SelectUsersBloc>().add(
-              SelectUsersEvent.searchUsers(
+        context.read<SelectMembersBloc>().add(
+              SelectMembersEvent.searchUsers(
                 searchText: searchText.trim(),
+                projectId: widget.projectId,
               ),
             );
       },
@@ -145,7 +149,9 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
             subtitle: Text(user.email),
             trailing: IconButton(
               onPressed: () {
-                context.read<SelectUsersBloc>().add(SelectUsersEvent.selectUser(
+                context
+                    .read<SelectMembersBloc>()
+                    .add(SelectMembersEvent.selectUser(
                       index: index,
                       users: users,
                     ));
