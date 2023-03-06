@@ -20,30 +20,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 16),
-            const CircleAvatar(
-              radius: 50,
-              child: Icon(
-                Icons.person_rounded,
-                size: 70,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildMenuItems(),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                context.read<AuthenticationBloc>().add(
-                      const AuthenticationEvent.logout(),
-                    );
-              },
-              child: const Text('Logout'),
-            ),
-          ],
-        ),
+      body: Column(
+        children: <Widget>[
+          const SizedBox(height: 16),
+          _buildMenuItems(),
+          const SizedBox(height: 16),
+          const Spacer(),
+          ElevatedButton(
+            onPressed: () {
+              context.read<AuthenticationBloc>().add(
+                    const AuthenticationEvent.logout(),
+                  );
+            },
+            child: const Text('Logout'),
+          ),
+          const SizedBox(height: 32),
+        ],
       ),
     );
   }
