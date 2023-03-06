@@ -27,4 +27,8 @@ class TaskState with _$TaskState {
   }) = _FetchAttachedDocumentsSuccess;
   const factory TaskState.fetchAttachedDocumentsFailure() =
       _FetchAttachedDocumentsFailure;
+  const factory TaskState.removeMemberSuccess() = _RemoveMemberSuccess;
+  const factory TaskState.removeMemberFailure({
+    required NetworkExceptions error,
+  }) = _RemoveMemberFailure;
 }

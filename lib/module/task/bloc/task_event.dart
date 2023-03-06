@@ -26,4 +26,9 @@ class TaskEvent with _$TaskEvent {
   const factory TaskEvent.expandDocument({
     required List<Document> documents,
   }) = _ExpandDocument;
+  const factory TaskEvent.removeMember({
+    required int taskId,
+    required int projectId,
+    required int userId,
+  }) = _RemoveMember;
 }

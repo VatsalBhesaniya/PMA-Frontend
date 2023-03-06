@@ -3,10 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router/go_router.dart';
 import 'package:pma/config/http_client_config.dart';
+import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/document.dart';
+import 'package:pma/models/member.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
+import 'package:pma/models/user.dart';
 import 'package:pma/module/task/bloc/task_bloc.dart';
 import 'package:pma/module/task/task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
@@ -63,9 +66,26 @@ class _TaskScreenState extends State<TaskScreen> {
               _showSnackBar(context: context, theme: theme);
             },
             deleteTaskFailure: (NetworkExceptions error) {
-              _buildDeleteTaskFailureAlert(
+              _buildApiFailureAlert(
                 context: context,
                 theme: theme,
+                error:
+                    'Could not delete a task successfully. Please try again.',
+              );
+            },
+            removeMemberSuccess: () {
+              context.read<TaskBloc>().add(
+                    TaskEvent.fetchTask(
+                      taskId: int.parse(widget.taskId),
+                    ),
+                  );
+            },
+            removeMemberFailure: (NetworkExceptions error) {
+              _buildApiFailureAlert(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not invite members successfully. Please try again.',
               );
             },
             orElse: () => null,
@@ -129,47 +149,15 @@ class _TaskScreenState extends State<TaskScreen> {
                           const SizedBox(height: 16),
                           Text(task.title),
                           const SizedBox(height: 16),
-                          DropdownButton<TaskStatus>(
-                            value: TaskStatus.values[task.status - 1],
-                            onChanged: (TaskStatus? value) {
-                              if (value != null) {
-                                context.read<TaskBloc>().add(
-                                      TaskEvent.updateTask(
-                                        task: task.copyWith(
-                                          status: value.index + 1,
-                                        ),
-                                      ),
-                                    );
-                              }
-                            },
-                            items: <DropdownMenuItem<TaskStatus>>[
-                              DropdownMenuItem<TaskStatus>(
-                                value: TaskStatus.todo,
-                                child: Text(TaskStatus.todo.title),
-                              ),
-                              DropdownMenuItem<TaskStatus>(
-                                value: TaskStatus.inProgress,
-                                child: Text(TaskStatus.inProgress.title),
-                              ),
-                              DropdownMenuItem<TaskStatus>(
-                                value: TaskStatus.completed,
-                                child: Text(TaskStatus.completed.title),
-                              ),
-                              DropdownMenuItem<TaskStatus>(
-                                value: TaskStatus.qa,
-                                child: Text(TaskStatus.qa.title),
-                              ),
-                            ],
+                          _buildMembers(
+                            context: context,
+                            theme: theme,
+                            task: task,
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              const Text('Owner'),
-                              const SizedBox(width: 16),
-                              Text(task.owner.username),
-                            ],
-                          ),
+                          _buildTaskStatus(task, context),
+                          const SizedBox(height: 16),
+                          _buildOwner(task),
                           const SizedBox(height: 16),
                           _buildDescription(
                             theme: theme,
@@ -179,9 +167,7 @@ class _TaskScreenState extends State<TaskScreen> {
                           const Text('Created At'),
                           const SizedBox(height: 16),
                           Text(task.createdAt),
-                          const SizedBox(
-                            height: 20,
-                          ),
+                          const SizedBox(height: 20),
                           _buildNotesAttached(),
                           _buildDocumentsAttached(),
                         ],
@@ -206,6 +192,151 @@ class _TaskScreenState extends State<TaskScreen> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildMembers({
+    required BuildContext context,
+    required ThemeData theme,
+    required Task task,
+  }) {
+    final User currentUser = context.read<User>();
+    final bool isOwner = task.owner.id == currentUser.id;
+    return Column(
+      children: <Widget>[
+        _buildMembersTitle(
+          theme: theme,
+          context: context,
+          isOwner: isOwner,
+        ),
+        _buildMembersList(
+          context: context,
+          theme: theme,
+          task: task,
+          isOwner: isOwner,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMembersTitle({
+    required ThemeData theme,
+    required BuildContext context,
+    required bool isOwner,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Text(
+            'Members',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        if (isOwner)
+          TextButton.icon(
+            onPressed: () {
+              context.goNamed(
+                RouteConstants.assignMembers,
+                params: <String, String>{
+                  'taskId': widget.taskId,
+                  'projectId': widget.projectId,
+                },
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Add'),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildMembersList({
+    required BuildContext context,
+    required ThemeData theme,
+    required Task task,
+    required bool isOwner,
+  }) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: task.members.length,
+      itemBuilder: (BuildContext context, int index) {
+        final Member member = task.members[index];
+        return ListTile(
+          leading: const CircleAvatar(
+            child: Icon(Icons.person_outline_rounded),
+          ),
+          title: Text(member.user.username),
+          subtitle: Text(MemberRole.values[member.role - 1].title),
+          trailing: isOwner && member.role != 1
+              ? IconButton(
+                  onPressed: () {
+                    context.read<TaskBloc>().add(
+                          TaskEvent.removeMember(
+                            taskId: task.id,
+                            projectId: task.projectId,
+                            userId: member.userId,
+                          ),
+                        );
+                  },
+                  icon: Icon(
+                    Icons.cancel_rounded,
+                    color: theme.colorScheme.error,
+                  ),
+                )
+              : null,
+        );
+      },
+    );
+  }
+
+  Row _buildOwner(Task task) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        const Text('Owner'),
+        const SizedBox(width: 16),
+        Text(task.owner.username),
+      ],
+    );
+  }
+
+  DropdownButton<TaskStatus> _buildTaskStatus(Task task, BuildContext context) {
+    return DropdownButton<TaskStatus>(
+      value: TaskStatus.values[task.status - 1],
+      onChanged: (TaskStatus? value) {
+        if (value != null) {
+          context.read<TaskBloc>().add(
+                TaskEvent.updateTask(
+                  task: task.copyWith(
+                    status: value.index + 1,
+                  ),
+                ),
+              );
+        }
+      },
+      items: <DropdownMenuItem<TaskStatus>>[
+        DropdownMenuItem<TaskStatus>(
+          value: TaskStatus.todo,
+          child: Text(TaskStatus.todo.title),
+        ),
+        DropdownMenuItem<TaskStatus>(
+          value: TaskStatus.inProgress,
+          child: Text(TaskStatus.inProgress.title),
+        ),
+        DropdownMenuItem<TaskStatus>(
+          value: TaskStatus.completed,
+          child: Text(TaskStatus.completed.title),
+        ),
+        DropdownMenuItem<TaskStatus>(
+          value: TaskStatus.qa,
+          child: Text(TaskStatus.qa.title),
+        ),
+      ],
     );
   }
 
@@ -549,9 +680,10 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
-  void _buildDeleteTaskFailureAlert({
+  void _buildApiFailureAlert({
     required BuildContext context,
     required ThemeData theme,
+    required String error,
   }) {
     showDialog<String>(
       context: context,
@@ -565,9 +697,7 @@ class _TaskScreenState extends State<TaskScreen> {
               ),
             ),
           ),
-          content: const Text(
-            'Could not delete a task successfully. Please try again.',
-          ),
+          content: Text(error),
           actions: <Widget>[
             Center(
               child: TextButton(

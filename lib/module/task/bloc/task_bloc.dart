@@ -26,6 +26,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<_ExpandTask>(_onExpandTask);
     on<_FetchAttachedDocuments>(_onFetchAttachedDocuments);
     on<_ExpandDocument>(_onExpandDocument);
+    on<_RemoveMember>(_onRemoveMember);
   }
 
   final TaskRepository _taskRepository;
@@ -141,6 +142,29 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       _FetchAttachedDocumentsSuccess(
         documents: event.documents,
       ),
+    );
+  }
+
+  FutureOr<void> _onRemoveMember(
+      _RemoveMember event, Emitter<TaskState> emit) async {
+    emit(const _LoadInProgress());
+    final ApiResult<void> apiResult =
+        await _taskRepository.removeAssignedMember(
+      taskId: event.taskId,
+      projectId: event.projectId,
+      userId: event.userId,
+    );
+    apiResult.when(
+      success: (void value) {
+        emit(
+          const TaskState.removeMemberSuccess(),
+        );
+      },
+      failure: (NetworkExceptions error) {
+        emit(
+          TaskState.removeMemberFailure(error: error),
+        );
+      },
     );
   }
 }
