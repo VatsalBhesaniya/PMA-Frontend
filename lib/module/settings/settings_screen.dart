@@ -28,7 +28,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const AuthenticationEvent.logout(),
               );
         },
-        backgroundColor: theme.colorScheme.error,
         labelText: 'Logout',
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -81,26 +80,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               CircleAvatar(
+                backgroundColor: theme.colorScheme.secondary,
                 child: IconButton(
                   onPressed: () {
                     context.read<ThemeChanger>().setTheme(AppThemeMode.light);
                   },
+                  color: theme.colorScheme.primary,
                   icon: const Icon(Icons.light_mode_rounded),
                 ),
               ),
               CircleAvatar(
+                backgroundColor: theme.colorScheme.secondary,
                 child: IconButton(
                   onPressed: () {
                     context.read<ThemeChanger>().setTheme(AppThemeMode.dark);
                   },
+                  color: theme.colorScheme.primary,
                   icon: const Icon(Icons.nightlight_round),
                 ),
               ),
               CircleAvatar(
+                backgroundColor: theme.colorScheme.secondary,
                 child: IconButton(
                   onPressed: () {
                     context.read<ThemeChanger>().setTheme(AppThemeMode.system);
                   },
+                  color: theme.colorScheme.primary,
                   icon: const Icon(Icons.settings_suggest_rounded),
                 ),
               ),
