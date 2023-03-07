@@ -139,9 +139,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
             fetchUserFailure: (NetworkExceptions error) {
-              return const Scaffold(
+              return Scaffold(
                 body: Center(
-                  child: Text('Something went wrong.'),
+                  child: Text(
+                    'Something went wrong.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ),
               );
             },
@@ -291,7 +294,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          _buildUpdateButton(
+          _buildSaveButton(
             context: context,
             theme: theme,
             user: user,
@@ -313,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Widget _buildUpdateButton({
+  Widget _buildSaveButton({
     required BuildContext context,
     required ThemeData theme,
     required User user,
@@ -335,7 +338,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
           }
         },
-        child: const Text('Save'),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Save',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.background,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -356,7 +367,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               );
         },
-        child: const Text('Cancel'),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Cancel',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.background,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -409,14 +428,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             title,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onBackground,
+              color: theme.colorScheme.primary,
             ),
           ),
           Text(
             value,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
+            style: theme.textTheme.bodyLarge,
           ),
           const Divider(),
         ],
@@ -441,7 +458,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          content: Text(error),
+          content: Text(
+            error,
+            style: theme.textTheme.bodyMedium,
+          ),
           actions: <Widget>[
             Center(
               child: TextButton(

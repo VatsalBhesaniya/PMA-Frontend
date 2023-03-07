@@ -48,8 +48,8 @@ const ColorScheme _lightColorScheme = ColorScheme(
   onSurface: platinum,
   background: seashell,
   onBackground: seashell,
-  error: errorRed,
-  onError: errorRed,
+  error: errorRedLight,
+  onError: errorRedLight,
   outline: Colors.blueGrey,
   brightness: Brightness.light,
 );
@@ -65,8 +65,8 @@ const ColorScheme _darkColorScheme = ColorScheme(
   onSurface: surfaceWhite,
   background: timberwolf,
   onBackground: timberwolf,
-  error: errorRed,
-  onError: errorRed,
+  error: errorRedDark,
+  onError: errorRedDark,
   outline: Colors.blueGrey,
   brightness: Brightness.dark,
 );
@@ -81,7 +81,8 @@ TextTheme _buildTextTheme(TextTheme baseTheme) {
 }
 
 const Color surfaceWhite = Color(0xFFFFFBFA);
-const Color errorRed = Color(0xFFC5032B);
+const Color errorRedLight = Color.fromARGB(255, 223, 83, 83);
+const Color errorRedDark = Color.fromARGB(255, 160, 59, 59);
 const Color timberwolf = Color(0xFFDAD5D4);
 const Color paleDogwood = Color(0xFFF3C5B7);
 const Color peachYellow = Color(0xFFFBDEAC);

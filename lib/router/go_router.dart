@@ -55,13 +55,15 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             return const SettingsScreen();
           },
-        ),
-        GoRoute(
-          path: RouteConstants.profile,
-          name: RouteConstants.profile,
-          builder: (BuildContext context, GoRouterState state) {
-            return const ProfileScreen();
-          },
+          routes: <RouteBase>[
+            GoRoute(
+              path: RouteConstants.profile,
+              name: RouteConstants.profile,
+              builder: (BuildContext context, GoRouterState state) {
+                return const ProfileScreen();
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: '${RouteConstants.project}/:projectId',

@@ -62,10 +62,7 @@ class InputField extends StatelessWidget {
       focusNode: focusNode,
       scrollPadding: scrollPadding,
       decoration: _inputDecoration(context, currentTheme),
-      style: style ??
-          currentTheme.textTheme.bodyMedium?.copyWith(
-            color: currentTheme.colorScheme.primary,
-          ),
+      style: style ?? currentTheme.textTheme.bodyMedium,
       keyboardType: textInputType,
       textCapitalization: textCapitalization,
       validator: validator,
@@ -146,10 +143,7 @@ class InputField extends StatelessWidget {
   }
 
   Color _borderColor(ThemeData currentTheme, Color? color) {
-    if (currentTheme.brightness == Brightness.dark) {
-      return currentTheme.colorScheme.background;
-    }
-    return color ?? currentTheme.colorScheme.primary;
+    return currentTheme.colorScheme.primaryContainer;
   }
 
   TextStyle _hintStyle(BuildContext context, ThemeData currentTheme) {
