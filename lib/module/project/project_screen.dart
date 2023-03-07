@@ -81,7 +81,9 @@ class _ProjectScreenState extends State<ProjectScreen>
                     ),
                   ],
                 ),
-                floatingActionButton: _buildFloatingActionButton(),
+                floatingActionButton: _buildFloatingActionButton(
+                  theme: theme,
+                ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
                 body: Column(
@@ -104,7 +106,9 @@ class _ProjectScreenState extends State<ProjectScreen>
     );
   }
 
-  FloatingActionButton _buildFloatingActionButton() {
+  FloatingActionButton _buildFloatingActionButton({
+    required ThemeData theme,
+  }) {
     return FloatingActionButton(
       onPressed: () {
         switch (_tabController.index) {
@@ -129,7 +133,10 @@ class _ProjectScreenState extends State<ProjectScreen>
           default:
         }
       },
-      child: const Icon(Icons.add),
+      child: Icon(
+        Icons.add,
+        color: theme.colorScheme.primary,
+      ),
     );
   }
 
@@ -156,6 +163,7 @@ class _ProjectScreenState extends State<ProjectScreen>
           title: 'Documents',
         ),
       ],
+      indicatorColor: theme.colorScheme.primaryContainer,
     );
   }
 
@@ -166,9 +174,7 @@ class _ProjectScreenState extends State<ProjectScreen>
     return Tab(
       child: Text(
         title,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onPrimary,
-        ),
+        style: theme.textTheme.bodyMedium,
       ),
     );
   }

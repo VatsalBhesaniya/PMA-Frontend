@@ -15,21 +15,26 @@ class TextEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Column(
       children: <Widget>[
-        if (!readOnly) _buildToolbar(),
-        _buildEditor(),
+        if (!readOnly) _buildToolbar(theme),
+        _buildEditor(theme),
       ],
     );
   }
 
-  Column _buildToolbar() {
+  Column _buildToolbar(ThemeData theme) {
     return Column(
       children: <Widget>[
         QuillToolbar.basic(
           controller: controller,
+          iconTheme: QuillIconTheme(
+              iconSelectedColor: theme.colorScheme.primary,
+              iconSelectedFillColor: theme.colorScheme.primaryContainer),
           showAlignmentButtons: true,
           toolbarIconAlignment: WrapAlignment.start,
+          toolbarSectionSpacing: 0,
           showFontFamily: false,
           showFontSize: false,
           showStrikeThrough: false,
@@ -38,18 +43,17 @@ class TextEditor extends StatelessWidget {
           showLink: false,
           showSearchButton: false,
         ),
-        const SizedBox(height: 16),
         const Divider(),
       ],
     );
   }
 
-  Container _buildEditor() {
+  Container _buildEditor(ThemeData theme) {
     return Container(
-      constraints: const BoxConstraints(
-        minHeight: 200,
-      ),
       padding: const EdgeInsets.all(16),
+      constraints: const BoxConstraints(
+        minHeight: 300,
+      ),
       child: QuillEditor(
         readOnly: readOnly,
         showCursor: showCursor,
