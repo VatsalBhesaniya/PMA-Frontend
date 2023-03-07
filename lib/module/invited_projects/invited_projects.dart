@@ -15,6 +15,7 @@ class InvitedPorojectsScreen extends StatefulWidget {
 class _InvitedPorojectsScreenState extends State<InvitedPorojectsScreen> {
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: BlocBuilder<InvitedProjectsBloc, InvitedProjectsState>(
@@ -34,7 +35,11 @@ class _InvitedPorojectsScreenState extends State<InvitedPorojectsScreen> {
                 );
               },
               fetchInvitedProjectsSuccess: (List<Project> projects) {
-                return ListView.builder(
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
                   itemCount: projects.length,
                   itemBuilder: (BuildContext context, int index) {
                     final Project project = projects[index];
@@ -47,14 +52,20 @@ class _InvitedPorojectsScreenState extends State<InvitedPorojectsScreen> {
                           },
                         );
                       },
-                      title: Text(project.title),
+                      title: Text(
+                        project.title,
+                        style: theme.textTheme.titleMedium,
+                      ),
                     );
                   },
                 );
               },
               fetchInvitedProjectsFailure: () {
-                return const Center(
-                  child: Text('Something went wrong.'),
+                return Center(
+                  child: Text(
+                    'Something went wrong.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 );
               },
               orElse: () => const SizedBox(),

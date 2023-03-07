@@ -76,7 +76,11 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                 );
               },
               fetchProjectsSuccess: (List<Project> projects) {
-                return ListView.builder(
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
                   itemCount: projects.length,
                   itemBuilder: (BuildContext context, int index) {
                     final Project project = projects[index];
@@ -89,14 +93,20 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                           },
                         );
                       },
-                      title: Text(project.title),
+                      title: Text(
+                        project.title,
+                        style: theme.textTheme.titleMedium,
+                      ),
                     );
                   },
                 );
               },
               fetchProjectsFailure: () {
-                return const Center(
-                  child: Text('Something went wrong.'),
+                return Center(
+                  child: Text(
+                    'Something went wrong.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 );
               },
               orElse: () => const SizedBox(),
@@ -171,6 +181,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                             ),
                           ),
                         );
+                    _projectTitleController.clear();
                     Navigator.pop(ctx, 'OK');
                   }
                 },
@@ -211,8 +222,9 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
               ),
             ),
           ),
-          content: const Text(
+          content: Text(
             'Could not create project successfully. Please try again.',
+            style: theme.textTheme.bodyMedium,
           ),
           actions: <Widget>[
             Center(

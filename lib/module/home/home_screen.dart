@@ -43,13 +43,18 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         title: const Text('Home'),
         actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              context.goNamed(RouteConstants.settings);
-            },
-            icon: const CircleAvatar(
-              child: Icon(
-                Icons.person_outline_rounded,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: IconButton(
+              onPressed: () {
+                context.goNamed(RouteConstants.settings);
+              },
+              icon: CircleAvatar(
+                backgroundColor: theme.colorScheme.background,
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ),
           ),
@@ -95,9 +100,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Tab(
       child: Text(
         title,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onPrimary,
-        ),
+        style: theme.textTheme.bodyMedium,
       ),
     );
   }
