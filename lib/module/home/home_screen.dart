@@ -5,7 +5,7 @@ import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/module/home/projects_repository.dart';
 import 'package:pma/module/invited_projects/bloc/invited_projects_bloc.dart';
-import 'package:pma/module/invited_projects/invited_projects.dart';
+import 'package:pma/module/invited_projects/invited_projects_screen.dart';
 import 'package:pma/module/my_projects/bloc/my_projects_bloc.dart';
 import 'package:pma/module/my_projects/my_projects_screen.dart';
 import 'package:pma/utils/dio_client.dart';
