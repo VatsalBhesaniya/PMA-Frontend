@@ -5,6 +5,7 @@ import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/theme/theme_changer.dart';
+import 'package:pma/widgets/floating_action_button_extended.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -16,73 +17,65 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
       ),
+      floatingActionButton: FloatingActionButtonExtended(
+        onPressed: () {
+          context.read<AuthenticationBloc>().add(
+                const AuthenticationEvent.logout(),
+              );
+        },
+        backgroundColor: theme.colorScheme.error,
+        labelText: 'Logout',
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: Column(
         children: <Widget>[
           const SizedBox(height: 16),
-          _buildMenuItems(),
+          _buildMenuItem(theme: theme),
           const SizedBox(height: 16),
-          const Spacer(),
-          ElevatedButton(
-            onPressed: () {
-              context.read<AuthenticationBloc>().add(
-                    const AuthenticationEvent.logout(),
-                  );
-            },
-            child: const Text('Logout'),
-          ),
-          const SizedBox(height: 32),
+          _buildThemeMenuItem(theme: theme),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  Widget _buildMenuItems() {
-    return Column(
-      children: <Widget>[
-        _buildMenuItem(
-          onTap: () {
-            context.goNamed(RouteConstants.profile);
-          },
-          iconData: Icons.person,
-          title: 'Profile',
-        ),
-        _buildThemeMenuItem(),
-      ],
-    );
-  }
-
-  Widget _buildMenuItem({
-    Function()? onTap,
-    required IconData iconData,
-    required String title,
-    bool isTrailingIcon = true,
-  }) {
+  Widget _buildMenuItem({required ThemeData theme}) {
     return ListTile(
-      onTap: onTap,
-      leading: Icon(iconData),
-      title: Text(title),
-      trailing: isTrailingIcon
-          ? const Icon(
-              Icons.keyboard_arrow_right_rounded,
-            )
-          : null,
+      onTap: () {
+        context.goNamed(RouteConstants.profile);
+      },
+      leading: const Icon(Icons.person),
+      title: Text(
+        'Profile',
+        style: theme.textTheme.bodyLarge,
+      ),
+      trailing: const Icon(
+        Icons.keyboard_arrow_right_rounded,
+      ),
     );
   }
 
-  Widget _buildThemeMenuItem() {
+  Widget _buildThemeMenuItem({
+    required ThemeData theme,
+  }) {
     return Column(
       children: <Widget>[
-        const ListTile(
-          leading: Icon(Icons.color_lens_rounded),
-          title: Text('Theme'),
+        ListTile(
+          leading: const Icon(Icons.color_lens_rounded),
+          title: Text(
+            'Theme',
+            style: theme.textTheme.bodyLarge,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 70,
+            vertical: 8,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
