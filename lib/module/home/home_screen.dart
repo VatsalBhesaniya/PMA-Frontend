@@ -90,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen>
           title: 'Invited',
         ),
       ],
+      indicatorColor: theme.colorScheme.primaryContainer,
     );
   }
 

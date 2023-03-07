@@ -125,6 +125,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
       context: context,
       builder: (BuildContext ctx) {
         return Dialog(
+          backgroundColor: theme.colorScheme.background,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -137,9 +138,8 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.close_rounded,
-                        color: theme.colorScheme.error,
                       ),
                     ),
                   ),
@@ -185,7 +185,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                     Navigator.pop(ctx, 'OK');
                   }
                 },
-                color: theme.colorScheme.outline,
+                color: theme.colorScheme.primary,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(
                     Radius.circular(4),

@@ -71,7 +71,14 @@ class _TasksScreenState extends State<TasksScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(TaskStatus.todo.title),
+                    Text(
+                      TaskStatus.todo.title,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: theme.colorScheme.primary,
+                    ),
                     _buildTasks(
                       context: context,
                       tasks: tasks
@@ -80,7 +87,14 @@ class _TasksScreenState extends State<TasksScreen> {
                           .toList(),
                       theme: theme,
                     ),
-                    Text(TaskStatus.inProgress.title),
+                    Text(
+                      TaskStatus.inProgress.title,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: theme.colorScheme.primary,
+                    ),
                     _buildTasks(
                       context: context,
                       tasks: tasks
@@ -89,7 +103,14 @@ class _TasksScreenState extends State<TasksScreen> {
                           .toList(),
                       theme: theme,
                     ),
-                    Text(TaskStatus.completed.title),
+                    Text(
+                      TaskStatus.completed.title,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: theme.colorScheme.primary,
+                    ),
                     _buildTasks(
                       context: context,
                       tasks: tasks
@@ -98,7 +119,14 @@ class _TasksScreenState extends State<TasksScreen> {
                           .toList(),
                       theme: theme,
                     ),
-                    Text(TaskStatus.qa.title),
+                    Text(
+                      TaskStatus.qa.title,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: theme.colorScheme.primary,
+                    ),
                     _buildTasks(
                       context: context,
                       tasks: tasks
@@ -128,9 +156,19 @@ class _TasksScreenState extends State<TasksScreen> {
     required List<Task> tasks,
     required ThemeData theme,
   }) {
-    return ListView.builder(
+    tasks.sort(
+      (Task a, Task b) => b.createdAt.compareTo(a.createdAt),
+    );
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      separatorBuilder: (BuildContext context, int index) {
+        return const Divider(
+          height: 1,
+          indent: 16,
+          endIndent: 20,
+        );
+      },
       itemCount: tasks.length,
       itemBuilder: (BuildContext context, int index) {
         final Task task = tasks[index];
@@ -144,7 +182,10 @@ class _TasksScreenState extends State<TasksScreen> {
               },
             );
           },
-          title: Text(task.title),
+          title: Text(
+            task.title,
+            style: theme.textTheme.bodyMedium,
+          ),
           trailing: IconButton(
             onPressed: () {
               _showDeleteTaskConfirmDialog(
@@ -153,6 +194,7 @@ class _TasksScreenState extends State<TasksScreen> {
                 taskId: task.id,
               );
             },
+            color: theme.colorScheme.onError,
             icon: const Icon(
               Icons.delete_rounded,
             ),
