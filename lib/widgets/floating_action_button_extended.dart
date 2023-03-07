@@ -30,10 +30,7 @@ class FloatingActionButtonExtended extends StatelessWidget {
         ),
         label: Text(
           labelText,
-          style: labelStyle ??
-              theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.background,
-              ),
+          style: labelStyle ?? theme.textTheme.titleMedium,
         ),
       ),
     );
