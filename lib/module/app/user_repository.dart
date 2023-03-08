@@ -138,4 +138,32 @@ class UserRepository {
       );
     }
   }
+
+  Future<ApiResult<void>> updateUserPassword({
+    required Map<String, dynamic> userData,
+  }) async {
+    try {
+      final http.Response response = await http.put(
+        Uri.parse('${dioClient.baseURL}$updatePasswordEndpoint'),
+        headers: <String, String>{
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: jsonEncode(userData),
+      );
+
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      } else {
+        return const ApiResult<void>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+    } on Exception catch (e) {
+      return ApiResult<void>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
 }

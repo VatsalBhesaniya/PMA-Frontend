@@ -20,6 +20,7 @@ import 'package:pma/module/project_detail/project_detail_screen.dart';
 import 'package:pma/module/settings/settings_screen.dart';
 import 'package:pma/module/signup/signup_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
+import 'package:pma/module/update_password/update_password_screen.dart';
 
 // GoRouter configuration
 // The route configuration for the app.
@@ -34,6 +35,12 @@ final GoRouter router = GoRouter(
       builder: (BuildContext context, GoRouterState state) =>
           const LoginScreen(),
       routes: <RouteBase>[
+        GoRoute(
+          path: RouteConstants.updatePassword,
+          name: RouteConstants.updatePassword,
+          builder: (BuildContext context, GoRouterState state) =>
+              const UpdatePasswordScreen(),
+        ),
         GoRoute(
           path: RouteConstants.signup,
           name: RouteConstants.signup,

@@ -3,6 +3,7 @@ class RouteConstants {
   static String root = '/';
   static String login = 'login';
   static String signup = 'signup';
+  static String updatePassword = 'updatePassword';
   static String settings = 'settings';
   static String profile = 'profile';
   static String inviteMembers = 'inviteMembers';
