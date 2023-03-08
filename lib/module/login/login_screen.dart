@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/module/login/bloc/login_bloc.dart';
 import 'package:pma/router/go_router.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/utils/validations.dart';
+import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
               },
               loginFailure: (NetworkExceptions error) {
-                _buildApiFailureAlert(
+                pmaAlertDialog(
                   context: context,
                   theme: theme,
                   error: 'Could not login successfully. Please try again.',
@@ -47,7 +51,6 @@ class _LoginScreenState extends State<LoginScreen> {
           buildWhen: (LoginState previous, LoginState current) {
             return current.maybeWhen(
               loginSuccess: () => false,
-              loginFailure: (NetworkExceptions error) => false,
               orElse: () => true,
             );
           },
@@ -60,95 +63,115 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               orElse: () {
                 return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          TextFormField(
-                            controller: _emailController,
-                            decoration: const InputDecoration(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            InputField(
+                              controller: _emailController,
                               hintText: 'Email address',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(50),
-                                ),
+                              validator: (String? value) {
+                                if (value != null && value.trim().isNotEmpty) {
+                                  return Validations()
+                                      .emailValidator(email: value);
+                                }
+                                return null;
+                              },
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(50),
                               ),
-                              contentPadding: EdgeInsets.all(20),
-                              constraints: BoxConstraints(
-                                maxWidth: 400,
-                              ),
+                              inputFieldHeight: InputFieldHeight.large,
                             ),
-                            validator: (String? value) {
-                              if (value != null && value.trim().isEmpty) {
-                                return 'Please enter email address';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          TextFormField(
-                            controller: _passwordController,
-                            decoration: const InputDecoration(
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            InputField(
+                              controller: _passwordController,
                               hintText: 'Password',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(50),
-                                ),
+                              validator: (String? value) {
+                                if (value != null && value.trim().isNotEmpty) {
+                                  return Validations()
+                                      .passwordValidator(password: value);
+                                }
+                                return null;
+                              },
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(50),
                               ),
-                              contentPadding: EdgeInsets.all(20),
-                              constraints: BoxConstraints(
-                                maxWidth: 400,
-                              ),
+                              inputFieldHeight: InputFieldHeight.large,
                             ),
-                            validator: (String? value) {
-                              if (value != null && value.trim().isEmpty) {
-                                return 'Please enter password';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(
-                            height: 32,
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              final FormState? formState =
-                                  _formKey.currentState;
-                              if (formState != null && formState.validate()) {
-                                context.read<LoginBloc>().add(
-                                      LoginEvent.loginSubmitted(
-                                        email: _emailController.text.trim(),
-                                        password:
-                                            _passwordController.text.trim(),
-                                      ),
-                                    );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              fixedSize: const Size(100, 40),
-                              textStyle: const TextStyle(fontSize: 16),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(50),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: GestureDetector(
+                                onTap: () {
+                                  router.goNamed(RouteConstants.updatePassword);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Forgot password?',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.outline,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                            child: const Text('Login'),
-                          ),
-                          const SizedBox(height: 48),
-                          const Text("Don't have an account?"),
-                          TextButton(
-                            onPressed: () {
-                              router.goNamed(RouteConstants.signup);
-                            },
-                            child: const Text('Register'),
-                          ),
-                        ],
+                            const SizedBox(
+                              height: 32,
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                final FormState? formState =
+                                    _formKey.currentState;
+                                if (formState != null && formState.validate()) {
+                                  context.read<LoginBloc>().add(
+                                        LoginEvent.loginSubmitted(
+                                          email: _emailController.text.trim(),
+                                          password:
+                                              _passwordController.text.trim(),
+                                        ),
+                                      );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                fixedSize: const Size(100, 40),
+                                textStyle: const TextStyle(fontSize: 16),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(50),
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                'Login',
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: theme.colorScheme.background,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 48),
+                            Text(
+                              "Don't have an account?",
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                router.goNamed(RouteConstants.signup);
+                              },
+                              child: Text(
+                                'Register',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -158,42 +181,6 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         ),
       ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

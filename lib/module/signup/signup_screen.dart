@@ -10,6 +10,7 @@ import 'package:pma/router/go_router.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -49,7 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       );
                 },
                 signupFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
+                  pmaAlertDialog(
                     context: context,
                     theme: theme,
                     error: 'Could not login successfully. Please try again.',
@@ -207,45 +208,9 @@ class _SignupScreenState extends State<SignupScreen> {
         hintText: hintText,
         isObscure: isObscure,
         inputFieldHeight: InputFieldHeight.large,
-        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        borderRadius: const BorderRadius.all(Radius.circular(50)),
         validator: validator,
       ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
