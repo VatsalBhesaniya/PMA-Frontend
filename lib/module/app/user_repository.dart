@@ -118,11 +118,12 @@ class UserRepository {
   }
 
   Future<ApiResult<List<SearchUser>?>> fetchUsers({
+    required int projectId,
     required String searchText,
   }) async {
     try {
       final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$usersEndpoint?search=$searchText',
+        url: '$usersEndpoint/$projectId?search=$searchText',
         httpMethod: HttpMethod.get,
       );
       final List<SearchUser>? users = data

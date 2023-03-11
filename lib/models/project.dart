@@ -13,6 +13,7 @@ class Project with _$Project {
     @JsonKey() required String title,
     @JsonKey(name: 'created_by') required int createdBy,
     @JsonKey(name: 'created_at') required String createdAt,
+    @JsonKey(name: 'current_user_role') @Default(4) int currentUserRole,
   }) = _Project;
 
   factory Project.fromJson(Map<String, dynamic> json) =>

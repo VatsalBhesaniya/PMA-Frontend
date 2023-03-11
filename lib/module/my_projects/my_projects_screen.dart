@@ -9,6 +9,7 @@ import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/floating_action_button_extended.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class MyPorojectsScreen extends StatefulWidget {
   const MyPorojectsScreen({super.key});
@@ -33,7 +34,11 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
             theme: theme,
           );
         },
+        backgroundColor: theme.colorScheme.primary,
         labelText: 'Create Project',
+        labelStyle: theme.textTheme.titleMedium?.copyWith(
+          color: theme.colorScheme.background,
+        ),
       ),
       body: SafeArea(
         child: BlocConsumer<MyProjectsBloc, MyProjectsState>(
@@ -45,9 +50,11 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                     );
               },
               createProjectFailure: (NetworkExceptions error) {
-                _buildCreateProjectFailureAlert(
+                pmaAlertDialog(
                   context: context,
                   theme: theme,
+                  error:
+                      'Could not create project successfully. Please try again.',
                 );
               },
               orElse: () => null,
@@ -206,41 +213,4 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
     );
   }
 
-  void _buildCreateProjectFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(
-            'Could not create project successfully. Please try again.',
-            style: theme.textTheme.bodyMedium,
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

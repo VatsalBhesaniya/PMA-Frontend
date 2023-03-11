@@ -6,15 +6,18 @@ import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/select_users/bloc/select_users_bloc.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 import 'package:pma/widgets/search_bar.dart';
 
 class SelectUsersScreen extends StatefulWidget {
   const SelectUsersScreen({
     super.key,
+    required this.projectId,
     required this.buttonText,
     required this.onSelectUsers,
   });
 
+  final int projectId;
   final String buttonText;
   final Function(List<SearchUser>) onSelectUsers;
 
@@ -35,79 +38,76 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: BlocProvider<SelectUsersBloc>(
-          create: (BuildContext context) => SelectUsersBloc(
-            userRepository: UserRepository(
-              dioClient: context.read<DioClient>(),
-              appStorageManager: context.read<AppStorageManager>(),
-            ),
-          ),
-          child: BlocConsumer<SelectUsersBloc, SelectUsersState>(
-            listener: (BuildContext context, SelectUsersState state) {
-              state.maybeWhen(
-                searchUsersFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
-                    context: context,
-                    theme: theme,
-                    error:
-                        'Could not search user successfully. Please try again.',
-                  );
-                },
-                orElse: () => null,
+    return BlocProvider<SelectUsersBloc>(
+      create: (BuildContext context) => SelectUsersBloc(
+        userRepository: UserRepository(
+          dioClient: context.read<DioClient>(),
+          appStorageManager: context.read<AppStorageManager>(),
+        ),
+      ),
+      child: BlocConsumer<SelectUsersBloc, SelectUsersState>(
+        listener: (BuildContext context, SelectUsersState state) {
+          state.maybeWhen(
+            searchUsersFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error: 'Could not search user successfully. Please try again.',
               );
             },
-            buildWhen: (SelectUsersState previous, SelectUsersState current) {
-              return current.maybeWhen(
-                searchUsersFailure: (NetworkExceptions error) => false,
-                orElse: () => true,
-              );
-            },
-            builder: (BuildContext context, SelectUsersState state) {
-              return state.maybeWhen(
-                initial: () {
-                  context.read<SelectUsersBloc>().add(
-                        SelectUsersEvent.searchUsers(
-                          searchText: _searchController.text.trim(),
-                        ),
-                      );
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                },
-                loadInProgress: () {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                },
-                searchUsersSuccess: (List<SearchUser> users) {
-                  return GestureDetector(
-                    onTap: () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: <Widget>[
-                          _buildSearchBar(context: context),
-                          const SizedBox(height: 16),
-                          _buildUsers(users: users),
-                          _buildSelectButton(
-                            context: context,
-                            theme: theme,
-                            users: users,
-                          ),
-                        ],
-                      ),
+            orElse: () => null,
+          );
+        },
+        buildWhen: (SelectUsersState previous, SelectUsersState current) {
+          return current.maybeWhen(
+            searchUsersFailure: (NetworkExceptions error) => false,
+            orElse: () => true,
+          );
+        },
+        builder: (BuildContext context, SelectUsersState state) {
+          return state.maybeWhen(
+            initial: () {
+              context.read<SelectUsersBloc>().add(
+                    SelectUsersEvent.searchUsers(
+                      projectId: widget.projectId,
+                      searchText: _searchController.text.trim(),
                     ),
                   );
-                },
-                orElse: () => const SizedBox(),
+              return const Center(
+                child: CircularProgressIndicator(),
               );
             },
-          ),
-        ),
+            loadInProgress: () {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            },
+            searchUsersSuccess: (List<SearchUser> users) {
+              return GestureDetector(
+                onTap: () {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: <Widget>[
+                      _buildSearchBar(context: context),
+                      const SizedBox(height: 16),
+                      _buildUsers(users: users),
+                      if (users.isNotEmpty)
+                        _buildSelectButton(
+                          context: context,
+                          theme: theme,
+                          users: users,
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            orElse: () => const SizedBox(),
+          );
+        },
       ),
     );
   }
@@ -120,6 +120,7 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
       onCancel: () {
         context.read<SelectUsersBloc>().add(
               SelectUsersEvent.searchUsers(
+                projectId: widget.projectId,
                 searchText: _searchController.text.trim(),
               ),
             );
@@ -127,6 +128,7 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
       onChanged: (String searchText) {
         context.read<SelectUsersBloc>().add(
               SelectUsersEvent.searchUsers(
+                projectId: widget.projectId,
                 searchText: searchText.trim(),
               ),
             );
@@ -135,6 +137,13 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
   }
 
   Widget _buildUsers({required List<SearchUser> users}) {
+    if (users.isEmpty) {
+      return const Expanded(
+        child: Center(
+          child: Text('No members to select.'),
+        ),
+      );
+    }
     return Expanded(
       child: ListView.builder(
         itemCount: users.length,
@@ -173,7 +182,7 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
         );
       },
       elevation: 8,
-      color: theme.colorScheme.secondary,
+      color: theme.colorScheme.primary,
       padding: const EdgeInsets.symmetric(
         horizontal: 32,
         vertical: 8,
@@ -189,42 +198,6 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
           color: theme.colorScheme.background,
         ),
       ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
