@@ -11,6 +11,8 @@ import 'package:pma/module/milestones/milestones_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class EditMilestoneScreen extends StatefulWidget {
@@ -33,7 +35,6 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
       TextEditingController();
   final quill.QuillController _contentController =
       quill.QuillController.basic();
-  late DateTime? selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -54,15 +55,15 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
             listener: (BuildContext context, EditMilestoneState state) {
               state.maybeWhen(
                 updateMilestoneSuccess: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Milestone successfully updated.'),
-                    ),
+                  showSnackBar(
+                    context: context,
+                    theme: theme,
+                    message: 'Milestone successfully updated.',
                   );
                   context.pop();
                 },
                 updateMilestoneFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
+                  pmaAlertDialog(
                     context: context,
                     theme: theme,
                     error:
@@ -73,7 +74,7 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
                   context.pop();
                 },
                 deleteMilestoneFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
+                  pmaAlertDialog(
                     context: context,
                     theme: theme,
                     error:
@@ -134,15 +135,18 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
                           const SizedBox(height: 16),
                           _buildDescription(theme: theme),
                           const SizedBox(height: 16),
+                          _buildMarkAsCompleted(context, theme, milestone),
+                          const SizedBox(height: 16),
                           _buildCompletionDate(
                             context: context,
                             theme: theme,
+                            milestone: milestone,
                           ),
                           const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: <Widget>[
-                              _buildUpdateButton(
+                              _buildSaveButton(
                                 context: context,
                                 theme: theme,
                                 milestone: milestone,
@@ -185,18 +189,58 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
     );
   }
 
+  Widget _buildMarkAsCompleted(
+    BuildContext context,
+    ThemeData theme,
+    Milestone milestone,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(
+          'Mark as completed',
+          style: theme.textTheme.bodyMedium,
+        ),
+        Checkbox(
+          value: milestone.isCompleted,
+          onChanged: (bool? value) {
+            if (value != null) {
+              context.read<EditMilestoneBloc>().add(
+                    EditMilestoneEvent.editMilestone(
+                      milestone: milestone.copyWith(
+                        isCompleted: value,
+                      ),
+                    ),
+                  );
+            }
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildCompletionDate({
     required BuildContext context,
     required ThemeData theme,
+    required Milestone milestone,
   }) {
     return GestureDetector(
       onTap: () async {
-        selectedDate = await showDatePicker(
+        final DateTime? selectedDate = await showDatePicker(
           context: context,
           initialDate: DateTime.now(),
           firstDate: DateTime(2000),
           lastDate: DateTime(2050),
         );
+        if (selectedDate != null) {
+          context.read<EditMilestoneBloc>().add(
+                EditMilestoneEvent.editMilestone(
+                  milestone: milestone.copyWith(
+                    completionDate: selectedDate.toString(),
+                  ),
+                ),
+              );
+        }
         _complitonDateController.text = _dateTime(selectedDate.toString());
       },
       child: InputField(
@@ -220,7 +264,7 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
         datetime.timeZoneName;
   }
 
-  Widget _buildUpdateButton({
+  Widget _buildSaveButton({
     required BuildContext context,
     required ThemeData theme,
     required Milestone milestone,
@@ -229,13 +273,6 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
       child: ElevatedButton(
         onPressed: () {
           if (_formKey.currentState!.validate()) {
-            if (selectedDate == null) {
-              _buildApiFailureAlert(
-                context: context,
-                theme: theme,
-                error: 'Please select date of completion.',
-              );
-            }
             context.read<EditMilestoneBloc>().add(
                   EditMilestoneEvent.updateMilestone(
                     milestoneId: int.parse(widget.milestoneId),
@@ -247,15 +284,18 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
                       descriptionPlainText:
                           _contentController.document.toPlainText(),
                       isCompleted: milestone.isCompleted,
-                      completionDate: selectedDate != null
-                          ? selectedDate.toString()
-                          : milestone.completionDate,
+                      completionDate: milestone.completionDate,
                     ),
                   ),
                 );
           }
         },
-        child: const Text('Save'),
+        child: Text(
+          'Save',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.background,
+          ),
+        ),
       ),
     );
   }
@@ -274,44 +314,13 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
                 ),
               );
         },
-        child: const Text('Delete'),
-      ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
+        child: Text(
+          'Delete',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.background,
           ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+        ),
+      ),
     );
   }
 }

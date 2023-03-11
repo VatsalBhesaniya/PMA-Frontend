@@ -18,6 +18,7 @@ class EditMilestoneBloc extends Bloc<EditMilestoneEvent, EditMilestoneState> {
   })  : _milestonesRepository = milestonesRepository,
         super(const EditMilestoneState.initial()) {
     on<_FetchMilestone>(_onFetchMilestone);
+    on<_EditMilestone>(_onEditMilestone);
     on<_UpdateMilestone>(_onUpdateMilestone);
     on<_DeleteMilestone>(_onDeleteMilestone);
   }
@@ -43,6 +44,16 @@ class EditMilestoneBloc extends Bloc<EditMilestoneEvent, EditMilestoneState> {
           EditMilestoneState.fetchMilestoneFailure(error: error),
         );
       },
+    );
+  }
+
+  FutureOr<void> _onEditMilestone(
+      _EditMilestone event, Emitter<EditMilestoneState> emit) {
+    emit(const EditMilestoneState.loadInProgress());
+    emit(
+      EditMilestoneState.fetchMilestoneSuccess(
+        milestone: event.milestone,
+      ),
     );
   }
 
