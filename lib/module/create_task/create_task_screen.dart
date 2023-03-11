@@ -9,6 +9,8 @@ import 'package:pma/module/create_task/create_task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class CreateTaskScreen extends StatefulWidget {
@@ -46,17 +48,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             listener: (BuildContext context, CreateTaskState state) {
               state.maybeWhen(
                 createTaskSuccess: (int taskId) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Task successfully created.'),
-                    ),
+                  showSnackBar(
+                    context: context,
+                    theme: theme,
+                    message: 'Task successfully created.',
                   );
                   context.pop();
                 },
                 createTaskFailure: (NetworkExceptions error) {
-                  _buildCreateTaskFailureAlert(
+                  pmaAlertDialog(
                     context: context,
                     theme: theme,
+                    error:
+                        'Could not create task successfully. Please try again.',
                   );
                 },
                 orElse: () => null,
@@ -109,7 +113,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       hintText: 'Title',
       borderType: InputFieldBorderType.underlineInputBorder,
       validator: (String? value) {
-        if (value == null || value.isEmpty) {
+        if (value == null || value.trim().isEmpty) {
           return 'Please enter title';
         }
         return null;
@@ -169,40 +173,4 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     }
   }
 
-  void _buildCreateTaskFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Someth ing went wrong!. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

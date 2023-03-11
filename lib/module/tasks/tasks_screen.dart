@@ -7,14 +7,18 @@ import 'package:pma/models/task.dart';
 import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({
     required this.projectId,
+    required this.currentUserRole,
     super.key,
   });
 
   final String projectId;
+  final int currentUserRole;
 
   @override
   State<TasksScreen> createState() => _TasksScreenState();
@@ -33,12 +37,17 @@ class _TasksScreenState extends State<TasksScreen> {
                     projectId: int.parse(widget.projectId),
                   ),
                 );
-            _showSnackBar(context: context, theme: theme);
-          },
-          deleteTaskFailure: (NetworkExceptions error) {
-            _buildDeleteTaskFailureAlert(
+            showSnackBar(
               context: context,
               theme: theme,
+              message: 'Task successfully deleted',
+            );
+          },
+          deleteTaskFailure: (NetworkExceptions error) {
+            pmaAlertDialog(
+              context: context,
+              theme: theme,
+              error: 'Could not delete task successfully. Please try again.',
             );
           },
           orElse: () => null,
@@ -186,79 +195,21 @@ class _TasksScreenState extends State<TasksScreen> {
             task.title,
             style: theme.textTheme.bodyMedium,
           ),
-          trailing: IconButton(
-            onPressed: () {
-              _showDeleteTaskConfirmDialog(
-                context: context,
-                theme: theme,
-                taskId: task.id,
-              );
-            },
-            color: theme.colorScheme.onError,
-            icon: const Icon(
-              Icons.delete_rounded,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Task successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildDeleteTaskFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not delete a task successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
+          trailing: widget.currentUserRole == MemberRole.guest.index + 1
+              ? null
+              : IconButton(
+                  onPressed: () {
+                    _showDeleteTaskConfirmDialog(
+                      context: context,
+                      theme: theme,
+                      taskId: task.id,
+                    );
+                  },
+                  color: theme.colorScheme.onError,
+                  icon: const Icon(
+                    Icons.delete_rounded,
                   ),
                 ),
-              ),
-            ),
-          ],
         );
       },
     );
@@ -295,7 +246,7 @@ class _TasksScreenState extends State<TasksScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -304,7 +255,7 @@ class _TasksScreenState extends State<TasksScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),

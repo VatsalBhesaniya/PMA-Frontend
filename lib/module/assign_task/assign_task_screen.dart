@@ -8,6 +8,7 @@ import 'package:pma/module/select_members/select_members_screen.dart';
 import 'package:pma/module/task/task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class AssignTaskScreen extends StatefulWidget {
   const AssignTaskScreen({
@@ -28,6 +29,9 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Members'),
+      ),
       body: SafeArea(
         child: BlocProvider<AssignTaskBloc>(
           create: (BuildContext context) => AssignTaskBloc(
@@ -43,7 +47,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                   context.pop();
                 },
                 assignTaskToMemberFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
+                  pmaAlertDialog(
                     context: context,
                     theme: theme,
                     error:
@@ -68,6 +72,7 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
                       Expanded(
                         child: SelectMembersScreen(
                           projectId: int.parse(widget.projectId),
+                          taskId: int.parse(widget.taskId),
                           buttonText: 'Select',
                           onSelectUsers: (List<SearchUser> users) {
                             context.read<AssignTaskBloc>().add(
@@ -97,42 +102,6 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

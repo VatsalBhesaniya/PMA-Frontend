@@ -28,6 +28,7 @@ class SelectMembersBloc extends Bloc<SelectMembersEvent, SelectMembersState> {
         await _projectRepository.fetchProjectMembers(
       searchText: event.searchText,
       projectId: event.projectId,
+      taskId: event.taskId,
     );
     apiResult.when(
       success: (List<SearchUser>? users) {

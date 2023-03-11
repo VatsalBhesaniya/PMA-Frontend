@@ -20,6 +20,7 @@ class Task with _$Task {
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey(name: 'updated_at') String? updatedAt,
     @JsonKey(name: 'last_updated_by') int? lastUpdatedBy,
+    @JsonKey(name: 'current_user_role') @Default(4) int currentUserRole,
     @JsonKey() required List<Member> members,
     @JsonKey() required List<int> notes,
     @JsonKey() required List<int> documents,

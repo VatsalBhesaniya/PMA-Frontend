@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pma/models/attach_document.dart';
+import 'package:pma/models/attach_note.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
@@ -27,6 +29,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<_FetchAttachedDocuments>(_onFetchAttachedDocuments);
     on<_ExpandDocument>(_onExpandDocument);
     on<_RemoveMember>(_onRemoveMember);
+    on<_FetchProjectNotes>(_onFetchProjectNotes);
+    on<_SelectNote>(_onSelectNote);
+    on<_FetchProjectDocuments>(_onFetchProjectDocuments);
+    on<_SelectDocument>(_onSelectDocument);
+    on<_AttachNotes>(_onAttachNotes);
+    on<_RemoveAttachedNote>(_onRemoveAttachedNote);
+    on<_AttachDocuments>(_onAttachDocuments);
+    on<_RemoveAttachedDocument>(_onRemoveAttachedDocument);
   }
 
   final TaskRepository _taskRepository;
@@ -92,18 +102,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   FutureOr<void> _onFetchAttachedNotes(
       _FetchAttachedNotes event, Emitter<TaskState> emit) async {
     emit(const _FetchAttachedNotesLoading());
-    final ApiResult<List<Note>?> apiResult =
+    final ApiResult<List<Note>> apiResult =
         await _taskRepository.fetchAttachedNotes(noteIds: event.noteIds);
     apiResult.when(
-      success: (List<Note>? notes) {
-        if (notes == null) {
-          emit(const _FetchAttachedNotesFailure());
-        } else {
-          emit(_FetchAttachedNotesSuccess(notes: notes));
-        }
+      success: (List<Note> notes) {
+        emit(_FetchAttachedNotesSuccess(notes: notes));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchAttachedNotesFailure());
+        emit(_FetchAttachedNotesFailure(error: error));
       },
     );
   }
@@ -120,18 +126,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   FutureOr<void> _onFetchAttachedDocuments(
       _FetchAttachedDocuments event, Emitter<TaskState> emit) async {
     emit(const _FetchAttachedDocumentsLoading());
-    final ApiResult<List<Document>?> apiResult = await _taskRepository
+    final ApiResult<List<Document>> apiResult = await _taskRepository
         .fetchAttachedDocuments(documentIds: event.documentIds);
     apiResult.when(
-      success: (List<Document>? documents) {
-        if (documents == null) {
-          emit(const _FetchAttachedDocumentsFailure());
-        } else {
-          emit(_FetchAttachedDocumentsSuccess(documents: documents));
-        }
+      success: (List<Document> documents) {
+        emit(_FetchAttachedDocumentsSuccess(documents: documents));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchAttachedDocumentsFailure());
+        emit(_FetchAttachedDocumentsFailure(error: error));
       },
     );
   }
@@ -164,6 +166,157 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         emit(
           TaskState.removeMemberFailure(error: error),
         );
+      },
+    );
+  }
+
+  FutureOr<void> _onFetchProjectNotes(
+      _FetchProjectNotes event, Emitter<TaskState> emit) async {
+    emit(const _BottomSheetLoadInProgress());
+    final ApiResult<List<Note>> apiResult =
+        await _taskRepository.fetchProjectNotes(
+      taskId: event.taskId,
+      projectId: event.projectId,
+    );
+    apiResult.when(
+      success: (List<Note> notes) {
+        emit(
+          TaskState.fetchProjectNotesSuccess(
+            notes: notes,
+          ),
+        );
+      },
+      failure: (NetworkExceptions error) {
+        emit(
+          TaskState.fetchProjectNotesFailure(error: error),
+        );
+      },
+    );
+  }
+
+  FutureOr<void> _onFetchProjectDocuments(
+      _FetchProjectDocuments event, Emitter<TaskState> emit) async {
+    emit(const _BottomSheetLoadInProgress());
+    final ApiResult<List<Document>> apiResult =
+        await _taskRepository.fetchProjectDocuments(
+      taskId: event.taskId,
+      projectId: event.projectId,
+    );
+    apiResult.when(
+      success: (List<Document> documents) {
+        emit(
+          TaskState.fetchProjectDocumentsSuccess(
+            documents: documents,
+          ),
+        );
+      },
+      failure: (NetworkExceptions error) {
+        emit(
+          TaskState.fetchProjectDocumentsFailure(error: error),
+        );
+      },
+    );
+  }
+
+  FutureOr<void> _onSelectNote(_SelectNote event, Emitter<TaskState> emit) {
+    emit(const _BottomSheetLoadInProgress());
+    final List<Note> notes = List<Note>.from(event.notes);
+    final Note note = notes[event.index];
+    notes[event.index] = note.copyWith(isSelected: !note.isSelected);
+    emit(
+      TaskState.fetchProjectNotesSuccess(
+        notes: notes,
+      ),
+    );
+  }
+
+  FutureOr<void> _onSelectDocument(
+      _SelectDocument event, Emitter<TaskState> emit) {
+    emit(const _BottomSheetLoadInProgress());
+    final List<Document> documents = List<Document>.from(event.documents);
+    final Document document = documents[event.index];
+    documents[event.index] =
+        document.copyWith(isSelected: !document.isSelected);
+    emit(
+      TaskState.fetchProjectDocumentsSuccess(
+        documents: documents,
+      ),
+    );
+  }
+
+  FutureOr<void> _onAttachNotes(
+      _AttachNotes event, Emitter<TaskState> emit) async {
+    final List<Map<String, dynamic>> notesData = <Map<String, dynamic>>[];
+    for (final Note note in event.notes) {
+      final AttachNote attachNote = AttachNote(
+        taskId: event.taskId,
+        noteId: note.id,
+      );
+      notesData.add(attachNote.toJson());
+    }
+    final ApiResult<void> apiResult = await _taskRepository.attachNotes(
+      notesData: notesData,
+    );
+    apiResult.when(
+      success: (void value) {
+        emit(const TaskState.attachNotesSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(TaskState.attachNotesFailure(error: error));
+      },
+    );
+  }
+
+  FutureOr<void> _onAttachDocuments(
+      _AttachDocuments event, Emitter<TaskState> emit) async {
+    final List<Map<String, dynamic>> documentsData = <Map<String, dynamic>>[];
+    for (final Document document in event.documents) {
+      final AttachDocument attacheDocument = AttachDocument(
+        taskId: event.taskId,
+        documentId: document.id,
+      );
+      documentsData.add(attacheDocument.toJson());
+    }
+    final ApiResult<void> apiResult = await _taskRepository.attachDocuments(
+      documentsData: documentsData,
+    );
+    apiResult.when(
+      success: (void value) {
+        emit(const TaskState.attachDocumentsSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(TaskState.attachDocumentFailure(error: error));
+      },
+    );
+  }
+
+  FutureOr<void> _onRemoveAttachedNote(
+      _RemoveAttachedNote event, Emitter<TaskState> emit) async {
+    final ApiResult<void> apiResult = await _taskRepository.removeAttachedNote(
+      attachedNoteData: event.attachNote.toJson(),
+    );
+    apiResult.when(
+      success: (void value) {
+        emit(const TaskState.removeAttachedNoteSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(TaskState.removeAttachedNoteFailure(error: error));
+      },
+    );
+  }
+
+  FutureOr<void> _onRemoveAttachedDocument(
+      _RemoveAttachedDocument event, Emitter<TaskState> emit) async {
+    final ApiResult<void> apiResult =
+        await _taskRepository.removeAttachedDocument(
+      attachedDocumentData: event.attachDocument.toJson(),
+    );
+    apiResult.when(
+      success: (void value) {
+        emit(const TaskState.removeAttachedDocumentSuccess());
+      },
+      failure: (NetworkExceptions error) {
+        emit(TaskState.removeAttachedDocumentFailure(error: error));
       },
     );
   }

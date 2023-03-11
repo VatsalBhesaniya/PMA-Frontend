@@ -14,12 +14,26 @@ class TaskEvent with _$TaskEvent {
   const factory TaskEvent.deleteTask({
     required int taskId,
   }) = _DeleteTask;
+  const factory TaskEvent.attachNotes({
+    required List<Note> notes,
+    required int taskId,
+  }) = _AttachNotes;
+  const factory TaskEvent.removeAttachedNote({
+    required AttachNote attachNote,
+  }) = _RemoveAttachedNote;
   const factory TaskEvent.fetchAttachedNotes({
     required List<int> noteIds,
   }) = _FetchAttachedNotes;
   const factory TaskEvent.expandTask({
     required List<Note> notes,
   }) = _ExpandTask;
+  const factory TaskEvent.attachDocuments({
+    required List<Document> documents,
+    required int taskId,
+  }) = _AttachDocuments;
+  const factory TaskEvent.removeAttachedDocument({
+    required AttachDocument attachDocument,
+  }) = _RemoveAttachedDocument;
   const factory TaskEvent.fetchAttachedDocuments({
     required List<int> documentIds,
   }) = _FetchAttachedDocuments;
@@ -31,4 +45,20 @@ class TaskEvent with _$TaskEvent {
     required int projectId,
     required int userId,
   }) = _RemoveMember;
+  const factory TaskEvent.fetchProjectNotes({
+    required int taskId,
+    required int projectId,
+  }) = _FetchProjectNotes;
+  const factory TaskEvent.selectNote({
+    required int index,
+    required List<Note> notes,
+  }) = _SelectNote;
+  const factory TaskEvent.fetchProjectDocuments({
+    required int taskId,
+    required int projectId,
+  }) = _FetchProjectDocuments;
+  const factory TaskEvent.selectDocument({
+    required int index,
+    required List<Document> documents,
+  }) = _SelectDocument;
 }
