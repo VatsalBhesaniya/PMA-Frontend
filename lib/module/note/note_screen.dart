@@ -5,18 +5,24 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/note.dart';
+import 'package:pma/models/user.dart';
 import 'package:pma/module/note/bloc/note_bloc.dart';
 import 'package:pma/module/note/note_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class NoteScreen extends StatefulWidget {
   const NoteScreen({
+    required this.projectId,
     required this.noteId,
     super.key,
   });
 
+  final String projectId;
   final String noteId;
 
   @override
@@ -25,6 +31,7 @@ class NoteScreen extends StatefulWidget {
 
 class _NoteScreenState extends State<NoteScreen> {
   final quill.QuillController _controller = quill.QuillController.basic();
+  final TextEditingController _noteTitleController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,16 +47,25 @@ class _NoteScreenState extends State<NoteScreen> {
         listener: (BuildContext context, NoteState state) {
           state.maybeWhen(
             updateNoteFailure: () async {
-              _showUpdateNoteFailureAlert(context, theme);
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error: 'Could not update note successfully. Please try again.',
+              );
             },
             deleteNoteSuccess: () {
               context.pop();
-              _showSnackBar(context: context, theme: theme);
-            },
-            deleteNoteFailure: (NetworkExceptions error) {
-              _buildDeleteNoteFailureAlert(
+              showSnackBar(
                 context: context,
                 theme: theme,
+                message: 'Note successfully deleted',
+              );
+            },
+            deleteNoteFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error: 'Could not delete note successfully. Please try again.',
               );
             },
             orElse: () => null,
@@ -92,13 +108,15 @@ class _NoteScreenState extends State<NoteScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Note Detail'),
-                  actions: <Widget>[
-                    _buildActionButton(
-                      context: context,
-                      theme: theme,
-                      note: note,
-                    ),
-                  ],
+                  actions: note.currentUserRole == MemberRole.guest.index + 1
+                      ? null
+                      : <Widget>[
+                          _buildActionButton(
+                            context: context,
+                            theme: theme,
+                            note: note,
+                          ),
+                        ],
                 ),
                 body: SafeArea(
                   child: SingleChildScrollView(
@@ -107,16 +125,13 @@ class _NoteScreenState extends State<NoteScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Text(
-                            note.title,
-                            style: theme.textTheme.headlineSmall,
-                          ),
+                          _buildTitle(note, theme),
                           const SizedBox(height: 16),
                           _buildDescription(
                             theme: theme,
                             isEdit: note.isEdit,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 32),
                           _buildInfoItem(
                             theme: theme,
                             title: 'Created At',
@@ -130,7 +145,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           const SizedBox(height: 16),
                           _buildLastUpdatedBy(
                             theme: theme,
-                            lastUpdatedBy: note.lastUpdatedBy,
+                            lastUpdatedByUser: note.lastUpdatedByUser,
                           ),
                         ],
                       ),
@@ -151,37 +166,23 @@ class _NoteScreenState extends State<NoteScreen> {
     );
   }
 
-  Future<String?> _showUpdateNoteFailureAlert(
-      BuildContext context, ThemeData theme) {
-    return showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Someth ing went wrong!. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
+  InputField _buildTitle(Note note, ThemeData theme) {
+    return InputField(
+      controller: _noteTitleController..text = note.title,
+      isEnabled: note.isEdit,
+      hintText: 'Title',
+      borderType: note.isEdit
+          ? InputFieldBorderType.underlineInputBorder
+          : InputFieldBorderType.none,
+      style: theme.textTheme.headlineSmall?.copyWith(
+        color: theme.colorScheme.primary,
+      ),
+      horizontalContentPadding: 0,
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter title';
+        }
+        return null;
       },
     );
   }
@@ -192,44 +193,48 @@ class _NoteScreenState extends State<NoteScreen> {
     required Note note,
   }) {
     if (note.isEdit) {
-      return Row(
-        children: <Widget>[
-          TextButton(
-            onPressed: () {
-              context.read<NoteBloc>().add(
-                    NoteEvent.updateNote(
-                      note: note.copyWith(
-                        content: _controller.document.toDelta().toJson(),
-                        contentPlainText: _controller.document.toPlainText(),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: <Widget>[
+            TextButton(
+              onPressed: () {
+                context.read<NoteBloc>().add(
+                      NoteEvent.updateNote(
+                        note: note.copyWith(
+                          title: _noteTitleController.text.trim(),
+                          content: _controller.document.toDelta().toJson(),
+                          contentPlainText: _controller.document.toPlainText(),
+                        ),
                       ),
-                    ),
-                  );
-            },
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                color: Colors.lime,
+                    );
+              },
+              child: Text(
+                'Save',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primaryContainer,
+                ),
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<NoteBloc>().add(
-                    NoteEvent.editNote(
-                      note: note.copyWith(
-                        isEdit: false,
+            TextButton(
+              onPressed: () {
+                context.read<NoteBloc>().add(
+                      NoteEvent.editNote(
+                        note: note.copyWith(
+                          isEdit: false,
+                        ),
                       ),
-                    ),
-                  );
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.lime,
+                    );
+              },
+              child: Text(
+                'Cancel',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primaryContainer,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
     return Row(
@@ -278,11 +283,12 @@ class _NoteScreenState extends State<NoteScreen> {
       children: <Widget>[
         Text(
           title,
-          style: theme.textTheme.bodyLarge,
+          style: theme.textTheme.bodyMedium,
         ),
+        const SizedBox(height: 4),
         Text(
           info,
-          style: theme.textTheme.bodyMedium,
+          style: theme.textTheme.bodyLarge,
         ),
       ],
     );
@@ -305,14 +311,14 @@ class _NoteScreenState extends State<NoteScreen> {
 
   Widget _buildLastUpdatedBy({
     required ThemeData theme,
-    required int? lastUpdatedBy,
+    required User? lastUpdatedByUser,
   }) {
-    final int? updatedBy = lastUpdatedBy;
-    if (updatedBy != null) {
+    final User? updatedByUser = lastUpdatedByUser;
+    if (updatedByUser != null) {
       return _buildInfoItem(
         theme: theme,
         title: 'Last updated by',
-        info: updatedBy.toString(),
+        info: updatedByUser.username,
       );
     }
     return const SizedBox();
@@ -334,66 +340,6 @@ class _NoteScreenState extends State<NoteScreen> {
         readOnly: !isEdit,
         showCursor: isEdit,
       ),
-    );
-  }
-
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Note successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildDeleteNoteFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not delete a note successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -428,7 +374,7 @@ class _NoteScreenState extends State<NoteScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -437,7 +383,7 @@ class _NoteScreenState extends State<NoteScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),

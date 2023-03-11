@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/module/Notes/bloc/notes_bloc.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 
 class NotesScreen extends StatefulWidget {
-  const NotesScreen({super.key});
+  const NotesScreen({
+    required this.projectId,
+    required this.currentUserRole,
+    super.key,
+  });
+
+  final String projectId;
+  final int currentUserRole;
 
   @override
   State<NotesScreen> createState() => _NotesScreenState();
@@ -22,14 +32,21 @@ class _NotesScreenState extends State<NotesScreen> {
         state.maybeWhen(
           deleteNoteSuccess: () {
             context.read<NotesBloc>().add(
-                  const NotesEvent.fetchNotes(),
+                  NotesEvent.fetchNotes(
+                    projectId: int.parse(widget.projectId),
+                  ),
                 );
-            _showSnackBar(context: context, theme: theme);
-          },
-          deleteNoteFailure: (NetworkExceptions error) {
-            _buildDeleteNoteFailureAlert(
+            showSnackBar(
               context: context,
               theme: theme,
+              message: 'Note successfully deleted',
+            );
+          },
+          deleteNoteFailure: (NetworkExceptions error) {
+            pmaAlertDialog(
+              context: context,
+              theme: theme,
+              error: 'Could not delete note successfully. Please try again.',
             );
           },
           orElse: () => null,
@@ -46,7 +63,9 @@ class _NotesScreenState extends State<NotesScreen> {
         return state.maybeWhen(
           initial: () {
             context.read<NotesBloc>().add(
-                  const NotesEvent.fetchNotes(),
+                  NotesEvent.fetchNotes(
+                    projectId: int.parse(widget.projectId),
+                  ),
                 );
             return const CircularProgressIndicator();
           },
@@ -54,7 +73,14 @@ class _NotesScreenState extends State<NotesScreen> {
             return const CircularProgressIndicator();
           },
           fetchNotesSuccess: (List<Note> notes) {
-            return ListView.builder(
+            return ListView.separated(
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider(
+                  height: 1,
+                  indent: 16,
+                  endIndent: 20,
+                );
+              },
               itemCount: notes.length,
               itemBuilder: (BuildContext context, int index) {
                 final Note note = notes[index];
@@ -63,23 +89,27 @@ class _NotesScreenState extends State<NotesScreen> {
                     context.goNamed(
                       RouteConstants.note,
                       params: <String, String>{
+                        'projectId': widget.projectId,
                         'id': note.id.toString(),
                       },
                     );
                   },
                   title: Text(note.title),
-                  trailing: IconButton(
-                    onPressed: () {
-                      _showDeleteNoteConfirmDialog(
-                        context: context,
-                        theme: theme,
-                        noteId: note.id,
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.delete_rounded,
-                    ),
-                  ),
+                  trailing: widget.currentUserRole == MemberRole.guest.index + 1
+                      ? null
+                      : IconButton(
+                          onPressed: () {
+                            _showDeleteNoteConfirmDialog(
+                              context: context,
+                              theme: theme,
+                              noteId: note.id,
+                            );
+                          },
+                          color: theme.colorScheme.onError,
+                          icon: const Icon(
+                            Icons.delete_rounded,
+                          ),
+                        ),
                 );
               },
             );
@@ -90,66 +120,6 @@ class _NotesScreenState extends State<NotesScreen> {
             );
           },
           orElse: () => const SizedBox(),
-        );
-      },
-    );
-  }
-
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Note successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildDeleteNoteFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not delete a note successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
         );
       },
     );
@@ -186,7 +156,7 @@ class _NotesScreenState extends State<NotesScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -195,7 +165,7 @@ class _NotesScreenState extends State<NotesScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
