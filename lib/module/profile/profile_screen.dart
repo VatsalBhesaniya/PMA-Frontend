@@ -12,6 +12,7 @@ import 'package:pma/module/profile/profile_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -43,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         listener: (BuildContext context, ProfileState state) {
           state.maybeWhen(
             fetchUserFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -58,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
             },
             updateUserFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -69,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context.goNamed(RouteConstants.login);
             },
             deleteUserFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -438,45 +439,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const Divider(),
         ],
       ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(
-            error,
-            style: theme.textTheme.bodyMedium,
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
