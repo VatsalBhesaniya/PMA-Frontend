@@ -26,7 +26,7 @@ class DocumentsBloc extends Bloc<DocumentsEvent, DocumentsState> {
       _FetchDocuments event, Emitter<DocumentsState> emit) async {
     emit(const _LoadInProgress());
     final ApiResult<List<Document>?> apiResult =
-        await _documentsRepository.fetchDocuments();
+        await _documentsRepository.fetchDocuments(projectId: event.projectId);
     apiResult.when(
       success: (List<Document>? documents) {
         if (documents == null) {
