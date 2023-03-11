@@ -233,18 +233,18 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
           lastDate: DateTime(2050),
         );
         if (selectedDate != null) {
-          context.read<EditMilestoneBloc>().add(
-                EditMilestoneEvent.editMilestone(
-                  milestone: milestone.copyWith(
-                    completionDate: selectedDate.toString(),
+          if (context.mounted) {
+            context.read<EditMilestoneBloc>().add(
+                  EditMilestoneEvent.editMilestone(
+                    milestone: milestone.copyWith(
+                      completionDate: selectedDate.toString(),
+                    ),
                   ),
-                ),
-              );
+                );
+          }
         }
-        _complitonDateController.text = _dateTime(selectedDate.toString());
       },
       child: InputField(
-        onChanged: (String value) {},
         controller: _complitonDateController,
         isEnabled: false,
         hintText: 'Select Date',
