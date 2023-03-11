@@ -6,12 +6,14 @@ class TextEditor extends StatelessWidget {
     required this.controller,
     this.readOnly = false,
     this.showCursor = true,
+    this.minHeight = 300,
     super.key,
   });
 
   final QuillController controller;
   final bool readOnly;
   final bool showCursor;
+  final double minHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +53,8 @@ class TextEditor extends StatelessWidget {
   Container _buildEditor(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.all(16),
-      constraints: const BoxConstraints(
-        minHeight: 300,
+      constraints: BoxConstraints(
+        minHeight: minHeight,
       ),
       child: QuillEditor(
         readOnly: readOnly,
