@@ -15,7 +15,7 @@ class RouteConstants {
   static String createMilestone = 'createMilestone';
   static String editMilestone = 'editMilestone';
   static String task = 'task';
-  static String assignMembers = 'assignMembers';
+  static String assignTask = 'assignMembers';
   static String createTask = 'createTask';
   static String note = 'note';
   static String createNote = 'createNote';
