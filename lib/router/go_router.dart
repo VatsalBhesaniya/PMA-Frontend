@@ -5,7 +5,6 @@ import 'package:pma/module/assign_task/assign_task_screen.dart';
 import 'package:pma/module/create_document/create_document_screen.dart';
 import 'package:pma/module/create_milestone/create_milestone_screen.dart';
 import 'package:pma/module/create_note/create_note_screen.dart';
-import 'package:pma/module/create_project/create_project_screen.dart';
 import 'package:pma/module/create_task/create_task_screen.dart';
 import 'package:pma/module/document/document_screen.dart';
 import 'package:pma/module/edit_milestone/edit_milestone_screen.dart';
@@ -200,13 +199,6 @@ final GoRouter router = GoRouter(
               },
             ),
           ],
-        ),
-        GoRoute(
-          path: RouteConstants.createProject,
-          name: RouteConstants.createProject,
-          builder: (BuildContext context, GoRouterState state) {
-            return const CreateProjectScreen();
-          },
         ),
       ],
     ),
