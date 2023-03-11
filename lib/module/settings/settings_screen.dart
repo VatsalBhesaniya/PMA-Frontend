@@ -28,7 +28,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const AuthenticationEvent.logout(),
               );
         },
+        backgroundColor: theme.colorScheme.primary,
         labelText: 'Logout',
+        labelStyle: theme.textTheme.titleMedium?.copyWith(
+          color: theme.colorScheme.background,
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: Column(
