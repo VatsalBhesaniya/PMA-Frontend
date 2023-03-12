@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router/go_router.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/create_note.dart';
 import 'package:pma/module/create_note/bloc/create_note_bloc.dart';
@@ -43,7 +42,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
         child: BlocProvider<CreateNoteBloc>(
           create: (BuildContext context) => CreateNoteBloc(
             createNoteRepository: CreateNoteRepository(
-              httpClient: context.read<HttpClientConfig>(),
+              dioClient: context.read<DioClient>(),
             ),
           ),
           child: BlocConsumer<CreateNoteBloc, CreateNoteState>(

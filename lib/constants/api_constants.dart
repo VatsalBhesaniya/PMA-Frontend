@@ -20,6 +20,7 @@ const String assignTasksEndpoint = 'tasks/assign';
 const String attachNotesEndpoint = 'tasks/attach/notes';
 const String attachDocumentsEndpoint = 'tasks/attach/documents';
 const String notesEndpoint = 'notes';
+const String createNotesEndpoint = 'notes/create';
 const String projectNotesEndpoint = 'notes/project';
 const String documentsEndpoint = 'documents';
 const String createDocumentsEndpoint = 'documents/create';
