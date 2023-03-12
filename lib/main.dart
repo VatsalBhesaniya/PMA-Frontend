@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
@@ -109,19 +108,8 @@ void main() {
                 );
               },
               authenticated: (String token, User user) {
-                return MultiProvider(
-                  providers: <SingleChildWidget>[
-                    Provider<User>.value(
-                      value: currentUser,
-                    ),
-                    Provider<HttpClientConfig>.value(
-                      value: HttpClientConfig(
-                        baseUrl:
-                            Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
-                        token: token,
-                      ),
-                    ),
-                  ],
+                return Provider<User>.value(
+                  value: currentUser,
                   child: const PmaApp(),
                 );
               },
