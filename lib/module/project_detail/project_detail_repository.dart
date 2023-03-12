@@ -49,6 +49,25 @@ class ProjectDetailRepository {
     }
   }
 
+  Future<ApiResult<void>> updateProjectMemberRole({
+    required Map<String, dynamic> memberData,
+  }) async {
+    try {
+      await dioClient.request<Map<String, dynamic>?>(
+        url: inviteMembersEndpoint,
+        httpMethod: HttpMethod.put,
+        data: memberData,
+      );
+      return const ApiResult<void>.success(
+        data: null,
+      );
+    } on Exception catch (e) {
+      return ApiResult<void>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
   Future<ApiResult<bool>> removeMember({
     required int projectId,
     required int userId,

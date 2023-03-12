@@ -48,8 +48,23 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               pmaAlertDialog(
                 context: context,
                 theme: theme,
+                error: NetworkExceptions.getErrorMessage(error),
+              );
+            },
+            updateProjectDetailFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
                 error:
-                    'Could not delete project successfully. Please try again.',
+                    'Could not update project detail successfully. Please try again.',
+              );
+            },
+            updateProjectMemberRoleFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not update member role successfully. Please try again.',
               );
             },
             removeMemberSuccess: () {
@@ -90,6 +105,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         buildWhen: (ProjectDetailState previous, ProjectDetailState current) {
           return current.maybeWhen(
             fetchProjectDetailSuccess: (ProjectDetail projectDetail) => true,
+            updateProjectDetailFailure: (NetworkExceptions error) => false,
+            updateProjectMemberRoleFailure: (NetworkExceptions error) => false,
             removeMemberSuccess: () => false,
             removeMemberFailure: (NetworkExceptions error) => false,
             deleteProjectSuccess: () => false,
@@ -434,7 +451,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                               updatedMembers.add(projectMember);
                             }
                             context.read<ProjectDetailBloc>().add(
-                                  ProjectDetailEvent.updateProjectDetail(
+                                  ProjectDetailEvent.updateProjectMemberRole(
+                                    member:
+                                        member.copyWith(role: role.index + 1),
                                     projectDetail: projectDetail.copyWith(
                                       members: updatedMembers,
                                     ),

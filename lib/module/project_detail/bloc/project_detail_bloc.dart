@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pma/models/member.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/models/project_detail.dart';
 import 'package:pma/module/project_detail/project_detail_repository.dart';
@@ -20,6 +21,7 @@ class ProjectDetailBloc extends Bloc<ProjectDetailEvent, ProjectDetailState> {
     on<_FetchProjectDetail>(_onFetchProjectDetail);
     on<_EditProjectDetail>(_onEditProjectDetail);
     on<_UpdateProjectDetail>(_onUpdateProjectDetail);
+    on<_UpdateProjectMemberRole>(_onUpdateProjectMemberRole);
     on<_RemoveMember>(_onRemoveMember);
     on<_DeleteProject>(_onDeleteProject);
   }
@@ -55,7 +57,6 @@ class ProjectDetailBloc extends Bloc<ProjectDetailEvent, ProjectDetailState> {
 
   FutureOr<void> _onUpdateProjectDetail(
       _UpdateProjectDetail event, Emitter<ProjectDetailState> emit) async {
-    emit(const _LoadInProgress());
     final Project project = Project(
       id: event.projectDetail.id,
       title: event.projectDetail.title,
@@ -76,7 +77,27 @@ class ProjectDetailBloc extends Bloc<ProjectDetailEvent, ProjectDetailState> {
         );
       },
       failure: (NetworkExceptions error) {
-        emit(const _UpdateProjectDetailFailure());
+        emit(_UpdateProjectDetailFailure(error: error));
+      },
+    );
+  }
+
+  FutureOr<void> _onUpdateProjectMemberRole(
+      _UpdateProjectMemberRole event, Emitter<ProjectDetailState> emit) async {
+    final ApiResult<void> apiResult =
+        await _projectDetailRepository.updateProjectMemberRole(
+      memberData: event.member.toJson()..remove('user'),
+    );
+    apiResult.when(
+      success: (void result) {
+        emit(
+          _FetchProjectDetailSuccess(
+            projectDetail: event.projectDetail,
+          ),
+        );
+      },
+      failure: (NetworkExceptions error) {
+        emit(_UpdateProjectMemberRoleFailure(error: error));
       },
     );
   }
