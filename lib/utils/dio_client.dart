@@ -32,7 +32,7 @@ class DioClient {
     required String url,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? queryParameters,
-    FormData? data,
+    dynamic data,
   }) async {
     try {
       late Response<T> response;
