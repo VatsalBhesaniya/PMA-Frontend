@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/invite_members/bloc/invite_members_bloc.dart';
 import 'package:pma/module/invite_members/invite_members_repository.dart';
@@ -35,7 +34,6 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
           create: (BuildContext context) => InviteMembersBloc(
             inviteMembersRepository: InviteMembersRepository(
               dioClient: context.read<DioClient>(),
-              httpClient: context.read<HttpClientConfig>(),
             ),
           ),
           child: BlocConsumer<InviteMembersBloc, InviteMembersState>(

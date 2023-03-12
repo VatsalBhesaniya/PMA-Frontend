@@ -33,21 +33,13 @@ class InviteMembersBloc extends Bloc<InviteMembersEvent, InviteMembersState> {
       );
       members.add(member.toJson());
     }
-    final ApiResult<bool> apiResult =
+    final ApiResult<void> apiResult =
         await _inviteMembersRepository.inviteMembers(
       membersData: members,
     );
     apiResult.when(
-      success: (bool isInvited) {
-        if (isInvited) {
-          emit(const InviteMembersState.inviteMembersSuccess());
-        } else {
-          emit(
-            const InviteMembersState.inviteMembersFailure(
-              error: NetworkExceptions.defaultError(),
-            ),
-          );
-        }
+      success: (void response) {
+        emit(const InviteMembersState.inviteMembersSuccess());
       },
       failure: (NetworkExceptions error) {
         emit(InviteMembersState.inviteMembersFailure(error: error));
