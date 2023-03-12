@@ -26,7 +26,7 @@ class CreateMilestoneBloc
       _CreateMilestone event, Emitter<CreateMilestoneState> emit) async {
     final ApiResult<void> apiResult =
         await _milestonesRepository.createMilestone(
-      milestonesData: event.milestone.toJson(),
+      milestoneData: event.milestone.toJson(),
     );
     apiResult.when(
       success: (void value) {
