@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/assign_task/bloc/assign_task_bloc.dart';
 import 'package:pma/module/select_members/select_members_screen.dart';
@@ -37,7 +36,6 @@ class _AssignTaskScreenState extends State<AssignTaskScreen> {
           create: (BuildContext context) => AssignTaskBloc(
             taskRepository: TaskRepository(
               dioClient: context.read<DioClient>(),
-              httpClient: context.read<HttpClientConfig>(),
             ),
           ),
           child: BlocConsumer<AssignTaskBloc, AssignTaskState>(

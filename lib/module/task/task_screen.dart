@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/attach_document.dart';
@@ -46,7 +45,6 @@ class _TaskScreenState extends State<TaskScreen> {
       create: (BuildContext context) => TaskBloc(
         taskRepository: TaskRepository(
           dioClient: context.read<DioClient>(),
-          httpClient: context.read<HttpClientConfig>(),
         ),
       ),
       child: BlocConsumer<TaskBloc, TaskState>(
@@ -64,7 +62,7 @@ class _TaskScreenState extends State<TaskScreen> {
                     ),
                   );
             },
-            updateTaskFailure: () async {
+            updateTaskFailure: (NetworkExceptions error) async {
               pmaAlertDialog(
                 context: context,
                 theme: theme,
@@ -154,7 +152,7 @@ class _TaskScreenState extends State<TaskScreen> {
             initial: () => true,
             loadInProgress: () => true,
             fetchTaskSuccess: (Task task) => true,
-            fetchTaskFailure: () => true,
+            fetchTaskFailure: (NetworkExceptions error) => true,
             orElse: () => false,
           );
         },
@@ -224,7 +222,7 @@ class _TaskScreenState extends State<TaskScreen> {
                 ),
               );
             },
-            fetchTaskFailure: () {
+            fetchTaskFailure: (NetworkExceptions error) {
               return const Scaffold(
                 body: Center(
                   child: Text('Something went wrong.'),
@@ -1324,7 +1322,6 @@ class _TaskScreenState extends State<TaskScreen> {
       isExpanded: document.isExpanded,
     );
   }
-
 
   void _showDeleteTaskConfirmDialog({
     required BuildContext context,

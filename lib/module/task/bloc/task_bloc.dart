@@ -43,18 +43,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   FutureOr<void> _onFetchTask(_FetchTask event, Emitter<TaskState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<Task?> apiResult =
+    final ApiResult<Task> apiResult =
         await _taskRepository.fetchTask(taskId: event.taskId);
     apiResult.when(
-      success: (Task? task) {
-        if (task == null) {
-          emit(const _FetchTaskFailure());
-        } else {
-          emit(_FetchTaskSuccess(task: task));
-        }
+      success: (Task task) {
+        emit(_FetchTaskSuccess(task: task));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchTaskFailure());
+        emit(_FetchTaskFailure(error: error));
       },
     );
   }
@@ -67,18 +63,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   FutureOr<void> _onUpdateTask(
       _UpdateTask event, Emitter<TaskState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<Task?> apiResult =
+    final ApiResult<Task> apiResult =
         await _taskRepository.updateTask(task: event.task);
     apiResult.when(
-      success: (Task? task) {
-        if (task == null) {
-          emit(const _UpdateTaskFailure());
-        } else {
-          emit(_FetchTaskSuccess(task: task));
-        }
+      success: (Task task) {
+        emit(_FetchTaskSuccess(task: task));
       },
       failure: (NetworkExceptions error) {
-        emit(const _UpdateTaskFailure());
+        emit(_UpdateTaskFailure(error: error));
       },
     );
   }
@@ -293,7 +285,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   FutureOr<void> _onRemoveAttachedNote(
       _RemoveAttachedNote event, Emitter<TaskState> emit) async {
     final ApiResult<void> apiResult = await _taskRepository.removeAttachedNote(
-      attachedNoteData: event.attachNote.toJson(),
+      taskId: event.attachNote.taskId,
+      noteId: event.attachNote.noteId,
     );
     apiResult.when(
       success: (void value) {
@@ -309,7 +302,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       _RemoveAttachedDocument event, Emitter<TaskState> emit) async {
     final ApiResult<void> apiResult =
         await _taskRepository.removeAttachedDocument(
-      attachedDocumentData: event.attachDocument.toJson(),
+      taskId: event.attachDocument.taskId,
+      documentId: event.attachDocument.documentId,
     );
     apiResult.when(
       success: (void value) {
