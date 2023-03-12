@@ -19,8 +19,13 @@ class ProjectDetailRepository {
         url: '$projectDetailEndpoint/$projectId',
         httpMethod: HttpMethod.get,
       );
+      if (data == null) {
+        return const ApiResult<ProjectDetail?>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
       return ApiResult<ProjectDetail?>.success(
-        data: ProjectDetail.fromJson(data!),
+        data: ProjectDetail.fromJson(data),
       );
     } on Exception catch (e) {
       return ApiResult<ProjectDetail?>.failure(

@@ -136,6 +136,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               );
             },
             fetchProjectDetailSuccess: (ProjectDetail projectDetail) {
+              final List<Member> sortedMembers =
+                  List<Member>.from(projectDetail.members);
+              sortedMembers.sort(
+                (Member a, Member b) =>
+                    a.user.username.compareTo(b.user.username),
+              );
+              projectDetail = projectDetail.copyWith(members: sortedMembers);
               final User currentUser = context.read<User>();
               final Member owner = projectDetail.members
                   .where((Member member) =>
@@ -370,13 +377,20 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         ),
         if (isOwner)
           TextButton.icon(
-            onPressed: () {
-              context.goNamed(
+            onPressed: () async {
+              await context.pushNamed(
                 RouteConstants.inviteMembers,
                 params: <String, String>{
                   'projectId': widget.projectId,
                 },
               );
+              if (mounted) {
+                context.read<ProjectDetailBloc>().add(
+                      ProjectDetailEvent.fetchProjectDetail(
+                        projectId: int.parse(widget.projectId),
+                      ),
+                    );
+              }
             },
             icon: const Icon(Icons.add),
             label: const Text('Add'),
