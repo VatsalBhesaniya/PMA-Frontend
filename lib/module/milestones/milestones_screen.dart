@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/milestone.dart';
@@ -98,60 +98,10 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
                             style: theme.textTheme.bodyMedium,
                           ),
                         )
-                      : Stepper(
-                          currentStep: _index,
-                          onStepTapped: (int index) {
-                            setState(() {
-                              _index = index;
-                            });
-                          },
-                          controlsBuilder:
-                              (BuildContext context, ControlsDetails details) {
-                            if (roadmap.currentUserRole ==
-                                MemberRole.guest.index + 1) {
-                              return const SizedBox();
-                            }
-                            return Row(
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      final List<Milestone> roadmapMilestones =
-                                          List<Milestone>.from(
-                                              roadmap.milestones);
-                                      roadmapMilestones.sort(
-                                        (Milestone a, Milestone b) => a
-                                            .completionDate
-                                            .compareTo(b.completionDate),
-                                      );
-                                      context.goNamed(
-                                        RouteConstants.editMilestone,
-                                        params: <String, String>{
-                                          'projectId': widget.projectId,
-                                          'milestoneId': roadmapMilestones[
-                                                  details.stepIndex]
-                                              .id
-                                              .toString(),
-                                        },
-                                      );
-                                    },
-                                    child: Text(
-                                      'Edit',
-                                      style:
-                                          theme.textTheme.bodyMedium?.copyWith(
-                                        color: theme.colorScheme.background,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                          steps: _buildSteps(
-                            theme: theme,
-                            milestones: roadmap.milestones,
-                          ),
+                      : _buildStepper(
+                          context: context,
+                          theme: theme,
+                          roadmap: roadmap,
                         ),
                 ),
               );
@@ -175,18 +125,89 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
     );
   }
 
+  Stepper _buildStepper({
+    required BuildContext context,
+    required ThemeData theme,
+    required Roadmap roadmap,
+  }) {
+    return Stepper(
+      currentStep: _index,
+      onStepTapped: (int index) {
+        setState(() {
+          _index = index;
+        });
+      },
+      controlsBuilder: (_, ControlsDetails details) {
+        if (roadmap.currentUserRole == MemberRole.guest.index + 1) {
+          return const SizedBox();
+        }
+        return Row(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: ElevatedButton(
+                onPressed: () async {
+                  final List<Milestone> roadmapMilestones =
+                      List<Milestone>.from(roadmap.milestones);
+                  roadmapMilestones.sort(
+                    (Milestone a, Milestone b) =>
+                        a.completionDate.compareTo(b.completionDate),
+                  );
+                  await context.pushNamed<void>(
+                    RouteConstants.editMilestone,
+                    params: <String, String>{
+                      'projectId': widget.projectId,
+                      'milestoneId':
+                          roadmapMilestones[details.stepIndex].id.toString(),
+                    },
+                  );
+                  if (mounted) {
+                    _index = 0;
+                    context.read<MilestonesBloc>().add(
+                          MilestonesEvent.fetchMilestones(
+                            projectId: int.parse(widget.projectId),
+                          ),
+                        );
+                  }
+                },
+                child: Text(
+                  'Edit',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.background,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+      steps: _buildSteps(
+        theme: theme,
+        milestones: roadmap.milestones,
+      ),
+    );
+  }
+
   FloatingActionButton _buildFloatingActionButton({
     required BuildContext context,
     required ThemeData theme,
   }) {
     return FloatingActionButton(
-      onPressed: () {
-        context.goNamed(
+      onPressed: () async {
+        await context.pushNamed(
           RouteConstants.createMilestone,
           params: <String, String>{
             'projectId': widget.projectId,
           },
         );
+        if (mounted) {
+          _index = 0;
+          context.read<MilestonesBloc>().add(
+                MilestonesEvent.fetchMilestones(
+                  projectId: int.parse(widget.projectId),
+                ),
+              );
+        }
       },
       child: Icon(
         Icons.add,
@@ -254,5 +275,4 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
     return DateFormat('EEEE MMM d, y h:mm a ').format(datetime) +
         datetime.timeZoneName;
   }
-
 }

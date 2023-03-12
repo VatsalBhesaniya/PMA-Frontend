@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/invite_members/bloc/invite_members_bloc.dart';
 import 'package:pma/module/invite_members/invite_members_repository.dart';
