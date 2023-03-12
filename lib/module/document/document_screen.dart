@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/module/document/bloc/document_bloc.dart';
@@ -41,7 +40,6 @@ class _DocumentScreenState extends State<DocumentScreen> {
       create: (BuildContext context) => DocumentBloc(
         documentRepository: DocumentRepository(
           dioClient: context.read<DioClient>(),
-          httpClient: context.read<HttpClientConfig>(),
         ),
       ),
       child: BlocConsumer<DocumentBloc, DocumentState>(
