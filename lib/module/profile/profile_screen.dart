@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/update_user.dart';
@@ -36,7 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         userRepository: RepositoryProvider.of<UserRepository>(context),
         profileRepository: ProfileRepository(
           dioClient: context.read<DioClient>(),
-          httpClient: context.read<HttpClientConfig>(),
         ),
         appStorageManager: context.read<AppStorageManager>(),
       ),
