@@ -44,20 +44,12 @@ class MyProjectsBloc extends Bloc<MyProjectsEvent, MyProjectsState> {
 
   FutureOr<void> _onCreateProject(
       _CreateProject event, Emitter<MyProjectsState> emit) async {
-    final ApiResult<bool> apiResult = await _projectsRepository.createProject(
-      projectJson: event.project.toJson(),
+    final ApiResult<void> apiResult = await _projectsRepository.createProject(
+      projectData: event.project.toJson(),
     );
     apiResult.when(
-      success: (bool isCreated) {
-        if (isCreated) {
-          emit(const _CreateProjectSuccess());
-        } else {
-          emit(
-            const _CreateProjectFailure(
-              error: NetworkExceptions.defaultError(),
-            ),
-          );
-        }
+      success: (void value) {
+        emit(const _CreateProjectSuccess());
       },
       failure: (NetworkExceptions error) {
         emit(_CreateProjectFailure(error: error));

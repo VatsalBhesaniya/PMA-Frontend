@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/module/home/projects_repository.dart';
 import 'package:pma/module/invited_projects/bloc/invited_projects_bloc.dart';
@@ -117,7 +116,6 @@ class _HomeScreenState extends State<HomeScreen>
             create: (BuildContext context) => MyProjectsBloc(
               projectsRepository: ProjectsRepository(
                 dioClient: context.read<DioClient>(),
-                httpClient: context.read<HttpClientConfig>(),
               ),
             ),
             child: const MyPorojectsScreen(),
@@ -126,7 +124,6 @@ class _HomeScreenState extends State<HomeScreen>
             create: (BuildContext context) => InvitedProjectsBloc(
               projectsRepository: ProjectsRepository(
                 dioClient: context.read<DioClient>(),
-                httpClient: context.read<HttpClientConfig>(),
               ),
             ),
             child: const InvitedPorojectsScreen(),
