@@ -22,4 +22,5 @@ const String attachDocumentsEndpoint = 'tasks/attach/documents';
 const String notesEndpoint = 'notes';
 const String projectNotesEndpoint = 'notes/project';
 const String documentsEndpoint = 'documents';
+const String createDocumentsEndpoint = 'documents/create';
 const String projectDocumentsEndpoint = 'documents/project';
