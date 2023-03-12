@@ -81,13 +81,21 @@ class _ProjectScreenState extends State<ProjectScreen>
                     ),
                   ],
                 ),
-                floatingActionButton: _buildFloatingActionButton(),
+                floatingActionButton:
+                    project.currentUserRole == MemberRole.guest.index + 1
+                        ? null
+                        : _buildFloatingActionButton(
+                            theme: theme,
+                          ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
                 body: Column(
                   children: <Widget>[
                     _buildTabBar(theme: theme),
-                    _buildTabBarView(theme: theme),
+                    _buildTabBarView(
+                      theme: theme,
+                      currentUserRole: project.currentUserRole,
+                    ),
                   ],
                 ),
               );
@@ -104,7 +112,9 @@ class _ProjectScreenState extends State<ProjectScreen>
     );
   }
 
-  FloatingActionButton _buildFloatingActionButton() {
+  FloatingActionButton _buildFloatingActionButton({
+    required ThemeData theme,
+  }) {
     return FloatingActionButton(
       onPressed: () {
         switch (_tabController.index) {
@@ -119,17 +129,26 @@ class _ProjectScreenState extends State<ProjectScreen>
           case 1:
             context.goNamed(
               RouteConstants.createNote,
+              params: <String, String>{
+                'projectId': widget.projectId,
+              },
             );
             break;
           case 2:
             context.goNamed(
               RouteConstants.createDocument,
+              params: <String, String>{
+                'projectId': widget.projectId,
+              },
             );
             break;
           default:
         }
       },
-      child: const Icon(Icons.add),
+      child: Icon(
+        Icons.add,
+        color: theme.colorScheme.primary,
+      ),
     );
   }
 
@@ -156,6 +175,7 @@ class _ProjectScreenState extends State<ProjectScreen>
           title: 'Documents',
         ),
       ],
+      indicatorColor: theme.colorScheme.primaryContainer,
     );
   }
 
@@ -166,15 +186,14 @@ class _ProjectScreenState extends State<ProjectScreen>
     return Tab(
       child: Text(
         title,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onPrimary,
-        ),
+        style: theme.textTheme.bodyMedium,
       ),
     );
   }
 
   Expanded _buildTabBarView({
     required ThemeData theme,
+    required int currentUserRole,
   }) {
     return Expanded(
       child: TabBarView(
@@ -188,6 +207,7 @@ class _ProjectScreenState extends State<ProjectScreen>
             ),
             child: TasksScreen(
               projectId: widget.projectId,
+              currentUserRole: currentUserRole,
             ),
           ),
           BlocProvider<NotesBloc>(
@@ -196,7 +216,10 @@ class _ProjectScreenState extends State<ProjectScreen>
                 dioClient: context.read<DioClient>(),
               ),
             ),
-            child: const NotesScreen(),
+            child: NotesScreen(
+              projectId: widget.projectId,
+              currentUserRole: currentUserRole,
+            ),
           ),
           BlocProvider<DocumentsBloc>(
             create: (BuildContext context) => DocumentsBloc(
@@ -204,7 +227,10 @@ class _ProjectScreenState extends State<ProjectScreen>
                 dioClient: context.read<DioClient>(),
               ),
             ),
-            child: const DocumentsScreen(),
+            child: DocumentsScreen(
+              projectId: widget.projectId,
+              currentUserRole: currentUserRole,
+            ),
           ),
         ],
       ),

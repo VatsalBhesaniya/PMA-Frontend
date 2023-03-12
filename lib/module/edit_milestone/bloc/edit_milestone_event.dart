@@ -5,6 +5,9 @@ class EditMilestoneEvent with _$EditMilestoneEvent {
   const factory EditMilestoneEvent.fetchMilestone({
     required int milestoneId,
   }) = _FetchMilestone;
+  const factory EditMilestoneEvent.editMilestone({
+    required Milestone milestone,
+  }) = _EditMilestone;
   const factory EditMilestoneEvent.updateMilestone({
     required int milestoneId,
     required CreateMilestone milestone,

@@ -9,6 +9,7 @@ part 'create_note.g.dart';
 class CreateNote with _$CreateNote {
   @JsonSerializable(explicitToJson: true)
   factory CreateNote({
+    @JsonKey(name: 'project_id') required int projectId,
     @JsonKey() required String title,
     @JsonKey() List<dynamic>? content,
     @JsonKey(name: 'content_plain_text') String? contentPlainText,

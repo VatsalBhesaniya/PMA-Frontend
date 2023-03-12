@@ -10,6 +10,8 @@ import 'package:pma/module/milestones/milestones_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class CreateMilestoneScreen extends StatefulWidget {
@@ -52,15 +54,15 @@ class _CreateMilestoneScreenState extends State<CreateMilestoneScreen> {
             listener: (BuildContext context, CreateMilestoneState state) {
               state.maybeWhen(
                 createMilestoneSuccess: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Milestone successfully created.'),
-                    ),
+                  showSnackBar(
+                    context: context,
+                    theme: theme,
+                    message: 'Milestone successfully created.',
                   );
                   context.pop();
                 },
                 createMilestoneFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
+                  pmaAlertDialog(
                     context: context,
                     theme: theme,
                     error:
@@ -188,7 +190,7 @@ class _CreateMilestoneScreenState extends State<CreateMilestoneScreen> {
       onPressed: () {
         if (_formKey.currentState!.validate()) {
           if (selectedDate == null) {
-            _buildApiFailureAlert(
+            pmaAlertDialog(
               context: context,
               theme: theme,
               error: 'Please select date of completion.',
@@ -210,42 +212,6 @@ class _CreateMilestoneScreenState extends State<CreateMilestoneScreen> {
         }
       },
       child: const Text('Create'),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

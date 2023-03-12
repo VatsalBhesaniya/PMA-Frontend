@@ -118,11 +118,12 @@ class UserRepository {
   }
 
   Future<ApiResult<List<SearchUser>?>> fetchUsers({
+    required int projectId,
     required String searchText,
   }) async {
     try {
       final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$usersEndpoint?search=$searchText',
+        url: '$usersEndpoint/$projectId?search=$searchText',
         httpMethod: HttpMethod.get,
       );
       final List<SearchUser>? users = data
@@ -134,6 +135,34 @@ class UserRepository {
       );
     } on Exception catch (e) {
       return ApiResult<List<SearchUser>?>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
+  Future<ApiResult<void>> updateUserPassword({
+    required Map<String, dynamic> userData,
+  }) async {
+    try {
+      final http.Response response = await http.put(
+        Uri.parse('${dioClient.baseURL}$updatePasswordEndpoint'),
+        headers: <String, String>{
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: jsonEncode(userData),
+      );
+
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      } else {
+        return const ApiResult<void>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+    } on Exception catch (e) {
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

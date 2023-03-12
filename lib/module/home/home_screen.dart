@@ -5,7 +5,7 @@ import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/module/home/projects_repository.dart';
 import 'package:pma/module/invited_projects/bloc/invited_projects_bloc.dart';
-import 'package:pma/module/invited_projects/invited_projects.dart';
+import 'package:pma/module/invited_projects/invited_projects_screen.dart';
 import 'package:pma/module/my_projects/bloc/my_projects_bloc.dart';
 import 'package:pma/module/my_projects/my_projects_screen.dart';
 import 'package:pma/utils/dio_client.dart';
@@ -43,13 +43,18 @@ class _HomeScreenState extends State<HomeScreen>
       appBar: AppBar(
         title: const Text('Home'),
         actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              context.goNamed(RouteConstants.settings);
-            },
-            icon: const CircleAvatar(
-              child: Icon(
-                Icons.person_outline_rounded,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: IconButton(
+              onPressed: () {
+                context.goNamed(RouteConstants.settings);
+              },
+              icon: CircleAvatar(
+                backgroundColor: theme.colorScheme.background,
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ),
           ),
@@ -85,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen>
           title: 'Invited',
         ),
       ],
+      indicatorColor: theme.colorScheme.primaryContainer,
     );
   }
 
@@ -95,9 +101,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Tab(
       child: Text(
         title,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onPrimary,
-        ),
+        style: theme.textTheme.bodyMedium,
       ),
     );
   }

@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
+import 'package:pma/models/attach_document.dart';
+import 'package:pma/models/attach_note.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/member.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
-import 'package:pma/models/user.dart';
 import 'package:pma/module/task/bloc/task_bloc.dart';
 import 'package:pma/module/task/task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class TaskScreen extends StatefulWidget {
@@ -32,6 +37,7 @@ class TaskScreen extends StatefulWidget {
 
 class _TaskScreenState extends State<TaskScreen> {
   final quill.QuillController _controller = quill.QuillController.basic();
+  final TextEditingController _taskTitleController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -59,14 +65,22 @@ class _TaskScreenState extends State<TaskScreen> {
                   );
             },
             updateTaskFailure: () async {
-              _showUpdateTaskFailureAlert(context, theme);
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error: 'Could not update task successfully. Please try again.',
+              );
             },
             deleteTaskSuccess: () {
               context.pop();
-              _showSnackBar(context: context, theme: theme);
+              showSnackBar(
+                context: context,
+                theme: theme,
+                message: 'Task successfully deleted',
+              );
             },
             deleteTaskFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -81,11 +95,55 @@ class _TaskScreenState extends State<TaskScreen> {
                   );
             },
             removeMemberFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
                     'Could not invite members successfully. Please try again.',
+              );
+            },
+            attachNotesSuccess: () {
+              context.read<TaskBloc>().add(
+                    TaskEvent.fetchTask(
+                      taskId: int.parse(widget.taskId),
+                    ),
+                  );
+            },
+            removeAttachedNoteSuccess: () {
+              context.read<TaskBloc>().add(
+                    TaskEvent.fetchTask(
+                      taskId: int.parse(widget.taskId),
+                    ),
+                  );
+            },
+            removeAttachedNoteFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not remove note attached successfully. Please try again.',
+              );
+            },
+            attachDocumentsSuccess: () {
+              context.read<TaskBloc>().add(
+                    TaskEvent.fetchTask(
+                      taskId: int.parse(widget.taskId),
+                    ),
+                  );
+            },
+            removeAttachedDocumentSuccess: () {
+              context.read<TaskBloc>().add(
+                    TaskEvent.fetchTask(
+                      taskId: int.parse(widget.taskId),
+                    ),
+                  );
+            },
+            removeAttachedDocumentFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not remove document attached successfully. Please try again.',
               );
             },
             orElse: () => null,
@@ -129,13 +187,15 @@ class _TaskScreenState extends State<TaskScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Task Detail'),
-                  actions: <Widget>[
-                    _buildActionButton(
-                      context: context,
-                      theme: theme,
-                      task: task,
-                    ),
-                  ],
+                  actions: task.currentUserRole == MemberRole.guest.index + 1
+                      ? null
+                      : <Widget>[
+                          _buildActionButton(
+                            context: context,
+                            theme: theme,
+                            task: task,
+                          ),
+                        ],
                 ),
                 body: SafeArea(
                   child: SingleChildScrollView(
@@ -144,32 +204,19 @@ class _TaskScreenState extends State<TaskScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          const SizedBox(height: 16),
-                          Text('task id: ${task.id}'),
-                          const SizedBox(height: 16),
-                          Text(task.title),
-                          const SizedBox(height: 16),
-                          _buildMembers(
-                            context: context,
-                            theme: theme,
-                            task: task,
-                          ),
-                          const SizedBox(height: 16),
-                          _buildTaskStatus(task, context),
-                          const SizedBox(height: 16),
-                          _buildOwner(task),
+                          _buildTitle(task, theme),
                           const SizedBox(height: 16),
                           _buildDescription(
                             theme: theme,
                             isEdit: task.isEdit,
                           ),
-                          const SizedBox(height: 16),
-                          const Text('Created At'),
-                          const SizedBox(height: 16),
-                          Text(task.createdAt),
-                          const SizedBox(height: 20),
-                          _buildNotesAttached(),
-                          _buildDocumentsAttached(),
+                          const SizedBox(height: 32),
+                          if (!task.isEdit)
+                            _buildDetails(
+                              context: context,
+                              theme: theme,
+                              task: task,
+                            ),
                         ],
                       ),
                     ),
@@ -195,25 +242,105 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
+  InputField _buildTitle(Task task, ThemeData theme) {
+    return InputField(
+      controller: _taskTitleController..text = task.title,
+      isEnabled: task.isEdit,
+      hintText: 'Title',
+      borderType: task.isEdit
+          ? InputFieldBorderType.underlineInputBorder
+          : InputFieldBorderType.none,
+      style: theme.textTheme.headlineSmall?.copyWith(
+        color: theme.colorScheme.primary,
+      ),
+      horizontalContentPadding: 0,
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter title';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildDetails({
+    required BuildContext context,
+    required ThemeData theme,
+    required Task task,
+  }) {
+    final bool isGuest = task.currentUserRole == MemberRole.guest.index + 1;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        _buildTaskStatus(
+          theme: theme,
+          task: task,
+          context: context,
+        ),
+        const SizedBox(height: 16),
+        _buildInfoItem(
+          theme: theme,
+          title: 'Created By',
+          info: task.owner.username,
+        ),
+        const SizedBox(height: 16),
+        _buildInfoItem(
+          theme: theme,
+          title: 'Created At',
+          info: _dateTime(task.createdAt),
+        ),
+        const SizedBox(height: 10),
+        const Divider(),
+        const SizedBox(height: 10),
+        _buildMembers(
+          context: context,
+          theme: theme,
+          task: task,
+        ),
+        const SizedBox(height: 10),
+        const Divider(),
+        const SizedBox(height: 10),
+        _buildNotesAttached(
+          context: context,
+          theme: theme,
+          isGuest: isGuest,
+        ),
+        const SizedBox(height: 10),
+        const Divider(),
+        const SizedBox(height: 10),
+        _buildDocumentsAttached(
+          context: context,
+          theme: theme,
+          isGuest: isGuest,
+        ),
+      ],
+    );
+  }
+
+  String _dateTime(String timestamp) {
+    final DateTime datetime = DateTime.parse(timestamp).toLocal();
+    return DateFormat('EEEE MMM d, y h:mm a ').format(datetime) +
+        datetime.timeZoneName;
+  }
+
   Widget _buildMembers({
     required BuildContext context,
     required ThemeData theme,
     required Task task,
   }) {
-    final User currentUser = context.read<User>();
-    final bool isOwner = task.owner.id == currentUser.id;
+    final bool isGuest = task.currentUserRole == MemberRole.guest.index + 1;
     return Column(
       children: <Widget>[
         _buildMembersTitle(
           theme: theme,
           context: context,
-          isOwner: isOwner,
+          isGuest: isGuest,
         ),
         _buildMembersList(
           context: context,
           theme: theme,
           task: task,
-          isOwner: isOwner,
+          isGuest: isGuest,
         ),
       ],
     );
@@ -222,7 +349,7 @@ class _TaskScreenState extends State<TaskScreen> {
   Widget _buildMembersTitle({
     required ThemeData theme,
     required BuildContext context,
-    required bool isOwner,
+    required bool isGuest,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -231,24 +358,30 @@ class _TaskScreenState extends State<TaskScreen> {
           padding: const EdgeInsets.only(bottom: 6),
           child: Text(
             'Members',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.primary,
-            ),
+            style: theme.textTheme.bodyMedium,
           ),
         ),
-        if (isOwner)
+        if (!isGuest)
           TextButton.icon(
             onPressed: () {
               context.goNamed(
-                RouteConstants.assignMembers,
+                RouteConstants.assignTask,
                 params: <String, String>{
                   'taskId': widget.taskId,
                   'projectId': widget.projectId,
                 },
               );
             },
-            icon: const Icon(Icons.add),
-            label: const Text('Add'),
+            icon: Icon(
+              Icons.add,
+              color: theme.colorScheme.outline,
+            ),
+            label: Text(
+              'Add',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.outline,
+              ),
+            ),
           ),
       ],
     );
@@ -258,8 +391,17 @@ class _TaskScreenState extends State<TaskScreen> {
     required BuildContext context,
     required ThemeData theme,
     required Task task,
-    required bool isOwner,
+    required bool isGuest,
   }) {
+    if (task.members.isEmpty) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          'Not assigned to anyone yet.',
+          style: theme.textTheme.bodyLarge,
+        ),
+      );
+    }
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -267,12 +409,16 @@ class _TaskScreenState extends State<TaskScreen> {
       itemBuilder: (BuildContext context, int index) {
         final Member member = task.members[index];
         return ListTile(
-          leading: const CircleAvatar(
-            child: Icon(Icons.person_outline_rounded),
+          leading: CircleAvatar(
+            backgroundColor: theme.colorScheme.outline,
+            child: Icon(
+              Icons.person_outline_rounded,
+              color: theme.colorScheme.background,
+            ),
           ),
           title: Text(member.user.username),
           subtitle: Text(MemberRole.values[member.role - 1].title),
-          trailing: isOwner && member.role != 1
+          trailing: !isGuest
               ? IconButton(
                   onPressed: () {
                     context.read<TaskBloc>().add(
@@ -294,84 +440,93 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
-  Row _buildOwner(Task task) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildInfoItem({
+    required ThemeData theme,
+    required String title,
+    required String info,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text('Owner'),
-        const SizedBox(width: 16),
-        Text(task.owner.username),
+        Text(
+          title,
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          info,
+          style: theme.textTheme.bodyLarge,
+        ),
       ],
     );
   }
 
-  DropdownButton<TaskStatus> _buildTaskStatus(Task task, BuildContext context) {
-    return DropdownButton<TaskStatus>(
-      value: TaskStatus.values[task.status - 1],
-      onChanged: (TaskStatus? value) {
-        if (value != null) {
-          context.read<TaskBloc>().add(
-                TaskEvent.updateTask(
-                  task: task.copyWith(
-                    status: value.index + 1,
+  Widget _buildTaskStatus({
+    required BuildContext context,
+    required ThemeData theme,
+    required Task task,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.outline,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+      ),
+      child: DropdownButton<TaskStatus>(
+        isDense: true,
+        dropdownColor: theme.colorScheme.outline,
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        value: TaskStatus.values[task.status - 1],
+        onChanged: (TaskStatus? value) {
+          if (value != null) {
+            context.read<TaskBloc>().add(
+                  TaskEvent.updateTask(
+                    task: task.copyWith(
+                      status: value.index + 1,
+                    ),
                   ),
-                ),
-              );
-        }
-      },
-      items: <DropdownMenuItem<TaskStatus>>[
-        DropdownMenuItem<TaskStatus>(
-          value: TaskStatus.todo,
-          child: Text(TaskStatus.todo.title),
-        ),
-        DropdownMenuItem<TaskStatus>(
-          value: TaskStatus.inProgress,
-          child: Text(TaskStatus.inProgress.title),
-        ),
-        DropdownMenuItem<TaskStatus>(
-          value: TaskStatus.completed,
-          child: Text(TaskStatus.completed.title),
-        ),
-        DropdownMenuItem<TaskStatus>(
-          value: TaskStatus.qa,
-          child: Text(TaskStatus.qa.title),
-        ),
-      ],
-    );
-  }
-
-  Future<String?> _showUpdateTaskFailureAlert(
-      BuildContext context, ThemeData theme) {
-    return showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
+                );
+          }
+        },
+        items: <DropdownMenuItem<TaskStatus>>[
+          DropdownMenuItem<TaskStatus>(
+            value: TaskStatus.todo,
             child: Text(
-              'Alert',
+              TaskStatus.todo.title,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
+                color: theme.colorScheme.background,
               ),
             ),
           ),
-          content: const Text(
-            'Someth ing went wrong!. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
+          DropdownMenuItem<TaskStatus>(
+            value: TaskStatus.inProgress,
+            child: Text(
+              TaskStatus.inProgress.title,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.background,
               ),
             ),
-          ],
-        );
-      },
+          ),
+          DropdownMenuItem<TaskStatus>(
+            value: TaskStatus.completed,
+            child: Text(
+              TaskStatus.completed.title,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.background,
+              ),
+            ),
+          ),
+          DropdownMenuItem<TaskStatus>(
+            value: TaskStatus.qa,
+            child: Text(
+              TaskStatus.qa.title,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.background,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -381,45 +536,49 @@ class _TaskScreenState extends State<TaskScreen> {
     required Task task,
   }) {
     if (task.isEdit) {
-      return Row(
-        children: <Widget>[
-          TextButton(
-            onPressed: () {
-              context.read<TaskBloc>().add(
-                    TaskEvent.updateTask(
-                      task: task.copyWith(
-                        description: _controller.document.toDelta().toJson(),
-                        descriptionPlainText:
-                            _controller.document.toPlainText(),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: <Widget>[
+            TextButton(
+              onPressed: () {
+                context.read<TaskBloc>().add(
+                      TaskEvent.updateTask(
+                        task: task.copyWith(
+                          title: _taskTitleController.text.trim(),
+                          description: _controller.document.toDelta().toJson(),
+                          descriptionPlainText:
+                              _controller.document.toPlainText(),
+                        ),
                       ),
-                    ),
-                  );
-            },
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                color: Colors.lime,
+                    );
+              },
+              child: Text(
+                'Save',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primaryContainer,
+                ),
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<TaskBloc>().add(
-                    TaskEvent.editTask(
-                      task: task.copyWith(
-                        isEdit: false,
+            TextButton(
+              onPressed: () {
+                context.read<TaskBloc>().add(
+                      TaskEvent.editTask(
+                        task: task.copyWith(
+                          isEdit: false,
+                        ),
                       ),
-                    ),
-                  );
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.lime,
+                    );
+              },
+              child: Text(
+                'Cancel',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primaryContainer,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
     return Row(
@@ -471,25 +630,45 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
-  Column _buildNotesAttached() {
+  Column _buildNotesAttached({
+    required BuildContext context,
+    required ThemeData theme,
+    required bool isGuest,
+  }) {
     return Column(
       children: <Widget>[
         ListTile(
-          leading: const Icon(
+          contentPadding: EdgeInsets.zero,
+          minLeadingWidth: 8,
+          leading: Icon(
             Icons.note_alt_rounded,
+            color: theme.colorScheme.outline,
           ),
-          title: const Text('Notes Attached'),
-          trailing: IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.add),
+          title: Text(
+            'Notes Attached',
+            style: theme.textTheme.titleMedium,
           ),
+          trailing: isGuest
+              ? null
+              : IconButton(
+                  onPressed: () {
+                    _buildNotesBottomSheet(
+                      context: context,
+                      theme: theme,
+                    );
+                  },
+                  icon: Icon(
+                    Icons.add,
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
         ),
         BlocBuilder<TaskBloc, TaskState>(
           buildWhen: (TaskState previous, TaskState current) {
             return current.maybeWhen(
               fetchAttachedNotesLoading: () => true,
               fetchAttachedNotesSuccess: (List<Note> notes) => true,
-              fetchAttachedNotesFailure: () => true,
+              fetchAttachedNotesFailure: (NetworkExceptions error) => true,
               orElse: () => false,
             );
           },
@@ -499,9 +678,9 @@ class _TaskScreenState extends State<TaskScreen> {
                 return const CircularProgressIndicator();
               },
               fetchAttachedNotesSuccess: (List<Note> notes) {
-                return _buildNotes(notes, context);
+                return _buildNotes(notes, context, theme, isGuest);
               },
-              fetchAttachedNotesFailure: () {
+              fetchAttachedNotesFailure: (NetworkExceptions error) {
                 return const Text('Something went wrong!');
               },
               orElse: () {
@@ -514,13 +693,196 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
-  Padding _buildNotes(List<Note> notes, BuildContext context) {
+  Future<void> _buildNotesBottomSheet({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (BuildContext ctx) {
+        return BlocConsumer<TaskBloc, TaskState>(
+          bloc: context.read<TaskBloc>()
+            ..add(
+              TaskEvent.fetchProjectNotes(
+                taskId: int.parse(widget.taskId),
+                projectId: int.parse(widget.projectId),
+              ),
+            ),
+          listener: (BuildContext context, TaskState state) {
+            state.maybeWhen(
+              attachNotesSuccess: () {
+                Navigator.pop(ctx);
+              },
+              attachNotesFailure: (NetworkExceptions error) {
+                pmaAlertDialog(
+                  context: context,
+                  theme: theme,
+                  error:
+                      'Could not attach note successfully. Please try again.',
+                );
+              },
+              orElse: () => null,
+            );
+          },
+          buildWhen: (TaskState previous, TaskState current) {
+            return current.maybeWhen(
+              bottomSheetLoadInProgress: () => true,
+              fetchProjectNotesSuccess: (List<Note> notes) => true,
+              fetchProjectNotesFailure: (NetworkExceptions error) => true,
+              orElse: () => false,
+            );
+          },
+          builder: (_, TaskState state) {
+            return state.maybeWhen(
+              bottomSheetLoadInProgress: () {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+              fetchProjectNotesSuccess: (List<Note> notes) {
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height / 3,
+                    maxHeight: MediaQuery.of(context).size.height / 1.2,
+                  ),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                      color: Colors.white,
+                    ),
+                    child: _buildProjectNotes(notes, theme, context),
+                  ),
+                );
+              },
+              fetchProjectNotesFailure: (NetworkExceptions error) {
+                return const Center(
+                  child: Text('Something went wrong.'),
+                );
+              },
+              orElse: () => const SizedBox(),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildProjectNotes(
+    List<Note> notes,
+    ThemeData theme,
+    BuildContext context,
+  ) {
+    if (notes.isEmpty) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'No notes to attach.',
+            style: theme.textTheme.bodyMedium,
+          ),
+        ],
+      );
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        ListView.separated(
+          shrinkWrap: true,
+          itemCount: notes.length,
+          separatorBuilder: (BuildContext context, int index) {
+            return const Divider(height: 1);
+          },
+          itemBuilder: (_, int index) {
+            final Note note = notes[index];
+            return ListTile(
+              title: Text(
+                note.title,
+                style: theme.textTheme.bodyLarge,
+              ),
+              trailing: IconButton(
+                onPressed: () {
+                  context.read<TaskBloc>().add(
+                        TaskEvent.selectNote(
+                          index: index,
+                          notes: notes,
+                        ),
+                      );
+                },
+                icon: Icon(
+                  Icons.check_circle_outline_outlined,
+                  color: note.isSelected ? Colors.amber : Colors.grey,
+                ),
+              ),
+            );
+          },
+        ),
+        _buildAttachNotesButton(
+          context: context,
+          theme: theme,
+          notes: notes,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAttachNotesButton({
+    required BuildContext context,
+    required ThemeData theme,
+    required List<Note> notes,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
+      padding: const EdgeInsets.all(32),
+      child: MaterialButton(
+        onPressed: () {
+          context.read<TaskBloc>().add(
+                TaskEvent.attachNotes(
+                  notes: notes
+                      .where((Note note) => note.isSelected == true)
+                      .toList(),
+                  taskId: int.parse(widget.taskId),
+                ),
+              );
+        },
+        elevation: 8,
+        color: theme.colorScheme.primary,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 32,
+          vertical: 8,
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(8),
+          ),
+        ),
+        child: Text(
+          'Attach',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.background,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotes(
+    List<Note> notes,
+    BuildContext context,
+    ThemeData theme,
+    bool isGuest,
+  ) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.all(
+        Radius.circular(16),
       ),
       child: ExpansionPanelList(
+        expandedHeaderPadding: EdgeInsets.zero,
         expansionCallback: (int index, bool isExpanded) {
           final List<Note> updatedNotes = <Note>[];
           for (int i = 0; i < notes.length; i++) {
@@ -538,51 +900,124 @@ class _TaskScreenState extends State<TaskScreen> {
         },
         children: notes.map<ExpansionPanel>(
           (Note note) {
-            return _buildNote(note);
+            return _buildNote(
+              context: context,
+              theme: theme,
+              note: note,
+              isGuest: isGuest,
+            );
           },
         ).toList(),
       ),
     );
   }
 
-  ExpansionPanel _buildNote(Note note) {
+  ExpansionPanel _buildNote({
+    required BuildContext context,
+    required ThemeData theme,
+    required Note note,
+    required bool isGuest,
+  }) {
     return ExpansionPanel(
+      canTapOnHeader: true,
       headerBuilder: (BuildContext context, bool isExpanded) {
         return ListTile(
-          title: Text(note.title),
+          title: Text(
+            note.title,
+            style: theme.textTheme.bodyMedium,
+          ),
         );
       },
-      body: ListTile(
-        title: Text(note.contentPlainText ?? ''),
-        subtitle: const Text(
-          'To delete this panel, tap the trash can icon',
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: theme.colorScheme.outline),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(8),
+                ),
+              ),
+              child: TextEditor(
+                controller: quill.QuillController(
+                  selection:
+                      const TextSelection(baseOffset: 0, extentOffset: 0),
+                  document: quill.Document.fromJson(
+                    note.content ?? <dynamic>[],
+                  ),
+                ),
+                readOnly: true,
+                showCursor: false,
+                minHeight: 200,
+              ),
+            ),
+            if (isGuest) const SizedBox(height: 8),
+            if (!isGuest)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    context.read<TaskBloc>().add(
+                          TaskEvent.removeAttachedNote(
+                            attachNote: AttachNote(
+                              taskId: int.parse(widget.taskId),
+                              noteId: note.id,
+                            ),
+                          ),
+                        );
+                  },
+                  child: Text(
+                    'Remove',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
-        trailing: const Icon(Icons.delete),
-        onTap: () {},
       ),
       isExpanded: note.isExpanded,
     );
   }
 
-  Column _buildDocumentsAttached() {
+  Column _buildDocumentsAttached({
+    required BuildContext context,
+    required ThemeData theme,
+    required bool isGuest,
+  }) {
     return Column(
       children: <Widget>[
         ListTile(
-          leading: const Icon(
+          contentPadding: EdgeInsets.zero,
+          minLeadingWidth: 8,
+          leading: Icon(
             Icons.edit_document,
+            color: theme.colorScheme.outline,
           ),
-          title: const Text('Documents Attached'),
-          trailing: IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.add),
+          title: Text(
+            'Documents Attached',
+            style: theme.textTheme.titleMedium,
           ),
+          trailing: isGuest
+              ? null
+              : IconButton(
+                  onPressed: () {
+                    _buildDocumentsBottomSheet(context, theme);
+                  },
+                  icon: Icon(
+                    Icons.add,
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
         ),
         BlocBuilder<TaskBloc, TaskState>(
           buildWhen: (TaskState previous, TaskState current) {
             return current.maybeWhen(
               fetchAttachedDocumentsLoading: () => true,
               fetchAttachedDocumentsSuccess: (List<Document> documents) => true,
-              fetchAttachedDocumentsFailure: () => true,
+              fetchAttachedDocumentsFailure: (NetworkExceptions error) => true,
               orElse: () => false,
             );
           },
@@ -592,9 +1027,9 @@ class _TaskScreenState extends State<TaskScreen> {
                 return const CircularProgressIndicator();
               },
               fetchAttachedDocumentsSuccess: (List<Document> documents) {
-                return _buildDocuments(documents, context);
+                return _buildDocuments(documents, context, theme, isGuest);
               },
-              fetchAttachedDocumentsFailure: () {
+              fetchAttachedDocumentsFailure: (NetworkExceptions error) {
                 return const Text('Something went wrong!');
               },
               orElse: () {
@@ -607,13 +1042,196 @@ class _TaskScreenState extends State<TaskScreen> {
     );
   }
 
-  Padding _buildDocuments(List<Document> documents, BuildContext context) {
+  Future<void> _buildDocumentsBottomSheet(
+    BuildContext context,
+    ThemeData theme,
+  ) {
+    return showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (BuildContext ctx) {
+        return BlocConsumer<TaskBloc, TaskState>(
+          bloc: context.read<TaskBloc>()
+            ..add(
+              TaskEvent.fetchProjectDocuments(
+                taskId: int.parse(widget.taskId),
+                projectId: int.parse(widget.projectId),
+              ),
+            ),
+          listener: (BuildContext context, TaskState state) {
+            state.maybeWhen(
+              attachDocumentsSuccess: () {
+                Navigator.pop(ctx);
+              },
+              attachDocumentFailure: (NetworkExceptions error) {
+                pmaAlertDialog(
+                  context: context,
+                  theme: theme,
+                  error:
+                      'Could not attach note successfully. Please try again.',
+                );
+              },
+              orElse: () => null,
+            );
+          },
+          buildWhen: (TaskState previous, TaskState current) {
+            return current.maybeWhen(
+              bottomSheetLoadInProgress: () => true,
+              fetchProjectDocumentsSuccess: (List<Document> documents) => true,
+              fetchProjectDocumentsFailure: (NetworkExceptions error) => true,
+              orElse: () => false,
+            );
+          },
+          builder: (_, TaskState state) {
+            return state.maybeWhen(
+              bottomSheetLoadInProgress: () {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+              fetchProjectDocumentsSuccess: (List<Document> documents) {
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: MediaQuery.of(context).size.height / 3,
+                    maxHeight: MediaQuery.of(context).size.height / 1.2,
+                  ),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                      color: Colors.white,
+                    ),
+                    child: _buildProjectDocuments(documents, theme, context),
+                  ),
+                );
+              },
+              fetchProjectDocumentsFailure: (NetworkExceptions error) {
+                return const Center(
+                  child: Text('Something went wrong.'),
+                );
+              },
+              orElse: () => const SizedBox(),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildProjectDocuments(
+    List<Document> documents,
+    ThemeData theme,
+    BuildContext context,
+  ) {
+    if (documents.isEmpty) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            'No documents to attach.',
+            style: theme.textTheme.bodyMedium,
+          ),
+        ],
+      );
+    }
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        ListView.separated(
+          shrinkWrap: true,
+          itemCount: documents.length,
+          separatorBuilder: (BuildContext context, int index) {
+            return const Divider(height: 1);
+          },
+          itemBuilder: (_, int index) {
+            final Document document = documents[index];
+            return ListTile(
+              title: Text(
+                document.title,
+                style: theme.textTheme.bodyLarge,
+              ),
+              trailing: IconButton(
+                onPressed: () {
+                  context.read<TaskBloc>().add(
+                        TaskEvent.selectDocument(
+                          index: index,
+                          documents: documents,
+                        ),
+                      );
+                },
+                icon: Icon(
+                  Icons.check_circle_outline_outlined,
+                  color: document.isSelected ? Colors.amber : Colors.grey,
+                ),
+              ),
+            );
+          },
+        ),
+        _buildAttachDocumentsButton(
+          context: context,
+          theme: theme,
+          documents: documents,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAttachDocumentsButton({
+    required BuildContext context,
+    required ThemeData theme,
+    required List<Document> documents,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
+      padding: const EdgeInsets.all(32),
+      child: MaterialButton(
+        onPressed: () {
+          context.read<TaskBloc>().add(
+                TaskEvent.attachDocuments(
+                  documents: documents
+                      .where((Document document) => document.isSelected == true)
+                      .toList(),
+                  taskId: int.parse(widget.taskId),
+                ),
+              );
+        },
+        elevation: 8,
+        color: theme.colorScheme.primary,
+        padding: const EdgeInsets.symmetric(
+          horizontal: 32,
+          vertical: 8,
+        ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(8),
+          ),
+        ),
+        child: Text(
+          'Attach',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.background,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDocuments(
+    List<Document> documents,
+    BuildContext context,
+    ThemeData theme,
+    bool isGuest,
+  ) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.all(
+        Radius.circular(16),
       ),
       child: ExpansionPanelList(
+        expandedHeaderPadding: EdgeInsets.zero,
         expansionCallback: (int index, bool isExpanded) {
           final List<Document> updatedNotes = <Document>[];
           for (int i = 0; i < documents.length; i++) {
@@ -631,90 +1249,82 @@ class _TaskScreenState extends State<TaskScreen> {
         },
         children: documents.map<ExpansionPanel>(
           (Document document) {
-            return _buildDocument(document);
+            return _buildDocument(context, theme, document, isGuest);
           },
         ).toList(),
       ),
     );
   }
 
-  ExpansionPanel _buildDocument(Document document) {
+  ExpansionPanel _buildDocument(
+    BuildContext context,
+    ThemeData theme,
+    Document document,
+    bool isGuest,
+  ) {
     return ExpansionPanel(
       headerBuilder: (BuildContext context, bool isExpanded) {
         return ListTile(
-          title: Text(document.title),
+          title: Text(
+            document.title,
+            style: theme.textTheme.bodyMedium,
+          ),
         );
       },
-      body: ListTile(
-        title: Text(document.contentPlainText ?? ''),
-        subtitle: const Text(
-          'To delete this panel, tap the trash can icon',
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          children: <Widget>[
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: theme.colorScheme.outline),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(8),
+                ),
+              ),
+              child: TextEditor(
+                controller: quill.QuillController(
+                  selection:
+                      const TextSelection(baseOffset: 0, extentOffset: 0),
+                  document: quill.Document.fromJson(
+                    document.content ?? <dynamic>[],
+                  ),
+                ),
+                readOnly: true,
+                showCursor: false,
+                minHeight: 200,
+              ),
+            ),
+            if (isGuest) const SizedBox(height: 8),
+            if (!isGuest)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    context.read<TaskBloc>().add(
+                          TaskEvent.removeAttachedDocument(
+                            attachDocument: AttachDocument(
+                              taskId: int.parse(widget.taskId),
+                              documentId: document.id,
+                            ),
+                          ),
+                        );
+                  },
+                  child: Text(
+                    'Remove',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
-        trailing: const Icon(Icons.delete),
-        onTap: () {},
       ),
       isExpanded: document.isExpanded,
     );
   }
 
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Task successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _showDeleteTaskConfirmDialog({
     required BuildContext context,

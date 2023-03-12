@@ -6,10 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/milestone.dart';
+import 'package:pma/models/roadmap.dart';
 import 'package:pma/module/milestones/bloc/milestones_bloc.dart';
 import 'package:pma/module/milestones/milestones_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class MilestonesScreen extends StatefulWidget {
@@ -37,99 +39,140 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
           httpClient: context.read<HttpClientConfig>(),
         ),
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Milestones'),
-        ),
-        floatingActionButton: _buildFloatingActionButton(
-          context: context,
-          theme: theme,
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        body: SafeArea(
-          child: BlocConsumer<MilestonesBloc, MilestonesState>(
-            listener: (BuildContext context, MilestonesState state) {
-              state.maybeWhen(
-                fetchMilestoneFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
-                    context: context,
-                    theme: theme,
-                    error:
-                        'Could not fetch milestones successfully. Please try again.',
-                  );
-                },
-                orElse: () => null,
+      child: BlocConsumer<MilestonesBloc, MilestonesState>(
+        listener: (BuildContext context, MilestonesState state) {
+          state.maybeWhen(
+            fetchMilestoneFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not fetch milestones successfully. Please try again.',
               );
             },
-            builder: (BuildContext context, MilestonesState state) {
-              return state.maybeWhen(
-                initial: () {
-                  context.read<MilestonesBloc>().add(
-                        MilestonesEvent.fetchMilestones(
-                          projectId: int.parse(widget.projectId),
-                        ),
-                      );
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                },
-                loadInProgress: () {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                },
-                fetchMilestoneSuccess: (List<Milestone> milestones) {
-                  if (milestones.isEmpty) {
-                    return const Center(
-                      child: Text('No milestones added yet.'),
-                    );
-                  }
-                  return Stepper(
-                    currentStep: _index,
-                    onStepTapped: (int index) {
-                      setState(() {
-                        _index = index;
-                      });
-                    },
-                    controlsBuilder:
-                        (BuildContext context, ControlsDetails details) {
-                      return Row(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: ElevatedButton(
-                              onPressed: () {
-                                context.goNamed(
-                                  RouteConstants.editMilestone,
-                                  params: <String, String>{
-                                    'projectId': widget.projectId,
-                                    'milestoneId': milestones[details.stepIndex]
-                                        .id
-                                        .toString(),
-                                  },
-                                );
-                              },
-                              child: const Text('Edit'),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                    steps: _buildSteps(
-                      theme: theme,
-                      milestones: milestones,
+            orElse: () => null,
+          );
+        },
+        builder: (BuildContext context, MilestonesState state) {
+          return state.maybeWhen(
+            initial: () {
+              context.read<MilestonesBloc>().add(
+                    MilestonesEvent.fetchMilestones(
+                      projectId: int.parse(widget.projectId),
                     ),
                   );
-                },
-                fetchMilestoneFailure: (NetworkExceptions error) {
-                  return const Center(
-                      child: Text('Something went wrong! Please try again.'));
-                },
-                orElse: () => const SizedBox(),
+              return const Scaffold(
+                body: SafeArea(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
               );
             },
-          ),
-        ),
+            loadInProgress: () {
+              return const Scaffold(
+                body: SafeArea(
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              );
+            },
+            fetchMilestoneSuccess: (Roadmap roadmap) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text('Milestones'),
+                ),
+                floatingActionButton:
+                    roadmap.currentUserRole == MemberRole.guest.index + 1
+                        ? null
+                        : _buildFloatingActionButton(
+                            context: context,
+                            theme: theme,
+                          ),
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.centerDocked,
+                body: SafeArea(
+                  child: roadmap.milestones.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No milestones added yet.',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        )
+                      : Stepper(
+                          currentStep: _index,
+                          onStepTapped: (int index) {
+                            setState(() {
+                              _index = index;
+                            });
+                          },
+                          controlsBuilder:
+                              (BuildContext context, ControlsDetails details) {
+                            if (roadmap.currentUserRole ==
+                                MemberRole.guest.index + 1) {
+                              return const SizedBox();
+                            }
+                            return Row(
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      final List<Milestone> roadmapMilestones =
+                                          List<Milestone>.from(
+                                              roadmap.milestones);
+                                      roadmapMilestones.sort(
+                                        (Milestone a, Milestone b) => a
+                                            .completionDate
+                                            .compareTo(b.completionDate),
+                                      );
+                                      context.goNamed(
+                                        RouteConstants.editMilestone,
+                                        params: <String, String>{
+                                          'projectId': widget.projectId,
+                                          'milestoneId': roadmapMilestones[
+                                                  details.stepIndex]
+                                              .id
+                                              .toString(),
+                                        },
+                                      );
+                                    },
+                                    child: Text(
+                                      'Edit',
+                                      style:
+                                          theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.background,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                          steps: _buildSteps(
+                            theme: theme,
+                            milestones: roadmap.milestones,
+                          ),
+                        ),
+                ),
+              );
+            },
+            fetchMilestoneFailure: (NetworkExceptions error) {
+              return Scaffold(
+                body: SafeArea(
+                  child: Center(
+                    child: Text(
+                      'Something went wrong! Please try again.',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ),
+              );
+            },
+            orElse: () => const SizedBox(),
+          );
+        },
       ),
     );
   }
@@ -147,7 +190,10 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
           },
         );
       },
-      child: const Icon(Icons.add),
+      child: Icon(
+        Icons.add,
+        color: theme.colorScheme.primary,
+      ),
     );
   }
 
@@ -155,8 +201,13 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
     required ThemeData theme,
     required List<Milestone> milestones,
   }) {
+    final List<Milestone> roadmapMilestones = List<Milestone>.from(milestones);
+    roadmapMilestones.sort(
+      (Milestone a, Milestone b) =>
+          a.completionDate.compareTo(b.completionDate),
+    );
     final List<Step> steps = <Step>[];
-    for (final Milestone milestone in milestones) {
+    for (final Milestone milestone in roadmapMilestones) {
       final quill.QuillController controller = quill.QuillController.basic();
       if (milestone.description != null) {
         controller.document =
@@ -165,9 +216,22 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
       steps.add(
         Step(
           isActive: true,
-          state: milestone.isCompleted ? StepState.complete : StepState.indexed,
-          title: Text(milestone.title),
-          subtitle: Text(_dateTime(milestone.completionDate)),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                milestone.title,
+              ),
+              if (milestone.isCompleted)
+                Icon(
+                  Icons.done_rounded,
+                  color: theme.colorScheme.outline,
+                )
+            ],
+          ),
+          subtitle: Text(
+            _dateTime(milestone.completionDate),
+          ),
           content: Container(
             decoration: BoxDecoration(
               border: Border.all(color: theme.colorScheme.outline),
@@ -193,39 +257,4 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
         datetime.timeZoneName;
   }
 
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

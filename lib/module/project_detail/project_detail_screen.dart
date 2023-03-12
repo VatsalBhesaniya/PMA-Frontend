@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,9 +13,10 @@ import 'package:pma/module/project_detail/bloc/project_detail_bloc.dart';
 import 'package:pma/module/project_detail/project_detail_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
-import 'package:pma/widgets/floating_action_button_animator.dart';
 import 'package:pma/widgets/floating_action_button_extended.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   const ProjectDetailScreen({
@@ -45,7 +47,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         listener: (BuildContext context, ProjectDetailState state) {
           state.maybeWhen(
             fetchProjectDetailFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -60,7 +62,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   );
             },
             removeMemberFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -70,12 +72,18 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             deleteProjectSuccess: () {
               context.pop();
               context.pop();
-              _showSnackBar(context: context, theme: theme);
-            },
-            deleteProjectFailure: (NetworkExceptions error) {
-              _buildDeleteProjectFailureAlert(
+              showSnackBar(
                 context: context,
                 theme: theme,
+                message: 'Project successfully deleted',
+              );
+            },
+            deleteProjectFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not delete project successfully. Please try again.',
               );
             },
             orElse: () => null,
@@ -113,13 +121,22 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               );
             },
             fetchProjectDetailSuccess: (ProjectDetail projectDetail) {
+              final User currentUser = context.read<User>();
+              final Member owner = projectDetail.members
+                  .where((Member member) =>
+                      member.role == MemberRole.owner.index + 1)
+                  .first;
+              final bool isOwner = currentUser.id == owner.userId;
+              final Member? member = projectDetail.members.firstWhereOrNull(
+                  (Member member) => member.role == MemberRole.guest.index + 1);
+              final bool isGuest =
+                  member == null || currentUser.id == member.userId;
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Project Detail'),
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
-                floatingActionButtonAnimator: NoScalingAnimation(),
                 floatingActionButton: FloatingActionButtonExtended(
                   onPressed: () {
                     _showDeleteProjectConfirmDialog(
@@ -130,6 +147,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                   },
                   backgroundColor: theme.colorScheme.error,
                   labelText: 'Delete Project',
+                  labelStyle: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.background,
+                  ),
                 ),
                 body: SafeArea(
                   child: SingleChildScrollView(
@@ -142,10 +162,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                             context: context,
                             theme: theme,
                             projectDetail: projectDetail,
+                            isOwner: isOwner,
                           ),
                           const SizedBox(height: 16),
                           Text(_dateTime(projectDetail.createdAt)),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
+                          const Divider(),
+                          const SizedBox(height: 10),
                           GestureDetector(
                             onTap: () {
                               context.goNamed(
@@ -153,21 +176,32 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                                 params: <String, String>{
                                   'projectId': widget.projectId,
                                 },
+                                extra: isGuest,
                               );
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const <Widget>[
-                                Text('Milestones'),
-                                Icon(Icons.chevron_right_rounded),
+                              children: <Widget>[
+                                Text(
+                                  'Milestones',
+                                  style: theme.textTheme.bodyLarge,
+                                ),
+                                Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: theme.colorScheme.outline,
+                                ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
+                          const Divider(),
+                          const SizedBox(height: 10),
                           _buildMembers(
                             context: context,
                             theme: theme,
                             projectDetail: projectDetail,
+                            owner: owner,
+                            isOwner: isOwner,
                           ),
                           const SizedBox(height: 48),
                         ],
@@ -243,12 +277,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     required BuildContext context,
     required ThemeData theme,
     required ProjectDetail projectDetail,
+    required bool isOwner,
   }) {
     return Row(
       children: <Widget>[
         Expanded(
           child: InputField(
-            onChanged: (String value) {},
             controller: _projectTitleController..text = projectDetail.title,
             isEnabled: projectDetail.isEdit,
             hintText: 'Title',
@@ -267,12 +301,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
             },
           ),
         ),
-        const SizedBox(width: 16),
-        _buildActionButton(
-          context: context,
-          theme: theme,
-          projectDetail: projectDetail,
-        ),
+        if (isOwner) const SizedBox(width: 16),
+        if (isOwner)
+          _buildActionButton(
+            context: context,
+            theme: theme,
+            projectDetail: projectDetail,
+          ),
       ],
     );
   }
@@ -281,12 +316,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     required BuildContext context,
     required ThemeData theme,
     required ProjectDetail projectDetail,
+    required Member owner,
+    required bool isOwner,
   }) {
-    final User currentUser = context.read<User>();
-    final Member owner = projectDetail.members
-        .where((Member member) => member.role == MemberRole.owner.index + 1)
-        .first;
-    final bool isOwner = currentUser.id == owner.userId;
     return Column(
       children: <Widget>[
         _buildMembersTitle(
@@ -298,6 +330,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           context: context,
           theme: theme,
           projectDetail: projectDetail,
+          owner: owner,
           isOwner: isOwner,
         ),
       ],
@@ -316,9 +349,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           padding: const EdgeInsets.only(bottom: 6),
           child: Text(
             'Members',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.primary,
-            ),
+            style: theme.textTheme.bodyLarge,
           ),
         ),
         if (isOwner)
@@ -342,22 +373,112 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     required BuildContext context,
     required ThemeData theme,
     required ProjectDetail projectDetail,
+    required Member owner,
     required bool isOwner,
   }) {
-    return ListView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      separatorBuilder: (BuildContext context, int index) {
+        return const Divider(
+          height: 1,
+          indent: 16,
+          endIndent: 20,
+        );
+      },
       itemCount: projectDetail.members.length,
       itemBuilder: (BuildContext context, int index) {
         final Member member = projectDetail.members[index];
         return ListTile(
-          leading: const CircleAvatar(
-            child: Icon(Icons.person_outline_rounded),
+          leading: CircleAvatar(
+            backgroundColor: theme.colorScheme.outline,
+            child: Icon(
+              Icons.person_outline_rounded,
+              color: theme.colorScheme.background,
+            ),
           ),
-          title: Text(member.user.username),
-          subtitle: Text(MemberRole.values[member.role - 1].title),
-          trailing: isOwner && member.role != 1
-              ? IconButton(
+          title: Text(
+            member.user.username,
+            style: theme.textTheme.titleMedium,
+          ),
+          subtitle: !isOwner || owner.userId == member.userId
+              ? Text(MemberRole.values[member.role - 1].title)
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.outline,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                      ),
+                      child: DropdownButton<MemberRole>(
+                        isDense: true,
+                        dropdownColor: theme.colorScheme.outline,
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                        value: MemberRole.values[member.role - 1],
+                        onChanged: (MemberRole? value) {
+                          final MemberRole? role = value;
+                          if (role != null) {
+                            final List<Member> updatedMembers = <Member>[];
+                            for (Member projectMember
+                                in projectDetail.members) {
+                              if (projectMember.userId == member.userId) {
+                                projectMember = projectMember.copyWith(
+                                  role: role.index + 1,
+                                );
+                              }
+                              updatedMembers.add(projectMember);
+                            }
+                            context.read<ProjectDetailBloc>().add(
+                                  ProjectDetailEvent.updateProjectDetail(
+                                    projectDetail: projectDetail.copyWith(
+                                      members: updatedMembers,
+                                    ),
+                                  ),
+                                );
+                          }
+                        },
+                        items: <DropdownMenuItem<MemberRole>>[
+                          DropdownMenuItem<MemberRole>(
+                            value: MemberRole.admin,
+                            child: Text(
+                              MemberRole.admin.title,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.background,
+                              ),
+                            ),
+                          ),
+                          DropdownMenuItem<MemberRole>(
+                            value: MemberRole.member,
+                            child: Text(
+                              MemberRole.member.title,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.background,
+                              ),
+                            ),
+                          ),
+                          DropdownMenuItem<MemberRole>(
+                            value: MemberRole.guest,
+                            child: Text(
+                              MemberRole.guest.title,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.background,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+          trailing: !isOwner || member.role == 1
+              ? null
+              : IconButton(
                   onPressed: () {
                     context.read<ProjectDetailBloc>().add(
                           ProjectDetailEvent.removeMember(
@@ -370,8 +491,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                     Icons.cancel_rounded,
                     color: theme.colorScheme.error,
                   ),
-                )
-              : null,
+                ),
         );
       },
     );
@@ -427,99 +547,4 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     );
   }
 
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Project successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildDeleteProjectFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not delete a project successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

@@ -5,7 +5,6 @@ import 'package:pma/module/assign_task/assign_task_screen.dart';
 import 'package:pma/module/create_document/create_document_screen.dart';
 import 'package:pma/module/create_milestone/create_milestone_screen.dart';
 import 'package:pma/module/create_note/create_note_screen.dart';
-import 'package:pma/module/create_project/create_project_screen.dart';
 import 'package:pma/module/create_task/create_task_screen.dart';
 import 'package:pma/module/document/document_screen.dart';
 import 'package:pma/module/edit_milestone/edit_milestone_screen.dart';
@@ -20,6 +19,7 @@ import 'package:pma/module/project_detail/project_detail_screen.dart';
 import 'package:pma/module/settings/settings_screen.dart';
 import 'package:pma/module/signup/signup_screen.dart';
 import 'package:pma/module/task/task_screen.dart';
+import 'package:pma/module/update_password/update_password_screen.dart';
 
 // GoRouter configuration
 // The route configuration for the app.
@@ -34,6 +34,12 @@ final GoRouter router = GoRouter(
       builder: (BuildContext context, GoRouterState state) =>
           const LoginScreen(),
       routes: <RouteBase>[
+        GoRoute(
+          path: RouteConstants.updatePassword,
+          name: RouteConstants.updatePassword,
+          builder: (BuildContext context, GoRouterState state) =>
+              const UpdatePasswordScreen(),
+        ),
         GoRoute(
           path: RouteConstants.signup,
           name: RouteConstants.signup,
@@ -55,13 +61,15 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) {
             return const SettingsScreen();
           },
-        ),
-        GoRoute(
-          path: RouteConstants.profile,
-          name: RouteConstants.profile,
-          builder: (BuildContext context, GoRouterState state) {
-            return const ProfileScreen();
-          },
+          routes: <RouteBase>[
+            GoRoute(
+              path: RouteConstants.profile,
+              name: RouteConstants.profile,
+              builder: (BuildContext context, GoRouterState state) {
+                return const ProfileScreen();
+              },
+            ),
+          ],
         ),
         GoRoute(
           path: '${RouteConstants.project}/:projectId',
@@ -122,26 +130,27 @@ final GoRouter router = GoRouter(
               ],
             ),
             GoRoute(
-                path: '${RouteConstants.task}/:taskId',
-                name: RouteConstants.task,
-                builder: (BuildContext context, GoRouterState state) {
-                  return TaskScreen(
-                    projectId: state.params['projectId']!,
-                    taskId: state.params['taskId']!,
-                  );
-                },
-                routes: <RouteBase>[
-                  GoRoute(
-                    path: RouteConstants.assignMembers,
-                    name: RouteConstants.assignMembers,
-                    builder: (BuildContext context, GoRouterState state) {
-                      return AssignTaskScreen(
-                        taskId: state.params['taskId']!,
-                        projectId: state.params['projectId']!,
-                      );
-                    },
-                  ),
-                ]),
+              path: '${RouteConstants.task}/:taskId',
+              name: RouteConstants.task,
+              builder: (BuildContext context, GoRouterState state) {
+                return TaskScreen(
+                  projectId: state.params['projectId']!,
+                  taskId: state.params['taskId']!,
+                );
+              },
+              routes: <RouteBase>[
+                GoRoute(
+                  path: RouteConstants.assignTask,
+                  name: RouteConstants.assignTask,
+                  builder: (BuildContext context, GoRouterState state) {
+                    return AssignTaskScreen(
+                      taskId: state.params['taskId']!,
+                      projectId: state.params['projectId']!,
+                    );
+                  },
+                ),
+              ],
+            ),
             GoRoute(
               path: RouteConstants.createTask,
               name: RouteConstants.createTask,
@@ -151,46 +160,45 @@ final GoRouter router = GoRouter(
                 );
               },
             ),
+            GoRoute(
+              path: '${RouteConstants.note}/:id',
+              name: RouteConstants.note,
+              builder: (BuildContext context, GoRouterState state) {
+                return NoteScreen(
+                  projectId: state.params['projectId']!,
+                  noteId: state.params['id']!,
+                );
+              },
+            ),
+            GoRoute(
+              path: RouteConstants.createNote,
+              name: RouteConstants.createNote,
+              builder: (BuildContext context, GoRouterState state) {
+                return CreateNoteScreen(
+                  projectId: state.params['projectId']!,
+                );
+              },
+            ),
+            GoRoute(
+              path: '${RouteConstants.document}/:id',
+              name: RouteConstants.document,
+              builder: (BuildContext context, GoRouterState state) {
+                return DocumentScreen(
+                  projectId: state.params['projectId']!,
+                  documentId: state.params['id']!,
+                );
+              },
+            ),
+            GoRoute(
+              path: RouteConstants.createDocument,
+              name: RouteConstants.createDocument,
+              builder: (BuildContext context, GoRouterState state) {
+                return CreateDocumentScreen(
+                  projectId: state.params['projectId']!,
+                );
+              },
+            ),
           ],
-        ),
-        GoRoute(
-          path: RouteConstants.createProject,
-          name: RouteConstants.createProject,
-          builder: (BuildContext context, GoRouterState state) {
-            return const CreateProjectScreen();
-          },
-        ),
-        GoRoute(
-          path: '${RouteConstants.note}/:id',
-          name: RouteConstants.note,
-          builder: (BuildContext context, GoRouterState state) {
-            return NoteScreen(
-              noteId: state.params['id']!,
-            );
-          },
-        ),
-        GoRoute(
-          path: RouteConstants.createNote,
-          name: RouteConstants.createNote,
-          builder: (BuildContext context, GoRouterState state) {
-            return const CreateNoteScreen();
-          },
-        ),
-        GoRoute(
-          path: '${RouteConstants.document}/:id',
-          name: RouteConstants.document,
-          builder: (BuildContext context, GoRouterState state) {
-            return DocumentScreen(
-              documentId: state.params['id']!,
-            );
-          },
-        ),
-        GoRoute(
-          path: RouteConstants.createDocument,
-          name: RouteConstants.createDocument,
-          builder: (BuildContext context, GoRouterState state) {
-            return const CreateDocumentScreen();
-          },
         ),
       ],
     ),

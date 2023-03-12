@@ -9,6 +9,8 @@ import 'package:pma/module/create_task/create_task_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class CreateTaskScreen extends StatefulWidget {
@@ -46,17 +48,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             listener: (BuildContext context, CreateTaskState state) {
               state.maybeWhen(
                 createTaskSuccess: (int taskId) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Task successfully created.'),
-                    ),
+                  showSnackBar(
+                    context: context,
+                    theme: theme,
+                    message: 'Task successfully created.',
                   );
                   context.pop();
                 },
                 createTaskFailure: (NetworkExceptions error) {
-                  _buildCreateTaskFailureAlert(
+                  pmaAlertDialog(
                     context: context,
                     theme: theme,
+                    error:
+                        'Could not create task successfully. Please try again.',
                   );
                 },
                 orElse: () => null,
@@ -80,46 +84,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       key: _formKey,
                       child: Column(
                         children: <Widget>[
-                          InputField(
-                            onChanged: (String value) {},
-                            controller: _taskTitleController,
-                            hintText: 'Title',
-                            borderType:
-                                InputFieldBorderType.underlineInputBorder,
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter title';
-                              }
-                              return null;
-                            },
-                          ),
+                          _buildTitle(),
                           const SizedBox(height: 16),
                           _buildDescription(theme: theme),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                context.read<CreateTaskBloc>().add(
-                                      CreateTaskEvent.createTask(
-                                        task: CreateTask(
-                                          projectId:
-                                              int.parse(widget.projectId),
-                                          title:
-                                              _taskTitleController.text.trim(),
-                                          description: _contentController
-                                              .document
-                                              .toDelta()
-                                              .toJson(),
-                                          descriptionPlainText:
-                                              _contentController.document
-                                                  .toPlainText(),
-                                        ),
-                                      ),
-                                    );
-                              }
-                            },
-                            child: const Text('Create'),
+                          const SizedBox(height: 32),
+                          _buildCreateButton(
+                            context: context,
+                            theme: theme,
                           ),
+                          const SizedBox(height: 32),
                         ],
                       ),
                     ),
@@ -134,11 +107,26 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     );
   }
 
+  InputField _buildTitle() {
+    return InputField(
+      controller: _taskTitleController,
+      hintText: 'Title',
+      borderType: InputFieldBorderType.underlineInputBorder,
+      validator: (String? value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Please enter title';
+        }
+        return null;
+      },
+    );
+  }
+
   Widget _buildDescription({
     required ThemeData theme,
   }) {
     return Container(
       decoration: BoxDecoration(
+        color: theme.colorScheme.onPrimary,
         border: Border.all(color: theme.colorScheme.outline),
         borderRadius: const BorderRadius.all(
           Radius.circular(8),
@@ -150,40 +138,39 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     );
   }
 
-  void _buildCreateTaskFailureAlert({
+  ElevatedButton _buildCreateButton({
     required BuildContext context,
     required ThemeData theme,
   }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Someth ing went wrong!. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
+    return ElevatedButton(
+      onPressed: () {
+        _onCreate(context);
       },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'Create',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.background,
+          ),
+        ),
+      ),
     );
   }
+
+  void _onCreate(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      context.read<CreateTaskBloc>().add(
+            CreateTaskEvent.createTask(
+              task: CreateTask(
+                projectId: int.parse(widget.projectId),
+                title: _taskTitleController.text.trim(),
+                description: _contentController.document.toDelta().toJson(),
+                descriptionPlainText: _contentController.document.toPlainText(),
+              ),
+            ),
+          );
+    }
+  }
+
 }

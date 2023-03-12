@@ -8,6 +8,7 @@ import 'package:pma/module/invite_members/invite_members_repository.dart';
 import 'package:pma/module/select_users/select_users_screen.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class InviteMembersScreen extends StatefulWidget {
   const InviteMembersScreen({
@@ -26,6 +27,9 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Members'),
+      ),
       body: SafeArea(
         child: BlocProvider<InviteMembersBloc>(
           create: (BuildContext context) => InviteMembersBloc(
@@ -41,7 +45,7 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
                   context.pop();
                 },
                 inviteMembersFailure: (NetworkExceptions error) {
-                  _buildApiFailureAlert(
+                  pmaAlertDialog(
                     context: context,
                     theme: theme,
                     error:
@@ -66,6 +70,7 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
                     children: <Widget>[
                       Expanded(
                         child: SelectUsersScreen(
+                          projectId: int.parse(widget.projectId),
                           buttonText: 'Invite',
                           onSelectUsers: (List<SearchUser> users) {
                             context.read<InviteMembersBloc>().add(
@@ -94,42 +99,6 @@ class _InviteMembersScreenState extends State<InviteMembersScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

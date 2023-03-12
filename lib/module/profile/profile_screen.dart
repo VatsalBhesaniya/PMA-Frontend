@@ -12,6 +12,7 @@ import 'package:pma/module/profile/profile_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -43,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         listener: (BuildContext context, ProfileState state) {
           state.maybeWhen(
             fetchUserFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -58,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
             },
             updateUserFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -69,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context.goNamed(RouteConstants.login);
             },
             deleteUserFailure: (NetworkExceptions error) {
-              _buildApiFailureAlert(
+              pmaAlertDialog(
                 context: context,
                 theme: theme,
                 error:
@@ -139,9 +140,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
             fetchUserFailure: (NetworkExceptions error) {
-              return const Scaffold(
+              return Scaffold(
                 body: Center(
-                  child: Text('Something went wrong.'),
+                  child: Text(
+                    'Something went wrong.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 ),
               );
             },
@@ -291,7 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          _buildUpdateButton(
+          _buildSaveButton(
             context: context,
             theme: theme,
             user: user,
@@ -313,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Widget _buildUpdateButton({
+  Widget _buildSaveButton({
     required BuildContext context,
     required ThemeData theme,
     required User user,
@@ -335,7 +339,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
           }
         },
-        child: const Text('Save'),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Save',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.background,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -356,7 +368,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               );
         },
-        child: const Text('Cancel'),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Cancel',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.background,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -409,54 +429,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             title,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onBackground,
+              color: theme.colorScheme.primary,
             ),
           ),
           Text(
             value,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
+            style: theme.textTheme.bodyLarge,
           ),
           const Divider(),
         ],
       ),
-    );
-  }
-
-  void _buildApiFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-    required String error,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: Text(error),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

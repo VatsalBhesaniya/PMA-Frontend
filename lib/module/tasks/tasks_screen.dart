@@ -7,14 +7,18 @@ import 'package:pma/models/task.dart';
 import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({
     required this.projectId,
+    required this.currentUserRole,
     super.key,
   });
 
   final String projectId;
+  final int currentUserRole;
 
   @override
   State<TasksScreen> createState() => _TasksScreenState();
@@ -33,12 +37,17 @@ class _TasksScreenState extends State<TasksScreen> {
                     projectId: int.parse(widget.projectId),
                   ),
                 );
-            _showSnackBar(context: context, theme: theme);
-          },
-          deleteTaskFailure: (NetworkExceptions error) {
-            _buildDeleteTaskFailureAlert(
+            showSnackBar(
               context: context,
               theme: theme,
+              message: 'Task successfully deleted',
+            );
+          },
+          deleteTaskFailure: (NetworkExceptions error) {
+            pmaAlertDialog(
+              context: context,
+              theme: theme,
+              error: 'Could not delete task successfully. Please try again.',
             );
           },
           orElse: () => null,
@@ -71,7 +80,14 @@ class _TasksScreenState extends State<TasksScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(TaskStatus.todo.title),
+                    Text(
+                      TaskStatus.todo.title,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: theme.colorScheme.primary,
+                    ),
                     _buildTasks(
                       context: context,
                       tasks: tasks
@@ -80,7 +96,14 @@ class _TasksScreenState extends State<TasksScreen> {
                           .toList(),
                       theme: theme,
                     ),
-                    Text(TaskStatus.inProgress.title),
+                    Text(
+                      TaskStatus.inProgress.title,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: theme.colorScheme.primary,
+                    ),
                     _buildTasks(
                       context: context,
                       tasks: tasks
@@ -89,7 +112,14 @@ class _TasksScreenState extends State<TasksScreen> {
                           .toList(),
                       theme: theme,
                     ),
-                    Text(TaskStatus.completed.title),
+                    Text(
+                      TaskStatus.completed.title,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: theme.colorScheme.primary,
+                    ),
                     _buildTasks(
                       context: context,
                       tasks: tasks
@@ -98,7 +128,14 @@ class _TasksScreenState extends State<TasksScreen> {
                           .toList(),
                       theme: theme,
                     ),
-                    Text(TaskStatus.qa.title),
+                    Text(
+                      TaskStatus.qa.title,
+                      style: theme.textTheme.bodyLarge,
+                    ),
+                    Divider(
+                      thickness: 1,
+                      color: theme.colorScheme.primary,
+                    ),
                     _buildTasks(
                       context: context,
                       tasks: tasks
@@ -128,9 +165,19 @@ class _TasksScreenState extends State<TasksScreen> {
     required List<Task> tasks,
     required ThemeData theme,
   }) {
-    return ListView.builder(
+    tasks.sort(
+      (Task a, Task b) => b.createdAt.compareTo(a.createdAt),
+    );
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      separatorBuilder: (BuildContext context, int index) {
+        return const Divider(
+          height: 1,
+          indent: 16,
+          endIndent: 20,
+        );
+      },
       itemCount: tasks.length,
       itemBuilder: (BuildContext context, int index) {
         final Task task = tasks[index];
@@ -144,79 +191,25 @@ class _TasksScreenState extends State<TasksScreen> {
               },
             );
           },
-          title: Text(task.title),
-          trailing: IconButton(
-            onPressed: () {
-              _showDeleteTaskConfirmDialog(
-                context: context,
-                theme: theme,
-                taskId: task.id,
-              );
-            },
-            icon: const Icon(
-              Icons.delete_rounded,
-            ),
+          title: Text(
+            task.title,
+            style: theme.textTheme.bodyMedium,
           ),
-        );
-      },
-    );
-  }
-
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Task successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildDeleteTaskFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not delete a task successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
+          trailing: widget.currentUserRole == MemberRole.guest.index + 1
+              ? null
+              : IconButton(
+                  onPressed: () {
+                    _showDeleteTaskConfirmDialog(
+                      context: context,
+                      theme: theme,
+                      taskId: task.id,
+                    );
+                  },
+                  color: theme.colorScheme.onError,
+                  icon: const Icon(
+                    Icons.delete_rounded,
                   ),
                 ),
-              ),
-            ),
-          ],
         );
       },
     );
@@ -253,7 +246,7 @@ class _TasksScreenState extends State<TasksScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -262,7 +255,7 @@ class _TasksScreenState extends State<TasksScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),

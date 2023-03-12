@@ -10,21 +10,31 @@ class DocumentsRepository {
   });
   final DioClient dioClient;
 
-  Future<ApiResult<List<Document>?>> fetchDocuments() async {
+  Future<ApiResult<List<Document>>> fetchDocuments({
+    required int projectId,
+  }) async {
     try {
       final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: documentsEndpoint,
+        url: '$projectDocumentsEndpoint/$projectId',
         httpMethod: HttpMethod.get,
       );
-      final List<Document>? documents = data
-          ?.map((dynamic document) =>
+      if (data == null) {
+        return const ApiResult<List<Document>>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+      final List<Document> documents = data
+          .map((dynamic document) =>
               Document.fromJson(document as Map<String, dynamic>))
           .toList();
-      return ApiResult<List<Document>?>.success(
+      documents.sort(
+        (Document a, Document b) => b.createdAt.compareTo(a.createdAt),
+      );
+      return ApiResult<List<Document>>.success(
         data: documents,
       );
     } on Exception catch (e) {
-      return ApiResult<List<Document>?>.failure(
+      return ApiResult<List<Document>>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

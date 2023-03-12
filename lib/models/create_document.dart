@@ -9,6 +9,7 @@ part 'create_document.g.dart';
 class CreateDocument with _$CreateDocument {
   @JsonSerializable(explicitToJson: true)
   factory CreateDocument({
+    @JsonKey(name: 'project_id') required int projectId,
     @JsonKey() required String title,
     @JsonKey() List<dynamic>? content,
     @JsonKey(name: 'content_plain_text') String? contentPlainText,

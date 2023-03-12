@@ -16,6 +16,7 @@ class ProjectDetail with _$ProjectDetail {
     @JsonKey(name: 'created_at') required String createdAt,
     @JsonKey() required List<Member> members,
     @JsonKey(ignore: true) @Default(false) bool isEdit,
+    @JsonKey(name: 'current_user_role') @Default(4) int currentUserRole,
   }) = _ProjectDetail;
 
   factory ProjectDetail.fromJson(Map<String, dynamic> json) =>

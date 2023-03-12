@@ -5,18 +5,24 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/document.dart';
+import 'package:pma/models/user.dart';
 import 'package:pma/module/document/bloc/document_bloc.dart';
 import 'package:pma/module/document/document_repository.dart';
 import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 import 'package:pma/widgets/text_editor.dart';
 
 class DocumentScreen extends StatefulWidget {
   const DocumentScreen({
+    required this.projectId,
     required this.documentId,
     super.key,
   });
 
+  final String projectId;
   final String documentId;
 
   @override
@@ -25,6 +31,8 @@ class DocumentScreen extends StatefulWidget {
 
 class _DocumentScreenState extends State<DocumentScreen> {
   final quill.QuillController _controller = quill.QuillController.basic();
+  final TextEditingController _documentTitleController =
+      TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,16 +48,27 @@ class _DocumentScreenState extends State<DocumentScreen> {
         listener: (BuildContext context, DocumentState state) {
           state.maybeWhen(
             updateDocumentFailure: () async {
-              _showUpdateDocumentFailureAlert(context, theme);
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not update document successfully. Please try again.',
+              );
             },
             deleteDocumentSuccess: () {
               context.pop();
-              _showSnackBar(context: context, theme: theme);
-            },
-            deleteDocumentFailure: (NetworkExceptions error) {
-              _buildDeleteDocumentFailureAlert(
+              showSnackBar(
                 context: context,
                 theme: theme,
+                message: 'Document successfully deleted',
+              );
+            },
+            deleteDocumentFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not delete document successfully. Please try again.',
               );
             },
             orElse: () => null,
@@ -92,13 +111,16 @@ class _DocumentScreenState extends State<DocumentScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Document Detail'),
-                  actions: <Widget>[
-                    _buildActionButton(
-                      context: context,
-                      theme: theme,
-                      document: document,
-                    ),
-                  ],
+                  actions:
+                      document.currentUserRole == MemberRole.guest.index + 1
+                          ? null
+                          : <Widget>[
+                              _buildActionButton(
+                                context: context,
+                                theme: theme,
+                                document: document,
+                              ),
+                            ],
                 ),
                 body: SafeArea(
                   child: SingleChildScrollView(
@@ -107,16 +129,31 @@ class _DocumentScreenState extends State<DocumentScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Text(
-                            document.title,
-                            style: theme.textTheme.headlineSmall,
+                          InputField(
+                            controller: _documentTitleController
+                              ..text = document.title,
+                            isEnabled: document.isEdit,
+                            hintText: 'Title',
+                            borderType: document.isEdit
+                                ? InputFieldBorderType.underlineInputBorder
+                                : InputFieldBorderType.none,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                            ),
+                            horizontalContentPadding: 0,
+                            validator: (String? value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter title';
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 16),
                           _buildDescription(
                             theme: theme,
                             isEdit: document.isEdit,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 32),
                           _buildInfoItem(
                             theme: theme,
                             title: 'Created At',
@@ -130,7 +167,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
                           const SizedBox(height: 16),
                           _buildLastUpdatedBy(
                             theme: theme,
-                            lastUpdatedBy: document.lastUpdatedBy,
+                            lastUpdatedByUser: document.lastUpdatedByUser,
                           ),
                         ],
                       ),
@@ -151,85 +188,54 @@ class _DocumentScreenState extends State<DocumentScreen> {
     );
   }
 
-  Future<String?> _showUpdateDocumentFailureAlert(
-      BuildContext context, ThemeData theme) {
-    return showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Someth ing went wrong!. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildActionButton({
     required BuildContext context,
     required ThemeData theme,
     required Document document,
   }) {
     if (document.isEdit) {
-      return Row(
-        children: <Widget>[
-          TextButton(
-            onPressed: () {
-              context.read<DocumentBloc>().add(
-                    DocumentEvent.updateDocument(
-                      document: document.copyWith(
-                        content: _controller.document.toDelta().toJson(),
-                        contentPlainText: _controller.document.toPlainText(),
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: <Widget>[
+            TextButton(
+              onPressed: () {
+                context.read<DocumentBloc>().add(
+                      DocumentEvent.updateDocument(
+                        document: document.copyWith(
+                          title: _documentTitleController.text.trim(),
+                          content: _controller.document.toDelta().toJson(),
+                          contentPlainText: _controller.document.toPlainText(),
+                        ),
                       ),
-                    ),
-                  );
-            },
-            child: const Text(
-              'Save',
-              style: TextStyle(
-                color: Colors.lime,
+                    );
+              },
+              child: Text(
+                'Save',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primaryContainer,
+                ),
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              context.read<DocumentBloc>().add(
-                    DocumentEvent.editDocument(
-                      document: document.copyWith(
-                        isEdit: false,
+            TextButton(
+              onPressed: () {
+                context.read<DocumentBloc>().add(
+                      DocumentEvent.editDocument(
+                        document: document.copyWith(
+                          isEdit: false,
+                        ),
                       ),
-                    ),
-                  );
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.lime,
+                    );
+              },
+              child: Text(
+                'Cancel',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.primaryContainer,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
     return Row(
@@ -278,11 +284,12 @@ class _DocumentScreenState extends State<DocumentScreen> {
       children: <Widget>[
         Text(
           title,
-          style: theme.textTheme.bodyLarge,
+          style: theme.textTheme.bodyMedium,
         ),
+        const SizedBox(height: 4),
         Text(
           info,
-          style: theme.textTheme.bodyMedium,
+          style: theme.textTheme.bodyLarge,
         ),
       ],
     );
@@ -305,14 +312,14 @@ class _DocumentScreenState extends State<DocumentScreen> {
 
   Widget _buildLastUpdatedBy({
     required ThemeData theme,
-    required int? lastUpdatedBy,
+    required User? lastUpdatedByUser,
   }) {
-    final int? updatedBy = lastUpdatedBy;
-    if (updatedBy != null) {
+    final User? updatedByUser = lastUpdatedByUser;
+    if (updatedByUser != null) {
       return _buildInfoItem(
         theme: theme,
         title: 'Last updated by',
-        info: updatedBy.toString(),
+        info: updatedByUser.username,
       );
     }
     return const SizedBox();
@@ -334,66 +341,6 @@ class _DocumentScreenState extends State<DocumentScreen> {
         readOnly: !isEdit,
         showCursor: isEdit,
       ),
-    );
-  }
-
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Document successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildDeleteDocumentFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not delete a document successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -428,7 +375,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -437,7 +384,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),

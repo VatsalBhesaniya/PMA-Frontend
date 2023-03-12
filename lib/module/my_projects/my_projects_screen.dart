@@ -9,6 +9,7 @@ import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/floating_action_button_extended.dart';
 import 'package:pma/widgets/input_field.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class MyPorojectsScreen extends StatefulWidget {
   const MyPorojectsScreen({super.key});
@@ -33,7 +34,11 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
             theme: theme,
           );
         },
+        backgroundColor: theme.colorScheme.primary,
         labelText: 'Create Project',
+        labelStyle: theme.textTheme.titleMedium?.copyWith(
+          color: theme.colorScheme.background,
+        ),
       ),
       body: SafeArea(
         child: BlocConsumer<MyProjectsBloc, MyProjectsState>(
@@ -45,9 +50,11 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                     );
               },
               createProjectFailure: (NetworkExceptions error) {
-                _buildCreateProjectFailureAlert(
+                pmaAlertDialog(
                   context: context,
                   theme: theme,
+                  error:
+                      'Could not create project successfully. Please try again.',
                 );
               },
               orElse: () => null,
@@ -76,7 +83,11 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                 );
               },
               fetchProjectsSuccess: (List<Project> projects) {
-                return ListView.builder(
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  separatorBuilder: (BuildContext context, int index) {
+                    return const Divider();
+                  },
                   itemCount: projects.length,
                   itemBuilder: (BuildContext context, int index) {
                     final Project project = projects[index];
@@ -89,14 +100,20 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                           },
                         );
                       },
-                      title: Text(project.title),
+                      title: Text(
+                        project.title,
+                        style: theme.textTheme.titleMedium,
+                      ),
                     );
                   },
                 );
               },
               fetchProjectsFailure: () {
-                return const Center(
-                  child: Text('Something went wrong.'),
+                return Center(
+                  child: Text(
+                    'Something went wrong.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 );
               },
               orElse: () => const SizedBox(),
@@ -115,6 +132,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
       context: context,
       builder: (BuildContext ctx) {
         return Dialog(
+          backgroundColor: theme.colorScheme.background,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -127,9 +145,8 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.close_rounded,
-                        color: theme.colorScheme.error,
                       ),
                     ),
                   ),
@@ -171,10 +188,11 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                             ),
                           ),
                         );
+                    _projectTitleController.clear();
                     Navigator.pop(ctx, 'OK');
                   }
                 },
-                color: theme.colorScheme.outline,
+                color: theme.colorScheme.primary,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(
                     Radius.circular(4),
@@ -195,40 +213,4 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
     );
   }
 
-  void _buildCreateProjectFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not create project successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }

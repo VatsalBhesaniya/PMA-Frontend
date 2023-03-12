@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/module/Documents/bloc/documents_bloc.dart';
 import 'package:pma/utils/network_exceptions.dart';
+import 'package:pma/widgets/pma_alert_dialog.dart';
+import 'package:pma/widgets/snackbar.dart';
 
 class DocumentsScreen extends StatefulWidget {
-  const DocumentsScreen({super.key});
+  const DocumentsScreen({
+    required this.projectId,
+    required this.currentUserRole,
+    super.key,
+  });
+
+  final String projectId;
+  final int currentUserRole;
 
   @override
   State<DocumentsScreen> createState() => _DocumentsScreenState();
@@ -22,14 +32,22 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         state.maybeWhen(
           deleteDocumentSuccess: () {
             context.read<DocumentsBloc>().add(
-                  const DocumentsEvent.fetchDocuments(),
+                  DocumentsEvent.fetchDocuments(
+                    projectId: int.parse(widget.projectId),
+                  ),
                 );
-            _showSnackBar(context: context, theme: theme);
-          },
-          deleteDocumentFailure: (NetworkExceptions error) {
-            _buildDeleteDocumentFailureAlert(
+            showSnackBar(
               context: context,
               theme: theme,
+              message: 'Document successfully deleted',
+            );
+          },
+          deleteDocumentFailure: (NetworkExceptions error) {
+            pmaAlertDialog(
+              context: context,
+              theme: theme,
+              error:
+                  'Could not delete document successfully. Please try again.',
             );
           },
           orElse: () => null,
@@ -46,15 +64,28 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         return state.maybeWhen(
           initial: () {
             context.read<DocumentsBloc>().add(
-                  const DocumentsEvent.fetchDocuments(),
+                  DocumentsEvent.fetchDocuments(
+                    projectId: int.parse(widget.projectId),
+                  ),
                 );
-            return const CircularProgressIndicator();
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           },
           loadInProgress: () {
-            return const CircularProgressIndicator();
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
           },
           fetchDocumentsSuccess: (List<Document> documents) {
-            return ListView.builder(
+            return ListView.separated(
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider(
+                  height: 1,
+                  indent: 16,
+                  endIndent: 20,
+                );
+              },
               itemCount: documents.length,
               itemBuilder: (BuildContext context, int index) {
                 final Document document = documents[index];
@@ -63,23 +94,27 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     context.goNamed(
                       RouteConstants.document,
                       params: <String, String>{
+                        'projectId': widget.projectId,
                         'id': document.id.toString(),
                       },
                     );
                   },
                   title: Text(document.title),
-                  trailing: IconButton(
-                    onPressed: () {
-                      _showDeleteDocumentConfirmDialog(
-                        context: context,
-                        theme: theme,
-                        documentId: document.id,
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.delete_rounded,
-                    ),
-                  ),
+                  trailing: widget.currentUserRole == MemberRole.guest.index + 1
+                      ? null
+                      : IconButton(
+                          onPressed: () {
+                            _showDeleteDocumentConfirmDialog(
+                              context: context,
+                              theme: theme,
+                              documentId: document.id,
+                            );
+                          },
+                          color: theme.colorScheme.onError,
+                          icon: const Icon(
+                            Icons.delete_rounded,
+                          ),
+                        ),
                 );
               },
             );
@@ -90,66 +125,6 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
             );
           },
           orElse: () => const SizedBox(),
-        );
-      },
-    );
-  }
-
-  void _showSnackBar({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        margin: const EdgeInsets.all(16),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: theme.colorScheme.surface,
-        content: Text(
-          'Document successfully deleted',
-          textAlign: TextAlign.center,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _buildDeleteDocumentFailureAlert({
-    required BuildContext context,
-    required ThemeData theme,
-  }) {
-    showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Center(
-            child: Text(
-              'Alert',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
-          content: const Text(
-            'Could not delete a document successfully. Please try again.',
-          ),
-          actions: <Widget>[
-            Center(
-              child: TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: Text(
-                  'OK',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                ),
-              ),
-            ),
-          ],
         );
       },
     );
@@ -186,7 +161,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -195,7 +170,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
