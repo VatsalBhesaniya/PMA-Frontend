@@ -7,8 +7,12 @@ class TaskState with _$TaskState {
   const factory TaskState.fetchTaskSuccess({
     required Task task,
   }) = _FetchTaskSuccess;
-  const factory TaskState.fetchTaskFailure() = _FetchTaskFailure;
-  const factory TaskState.updateTaskFailure() = _UpdateTaskFailure;
+  const factory TaskState.fetchTaskFailure({
+    required NetworkExceptions error,
+  }) = _FetchTaskFailure;
+  const factory TaskState.updateTaskFailure({
+    required NetworkExceptions error,
+  }) = _UpdateTaskFailure;
   const factory TaskState.deleteTaskSuccess() = _DeleteTaskSuccess;
   const factory TaskState.deleteTaskFailure({
     required NetworkExceptions error,

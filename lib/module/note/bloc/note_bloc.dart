@@ -50,15 +50,11 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   FutureOr<void> _onUpdateNote(
       _UpdateNote event, Emitter<NoteState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<Note?> apiResult =
+    final ApiResult<Note> apiResult =
         await _noteRepository.updateNote(note: event.note);
     apiResult.when(
-      success: (Note? note) {
-        if (note == null) {
-          emit(const _UpdateNoteFailure());
-        } else {
-          emit(_FetchNoteSuccess(note: note));
-        }
+      success: (Note note) {
+        emit(_FetchNoteSuccess(note: note));
       },
       failure: (NetworkExceptions error) {
         emit(const _UpdateNoteFailure());

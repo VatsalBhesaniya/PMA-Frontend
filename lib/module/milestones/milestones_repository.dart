@@ -1,8 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:http/http.dart' as http;
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/milestone.dart';
 import 'package:pma/models/roadmap.dart';
@@ -13,11 +8,9 @@ import 'package:pma/utils/network_exceptions.dart';
 class MilestonesRepository {
   MilestonesRepository({
     required this.dioClient,
-    required this.httpClient,
   });
 
   final DioClient dioClient;
-  final HttpClientConfig httpClient;
 
   Future<ApiResult<Milestone>> fetchMilestone({
     required int milestoneId,
@@ -72,26 +65,20 @@ class MilestonesRepository {
     required Map<String, dynamic> milestoneData,
   }) async {
     try {
-      final http.Response response = await http.put(
-        Uri.parse('${httpClient.baseUrl}$milestonesEndpoint/$milestoneId'),
-        headers: <String, String>{
-          HttpHeaders.authorizationHeader: httpClient.token,
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-        body: jsonEncode(milestoneData),
+      final Map<String, dynamic>? data =
+          await dioClient.request<Map<String, dynamic>?>(
+        url: '$milestonesEndpoint/$milestoneId',
+        httpMethod: HttpMethod.put,
+        data: milestoneData,
       );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse =
-            jsonDecode(response.body) as Map<String, dynamic>;
-        return ApiResult<Milestone>.success(
-          data: Milestone.fromJson(jsonResponse),
-        );
-      } else {
+      if (data == null) {
         return const ApiResult<Milestone>.failure(
           error: NetworkExceptions.defaultError(),
         );
       }
+      return ApiResult<Milestone>.success(
+        data: Milestone.fromJson(data),
+      );
     } on Exception catch (e) {
       return ApiResult<Milestone>.failure(
         error: NetworkExceptions.dioException(e),
@@ -100,26 +87,23 @@ class MilestonesRepository {
   }
 
   Future<ApiResult<void>> createMilestone({
-    required Map<String, dynamic> milestonesData,
+    required Map<String, dynamic> milestoneData,
   }) async {
     try {
-      final http.Response response = await http.post(
-        Uri.parse('${httpClient.baseUrl}$createMilestonesEndpoint'),
-        headers: <String, String>{
-          HttpHeaders.authorizationHeader: httpClient.token,
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-        body: jsonEncode(milestonesData),
+      final Map<String, dynamic>? data =
+          await dioClient.request<Map<String, dynamic>?>(
+        url: createMilestonesEndpoint,
+        httpMethod: HttpMethod.post,
+        data: milestoneData,
       );
-      if (response.statusCode == 200) {
-        return const ApiResult<void>.success(
-          data: null,
-        );
-      } else {
+      if (data == null) {
         return const ApiResult<void>.failure(
           error: NetworkExceptions.defaultError(),
         );
       }
+      return const ApiResult<void>.success(
+        data: null,
+      );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),

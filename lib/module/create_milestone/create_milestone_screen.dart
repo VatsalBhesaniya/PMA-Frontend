@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/models/create_milestone.dart';
 import 'package:pma/module/create_milestone/bloc/create_milestone_bloc.dart';
 import 'package:pma/module/milestones/milestones_repository.dart';
@@ -47,7 +46,6 @@ class _CreateMilestoneScreenState extends State<CreateMilestoneScreen> {
           create: (BuildContext context) => CreateMilestoneBloc(
             milestonesRepository: MilestonesRepository(
               dioClient: context.read<DioClient>(),
-              httpClient: context.read<HttpClientConfig>(),
             ),
           ),
           child: BlocConsumer<CreateMilestoneBloc, CreateMilestoneState>(

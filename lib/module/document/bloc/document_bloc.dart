@@ -51,15 +51,11 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   FutureOr<void> _onUpdateDocument(
       _UpdateDocument event, Emitter<DocumentState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<Document?> apiResult =
+    final ApiResult<Document> apiResult =
         await _documentRepository.updateDocument(document: event.document);
     apiResult.when(
-      success: (Document? document) {
-        if (document == null) {
-          emit(const _UpdateDocumentFailure());
-        } else {
-          emit(_FetchDocumentSuccess(document: document));
-        }
+      success: (Document document) {
+        emit(_FetchDocumentSuccess(document: document));
       },
       failure: (NetworkExceptions error) {
         emit(const _UpdateDocumentFailure());

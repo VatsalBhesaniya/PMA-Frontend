@@ -1,7 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/utils/api_result.dart';
@@ -11,10 +7,8 @@ import 'package:pma/utils/network_exceptions.dart';
 class ProjectsRepository {
   ProjectsRepository({
     required this.dioClient,
-    required this.httpClient,
   });
   final DioClient dioClient;
-  final HttpClientConfig httpClient;
 
   Future<ApiResult<List<Project>?>> fetchProjects() async {
     try {
@@ -56,29 +50,20 @@ class ProjectsRepository {
     }
   }
 
-  Future<ApiResult<bool>> createProject({
-    required Map<String, dynamic> projectJson,
+  Future<ApiResult<void>> createProject({
+    required Map<String, dynamic> projectData,
   }) async {
     try {
-      final http.Response response = await http.post(
-        Uri.parse('${httpClient.baseUrl}$createProjectEndpoint'),
-        headers: <String, String>{
-          HttpHeaders.authorizationHeader: httpClient.token,
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-        body: jsonEncode(projectJson),
+      await dioClient.request<void>(
+        url: createProjectEndpoint,
+        httpMethod: HttpMethod.post,
+        data: projectData,
       );
-      if (response.statusCode == 201) {
-        return const ApiResult<bool>.success(
-          data: true,
-        );
-      } else {
-        return const ApiResult<bool>.failure(
-          error: NetworkExceptions.defaultError(),
-        );
-      }
+      return const ApiResult<void>.success(
+        data: null,
+      );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

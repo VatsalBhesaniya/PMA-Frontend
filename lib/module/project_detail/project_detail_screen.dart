@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/member.dart';
@@ -40,7 +39,6 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       create: (BuildContext context) => ProjectDetailBloc(
         projectDetailRepository: ProjectDetailRepository(
           dioClient: context.read<DioClient>(),
-          httpClient: context.read<HttpClientConfig>(),
         ),
       ),
       child: BlocConsumer<ProjectDetailBloc, ProjectDetailState>(
@@ -231,6 +229,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               context.read<ProjectDetailBloc>().add(
                     ProjectDetailEvent.updateProjectDetail(
                       projectDetail: projectDetail.copyWith(
+                        title: _projectTitleController.text.trim(),
                         isEdit: false,
                       ),
                     ),
@@ -546,5 +545,4 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       },
     );
   }
-
 }

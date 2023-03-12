@@ -23,20 +23,14 @@ class CreateTaskBloc extends Bloc<CreateTaskEvent, CreateTaskState> {
 
   FutureOr<void> _onCreateTask(
       _CreateTask event, Emitter<CreateTaskState> emit) async {
-    final ApiResult<int?> apiResult = await _createTaskRepository.createTask(
+    final ApiResult<int> apiResult = await _createTaskRepository.createTask(
       taskData: event.task.toJson(),
     );
     apiResult.when(
-      success: (int? taskId) {
-        if (taskId == null) {
-          emit(const CreateTaskState.createTaskFailure(
-            error: NetworkExceptions.defaultError(),
-          ));
-        } else {
-          emit(
-            CreateTaskState.createTaskSuccess(taskId: taskId),
-          );
-        }
+      success: (int taskId) {
+        emit(
+          CreateTaskState.createTaskSuccess(taskId: taskId),
+        );
       },
       failure: (NetworkExceptions error) {
         emit(

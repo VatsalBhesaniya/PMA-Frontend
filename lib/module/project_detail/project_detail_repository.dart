@@ -1,9 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/api_constants.dart';
-import 'package:pma/models/project.dart';
 import 'package:pma/models/project_detail.dart';
 import 'package:pma/utils/api_result.dart';
 import 'package:pma/utils/dio_client.dart';
@@ -12,10 +7,8 @@ import 'package:pma/utils/network_exceptions.dart';
 class ProjectDetailRepository {
   ProjectDetailRepository({
     required this.dioClient,
-    required this.httpClient,
   });
   final DioClient dioClient;
-  final HttpClientConfig httpClient;
 
   Future<ApiResult<ProjectDetail?>> fetchProjectDetail({
     required int projectId,
@@ -36,33 +29,21 @@ class ProjectDetailRepository {
     }
   }
 
-  Future<ApiResult<bool>> updateProjectDetail({
-    required Project project,
+  Future<ApiResult<void>> updateProjectDetail({
+    required int projectId,
+    required Map<String, dynamic> projectData,
   }) async {
     try {
-      final String body = jsonEncode(project.toJson()..remove('id'));
-      final http.Response response = await http.put(
-        Uri.parse('${httpClient.baseUrl}$projectsEndpoint/${project.id}'),
-        headers: <String, String>{
-          HttpHeaders.authorizationHeader: httpClient.token,
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-        body: body,
+      await dioClient.request<void>(
+        url: '$projectsEndpoint/$projectId',
+        httpMethod: HttpMethod.put,
+        data: projectData,
       );
-
-      if (response.statusCode == 200) {
-        return const ApiResult<bool>.success(
-          data: true,
-        );
-      } else {
-        return ApiResult<bool>.failure(
-          error: NetworkExceptions.dioException(
-            Exception('Something went wrong!'),
-          ),
-        );
-      }
+      return const ApiResult<void>.success(
+        data: null,
+      );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

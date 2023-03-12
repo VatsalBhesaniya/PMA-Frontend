@@ -62,19 +62,18 @@ class ProjectDetailBloc extends Bloc<ProjectDetailEvent, ProjectDetailState> {
       createdBy: event.projectDetail.createdBy,
       createdAt: event.projectDetail.createdAt,
     );
-    final ApiResult<bool> apiResult =
-        await _projectDetailRepository.updateProjectDetail(project: project);
+    final ApiResult<void> apiResult =
+        await _projectDetailRepository.updateProjectDetail(
+      projectId: project.id,
+      projectData: project.toJson()..remove('id'),
+    );
     apiResult.when(
-      success: (bool isProjectUpdated) {
-        if (isProjectUpdated) {
-          emit(
-            _FetchProjectDetailSuccess(
-              projectDetail: event.projectDetail,
-            ),
-          );
-        } else {
-          emit(const _UpdateProjectDetailFailure());
-        }
+      success: (void result) {
+        emit(
+          _FetchProjectDetailSuccess(
+            projectDetail: event.projectDetail,
+          ),
+        );
       },
       failure: (NetworkExceptions error) {
         emit(const _UpdateProjectDetailFailure());

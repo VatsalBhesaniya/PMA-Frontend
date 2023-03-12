@@ -23,20 +23,14 @@ class CreateNoteBloc extends Bloc<CreateNoteEvent, CreateNoteState> {
 
   FutureOr<void> _onCreateNote(
       _CreateNote event, Emitter<CreateNoteState> emit) async {
-    final ApiResult<int?> apiResult = await _createNoteRepository.createNote(
+    final ApiResult<int> apiResult = await _createNoteRepository.createNote(
       noteData: event.note.toJson(),
     );
     apiResult.when(
-      success: (int? noteId) {
-        if (noteId == null) {
-          emit(const CreateNoteState.createNoteFailure(
-            error: NetworkExceptions.defaultError(),
-          ));
-        } else {
-          emit(
-            CreateNoteState.createNoteSuccess(noteId: noteId),
-          );
-        }
+      success: (int noteId) {
+        emit(
+          CreateNoteState.createNoteSuccess(noteId: noteId),
+        );
       },
       failure: (NetworkExceptions error) {
         emit(

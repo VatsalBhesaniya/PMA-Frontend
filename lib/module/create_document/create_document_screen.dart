@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router/go_router.dart';
-import 'package:pma/config/http_client_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/create_document.dart';
 import 'package:pma/module/create_document/bloc/create_document_bloc.dart';
@@ -44,7 +43,7 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
         child: BlocProvider<CreateDocumentBloc>(
           create: (BuildContext context) => CreateDocumentBloc(
             createDocumentRepository: CreateDocumentRepository(
-              httpClient: context.read<HttpClientConfig>(),
+              dioClient: context.read<DioClient>(),
             ),
           ),
           child: BlocConsumer<CreateDocumentBloc, CreateDocumentState>(
