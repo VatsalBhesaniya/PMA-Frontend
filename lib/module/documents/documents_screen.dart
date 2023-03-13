@@ -90,14 +90,21 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
               itemBuilder: (BuildContext context, int index) {
                 final Document document = documents[index];
                 return ListTile(
-                  onTap: () {
-                    context.goNamed(
+                  onTap: () async {
+                    await context.pushNamed(
                       RouteConstants.document,
                       params: <String, String>{
                         'projectId': widget.projectId,
                         'id': document.id.toString(),
                       },
                     );
+                    if (mounted) {
+                      context.read<DocumentsBloc>().add(
+                            DocumentsEvent.fetchDocuments(
+                              projectId: int.parse(widget.projectId),
+                            ),
+                          );
+                    }
                   },
                   title: Text(document.title),
                   trailing: widget.currentUserRole == MemberRole.guest.index + 1

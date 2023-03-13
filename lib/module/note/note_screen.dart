@@ -52,12 +52,12 @@ class _NoteScreenState extends State<NoteScreen> {
               );
             },
             deleteNoteSuccess: () {
-              context.pop();
               showSnackBar(
                 context: context,
                 theme: theme,
                 message: 'Note successfully deleted',
               );
+              context.pop();
             },
             deleteNoteFailure: (NetworkExceptions error) {
               pmaAlertDialog(
@@ -106,6 +106,12 @@ class _NoteScreenState extends State<NoteScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Note Detail'),
+                  automaticallyImplyLeading: false,
+                  leading: BackButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                  ),
                   actions: note.currentUserRole == MemberRole.guest.index + 1
                       ? null
                       : <Widget>[
@@ -153,11 +159,17 @@ class _NoteScreenState extends State<NoteScreen> {
               );
             },
             fetchNoteFailure: () {
-              return const Center(
-                child: Text('Something went wrong.'),
+              return const Scaffold(
+                body: Center(
+                  child: Text('Something went wrong.'),
+                ),
               );
             },
-            orElse: () => const SizedBox(),
+            orElse: () {
+              return const Scaffold(
+                body: SizedBox(),
+              );
+            },
           );
         },
       ),

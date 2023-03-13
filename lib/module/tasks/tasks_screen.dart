@@ -182,14 +182,21 @@ class _TasksScreenState extends State<TasksScreen> {
       itemBuilder: (BuildContext context, int index) {
         final Task task = tasks[index];
         return ListTile(
-          onTap: () {
-            context.goNamed(
+          onTap: () async {
+            await context.pushNamed(
               RouteConstants.task,
               params: <String, String>{
                 'projectId': widget.projectId,
                 'taskId': task.id.toString(),
               },
             );
+            if (mounted) {
+              context.read<TasksBloc>().add(
+                    TasksEvent.fetchTasks(
+                      projectId: int.parse(widget.projectId),
+                    ),
+                  );
+            }
           },
           title: Text(
             task.title,

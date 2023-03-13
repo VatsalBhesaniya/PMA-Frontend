@@ -70,12 +70,12 @@ class _TaskScreenState extends State<TaskScreen> {
               );
             },
             deleteTaskSuccess: () {
-              context.pop();
               showSnackBar(
                 context: context,
                 theme: theme,
                 message: 'Task successfully deleted',
               );
+              context.pop();
             },
             deleteTaskFailure: (NetworkExceptions error) {
               pmaAlertDialog(
@@ -185,6 +185,12 @@ class _TaskScreenState extends State<TaskScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Task Detail'),
+                  automaticallyImplyLeading: false,
+                  leading: BackButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                  ),
                   actions: task.currentUserRole == MemberRole.guest.index + 1
                       ? null
                       : <Widget>[

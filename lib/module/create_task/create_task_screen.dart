@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:go_router_flow/go_router_flow.dart';
+import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/create_task.dart';
 import 'package:pma/module/create_task/bloc/create_task_bloc.dart';
 import 'package:pma/module/create_task/create_task_repository.dart';
@@ -53,6 +54,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     message: 'Task successfully created.',
                   );
                   context.pop();
+                  context.pushNamed(
+                    RouteConstants.task,
+                    params: <String, String>{
+                      'projectId': widget.projectId,
+                      'taskId': taskId.toString(),
+                    },
+                  );
                 },
                 createTaskFailure: (NetworkExceptions error) {
                   pmaAlertDialog(

@@ -85,14 +85,21 @@ class _NotesScreenState extends State<NotesScreen> {
               itemBuilder: (BuildContext context, int index) {
                 final Note note = notes[index];
                 return ListTile(
-                  onTap: () {
-                    context.goNamed(
+                  onTap: () async {
+                    await context.pushNamed(
                       RouteConstants.note,
                       params: <String, String>{
                         'projectId': widget.projectId,
                         'id': note.id.toString(),
                       },
                     );
+                    if (mounted) {
+                      context.read<NotesBloc>().add(
+                            NotesEvent.fetchNotes(
+                              projectId: int.parse(widget.projectId),
+                            ),
+                          );
+                    }
                   },
                   title: Text(note.title),
                   trailing: widget.currentUserRole == MemberRole.guest.index + 1
