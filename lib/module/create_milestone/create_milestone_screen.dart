@@ -91,7 +91,6 @@ class _CreateMilestoneScreenState extends State<CreateMilestoneScreen> {
                       child: Column(
                         children: <Widget>[
                           InputField(
-                            onChanged: (String value) {},
                             controller: _milestoneTitleController,
                             hintText: 'Title',
                             borderType:
@@ -160,7 +159,6 @@ class _CreateMilestoneScreenState extends State<CreateMilestoneScreen> {
         _complitonDateController.text = _dateTime(selectedDate.toString());
       },
       child: InputField(
-        onChanged: (String value) {},
         controller: _complitonDateController,
         isEnabled: false,
         hintText: 'Select Date',

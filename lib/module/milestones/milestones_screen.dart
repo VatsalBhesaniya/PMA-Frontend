@@ -125,65 +125,68 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
     );
   }
 
-  Stepper _buildStepper({
+  Widget _buildStepper({
     required BuildContext context,
     required ThemeData theme,
     required Roadmap roadmap,
   }) {
-    return Stepper(
-      currentStep: _index,
-      onStepTapped: (int index) {
-        setState(() {
-          _index = index;
-        });
-      },
-      controlsBuilder: (_, ControlsDetails details) {
-        if (roadmap.currentUserRole == MemberRole.guest.index + 1) {
-          return const SizedBox();
-        }
-        return Row(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: ElevatedButton(
-                onPressed: () async {
-                  final List<Milestone> roadmapMilestones =
-                      List<Milestone>.from(roadmap.milestones);
-                  roadmapMilestones.sort(
-                    (Milestone a, Milestone b) =>
-                        a.completionDate.compareTo(b.completionDate),
-                  );
-                  await context.pushNamed<void>(
-                    RouteConstants.editMilestone,
-                    params: <String, String>{
-                      'projectId': widget.projectId,
-                      'milestoneId':
-                          roadmapMilestones[details.stepIndex].id.toString(),
-                    },
-                  );
-                  if (mounted) {
-                    _index = 0;
-                    context.read<MilestonesBloc>().add(
-                          MilestonesEvent.fetchMilestones(
-                            projectId: int.parse(widget.projectId),
-                          ),
-                        );
-                  }
-                },
-                child: Text(
-                  'Edit',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.background,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 80),
+      child: Stepper(
+        currentStep: _index,
+        onStepTapped: (int index) {
+          setState(() {
+            _index = index;
+          });
+        },
+        controlsBuilder: (_, ControlsDetails details) {
+          if (roadmap.currentUserRole == MemberRole.guest.index + 1) {
+            return const SizedBox();
+          }
+          return Row(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final List<Milestone> roadmapMilestones =
+                        List<Milestone>.from(roadmap.milestones);
+                    roadmapMilestones.sort(
+                      (Milestone a, Milestone b) =>
+                          a.completionDate.compareTo(b.completionDate),
+                    );
+                    await context.pushNamed<void>(
+                      RouteConstants.editMilestone,
+                      params: <String, String>{
+                        'projectId': widget.projectId,
+                        'milestoneId':
+                            roadmapMilestones[details.stepIndex].id.toString(),
+                      },
+                    );
+                    if (mounted) {
+                      _index = 0;
+                      context.read<MilestonesBloc>().add(
+                            MilestonesEvent.fetchMilestones(
+                              projectId: int.parse(widget.projectId),
+                            ),
+                          );
+                    }
+                  },
+                  child: Text(
+                    'Edit',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.background,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
-      steps: _buildSteps(
-        theme: theme,
-        milestones: roadmap.milestones,
+            ],
+          );
+        },
+        steps: _buildSteps(
+          theme: theme,
+          milestones: roadmap.milestones,
+        ),
       ),
     );
   }

@@ -26,7 +26,6 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButtonExtended(
         onPressed: () {
           _showCreateProjectDialog(
@@ -40,6 +39,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
           color: theme.colorScheme.background,
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SafeArea(
         child: BlocConsumer<MyProjectsBloc, MyProjectsState>(
           listener: (BuildContext context, MyProjectsState state) {
@@ -84,7 +84,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
               },
               fetchProjectsSuccess: (List<Project> projects) {
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.only(top: 16, bottom: 80),
                   separatorBuilder: (BuildContext context, int index) {
                     return const Divider();
                   },
@@ -171,6 +171,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                   key: _formKey,
                   child: InputField(
                     controller: _projectTitleController,
+                    autofocus: true,
                     hintText: 'Project title',
                     borderType: InputFieldBorderType.underlineInputBorder,
                     validator: (String? value) {

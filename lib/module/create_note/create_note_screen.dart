@@ -85,7 +85,6 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                       child: Column(
                         children: <Widget>[
                           InputField(
-                            onChanged: (String value) {},
                             controller: _noteTitleController,
                             hintText: 'Title',
                             borderType:

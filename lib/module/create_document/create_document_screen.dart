@@ -87,7 +87,6 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
                       child: Column(
                         children: <Widget>[
                           InputField(
-                            onChanged: (String value) {},
                             controller: _documentTitleController,
                             hintText: 'Title',
                             borderType:

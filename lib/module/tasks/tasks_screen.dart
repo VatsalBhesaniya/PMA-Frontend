@@ -154,6 +154,7 @@ class _TasksScreenState extends State<TasksScreen> {
                             .toList(),
                         theme: theme,
                       ),
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),

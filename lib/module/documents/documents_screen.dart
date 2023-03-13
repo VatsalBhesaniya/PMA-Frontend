@@ -89,6 +89,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
               floatingActionButtonLocation:
                   FloatingActionButtonLocation.centerDocked,
               body: ListView.separated(
+                padding: const EdgeInsets.only(top: 16, bottom: 80),
                 separatorBuilder: (BuildContext context, int index) {
                   return const Divider(
                     height: 1,
