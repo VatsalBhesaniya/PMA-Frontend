@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router_flow/go_router_flow.dart';
-import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/create_document.dart';
 import 'package:pma/module/create_document/bloc/create_document_bloc.dart';
 import 'package:pma/module/create_document/create_document_repository.dart';
@@ -55,14 +54,7 @@ class _CreateDocumentScreenState extends State<CreateDocumentScreen> {
                     theme: theme,
                     message: 'Document successfully created.',
                   );
-                  context.pop();
-                  context.goNamed(
-                    RouteConstants.document,
-                    params: <String, String>{
-                      'projectId': widget.projectId,
-                      'id': documentId.toString(),
-                    },
-                  );
+                  context.pop(documentId);
                 },
                 createDocumentFailure: (NetworkExceptions error) {
                   pmaAlertDialog(

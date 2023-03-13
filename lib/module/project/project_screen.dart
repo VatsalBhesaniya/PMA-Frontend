@@ -91,14 +91,6 @@ class _ProjectScreenState extends State<ProjectScreen>
                     ),
                   ],
                 ),
-                floatingActionButton:
-                    project.currentUserRole == MemberRole.guest.index + 1
-                        ? null
-                        : _buildFloatingActionButton(
-                            theme: theme,
-                          ),
-                floatingActionButtonLocation:
-                    FloatingActionButtonLocation.centerDocked,
                 body: Column(
                   children: <Widget>[
                     _buildTabBar(theme: theme),
@@ -120,46 +112,6 @@ class _ProjectScreenState extends State<ProjectScreen>
             orElse: () => const SizedBox(),
           );
         },
-      ),
-    );
-  }
-
-  FloatingActionButton _buildFloatingActionButton({
-    required ThemeData theme,
-  }) {
-    return FloatingActionButton(
-      onPressed: () {
-        switch (_tabController.index) {
-          case 0:
-            context.goNamed(
-              RouteConstants.createTask,
-              params: <String, String>{
-                'projectId': widget.projectId,
-              },
-            );
-            break;
-          case 1:
-            context.goNamed(
-              RouteConstants.createNote,
-              params: <String, String>{
-                'projectId': widget.projectId,
-              },
-            );
-            break;
-          case 2:
-            context.goNamed(
-              RouteConstants.createDocument,
-              params: <String, String>{
-                'projectId': widget.projectId,
-              },
-            );
-            break;
-          default:
-        }
-      },
-      child: Icon(
-        Icons.add,
-        color: theme.colorScheme.primary,
       ),
     );
   }
@@ -216,7 +168,11 @@ class _ProjectScreenState extends State<ProjectScreen>
               tasksRepository: TasksRepository(
                 dioClient: context.read<DioClient>(),
               ),
-            ),
+            )..add(
+                TasksEvent.fetchTasks(
+                  projectId: int.parse(widget.projectId),
+                ),
+              ),
             child: TasksScreen(
               projectId: widget.projectId,
               currentUserRole: currentUserRole,
@@ -227,7 +183,11 @@ class _ProjectScreenState extends State<ProjectScreen>
               notesRepository: NotesRepository(
                 dioClient: context.read<DioClient>(),
               ),
-            ),
+            )..add(
+                NotesEvent.fetchNotes(
+                  projectId: int.parse(widget.projectId),
+                ),
+              ),
             child: NotesScreen(
               projectId: widget.projectId,
               currentUserRole: currentUserRole,

@@ -20,6 +20,8 @@ void showSnackBar({
           color: theme.colorScheme.background,
         ),
       ),
+      showCloseIcon: true,
+      closeIconColor: theme.colorScheme.background,
     ),
   );
 }

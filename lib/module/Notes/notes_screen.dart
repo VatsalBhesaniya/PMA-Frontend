@@ -73,52 +73,64 @@ class _NotesScreenState extends State<NotesScreen> {
             return const CircularProgressIndicator();
           },
           fetchNotesSuccess: (List<Note> notes) {
-            return ListView.separated(
-              separatorBuilder: (BuildContext context, int index) {
-                return const Divider(
-                  height: 1,
-                  indent: 16,
-                  endIndent: 20,
-                );
-              },
-              itemCount: notes.length,
-              itemBuilder: (BuildContext context, int index) {
-                final Note note = notes[index];
-                return ListTile(
-                  onTap: () async {
-                    await context.pushNamed(
-                      RouteConstants.note,
-                      params: <String, String>{
-                        'projectId': widget.projectId,
-                        'id': note.id.toString(),
-                      },
-                    );
-                    if (mounted) {
-                      context.read<NotesBloc>().add(
-                            NotesEvent.fetchNotes(
-                              projectId: int.parse(widget.projectId),
-                            ),
-                          );
-                    }
-                  },
-                  title: Text(note.title),
-                  trailing: widget.currentUserRole == MemberRole.guest.index + 1
+            return Scaffold(
+              floatingActionButton:
+                  widget.currentUserRole == MemberRole.guest.index + 1
                       ? null
-                      : IconButton(
-                          onPressed: () {
-                            _showDeleteNoteConfirmDialog(
-                              context: context,
-                              theme: theme,
-                              noteId: note.id,
-                            );
-                          },
-                          color: theme.colorScheme.onError,
-                          icon: const Icon(
-                            Icons.delete_rounded,
-                          ),
+                      : _buildFloatingActionButton(
+                          context: context,
+                          theme: theme,
                         ),
-                );
-              },
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              body: ListView.separated(
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider(
+                    height: 1,
+                    indent: 16,
+                    endIndent: 20,
+                  );
+                },
+                itemCount: notes.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final Note note = notes[index];
+                  return ListTile(
+                    onTap: () async {
+                      await context.pushNamed(
+                        RouteConstants.note,
+                        params: <String, String>{
+                          'projectId': widget.projectId,
+                          'id': note.id.toString(),
+                        },
+                      );
+                      if (mounted) {
+                        context.read<NotesBloc>().add(
+                              NotesEvent.fetchNotes(
+                                projectId: int.parse(widget.projectId),
+                              ),
+                            );
+                      }
+                    },
+                    title: Text(note.title),
+                    trailing:
+                        widget.currentUserRole == MemberRole.guest.index + 1
+                            ? null
+                            : IconButton(
+                                onPressed: () {
+                                  _showDeleteNoteConfirmDialog(
+                                    context: context,
+                                    theme: theme,
+                                    noteId: note.id,
+                                  );
+                                },
+                                color: theme.colorScheme.onError,
+                                icon: const Icon(
+                                  Icons.delete_rounded,
+                                ),
+                              ),
+                  );
+                },
+              ),
             );
           },
           fetchNotesFailure: () {
@@ -129,6 +141,42 @@ class _NotesScreenState extends State<NotesScreen> {
           orElse: () => const SizedBox(),
         );
       },
+    );
+  }
+
+  FloatingActionButton _buildFloatingActionButton({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    return FloatingActionButton(
+      onPressed: () async {
+        final int? noteId = await context.pushNamed(
+          RouteConstants.createNote,
+          params: <String, String>{
+            'projectId': widget.projectId,
+          },
+        );
+        if (mounted && noteId != null) {
+          await context.pushNamed(
+            RouteConstants.note,
+            params: <String, String>{
+              'projectId': widget.projectId,
+              'id': noteId.toString(),
+            },
+          );
+          if (mounted) {
+            context.read<NotesBloc>().add(
+                  NotesEvent.fetchNotes(
+                    projectId: int.parse(widget.projectId),
+                  ),
+                );
+          }
+        }
+      },
+      child: Icon(
+        Icons.add,
+        color: theme.colorScheme.primary,
+      ),
     );
   }
 
