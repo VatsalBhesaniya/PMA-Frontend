@@ -92,13 +92,18 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                   itemBuilder: (BuildContext context, int index) {
                     final Project project = projects[index];
                     return ListTile(
-                      onTap: () {
-                        context.goNamed(
+                      onTap: () async {
+                        await context.pushNamed(
                           RouteConstants.project,
                           params: <String, String>{
                             'projectId': project.id.toString(),
                           },
                         );
+                        if (mounted) {
+                          context.read<MyProjectsBloc>().add(
+                                const MyProjectsEvent.fetchProjects(),
+                              );
+                        }
                       },
                       title: Text(
                         project.title,

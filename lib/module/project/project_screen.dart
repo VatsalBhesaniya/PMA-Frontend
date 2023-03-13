@@ -65,15 +65,25 @@ class _ProjectScreenState extends State<ProjectScreen>
                       projectId: int.parse(widget.projectId),
                     ),
                   );
-              return const CircularProgressIndicator();
+              return const Scaffold(
+                body: CircularProgressIndicator(),
+              );
             },
             loadInProgress: () {
-              return const CircularProgressIndicator();
+              return const Scaffold(
+                body: CircularProgressIndicator(),
+              );
             },
             fetchProjectSuccess: (Project project) {
               return Scaffold(
                 appBar: AppBar(
                   title: Text(project.title),
+                  automaticallyImplyLeading: false,
+                  leading: BackButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                  ),
                   actions: <Widget>[
                     _buildActionButton(
                       context: context,
@@ -101,8 +111,10 @@ class _ProjectScreenState extends State<ProjectScreen>
               );
             },
             fetchProjectFailure: () {
-              return const Center(
-                child: Text('Something went wrong.'),
+              return const Scaffold(
+                body: Center(
+                  child: Text('Something went wrong.'),
+                ),
               );
             },
             orElse: () => const SizedBox(),
@@ -242,13 +254,16 @@ class _ProjectScreenState extends State<ProjectScreen>
     required ThemeData theme,
   }) {
     return IconButton(
-      onPressed: () {
-        context.goNamed(
+      onPressed: () async {
+        final bool? isDeleted = await context.pushNamed(
           RouteConstants.projectDetail,
           params: <String, String>{
             'projectId': widget.projectId,
           },
         );
+        if (mounted && (isDeleted ?? false)) {
+          context.pop();
+        }
       },
       icon: const Icon(Icons.settings),
     );

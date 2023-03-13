@@ -83,13 +83,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               );
             },
             deleteProjectSuccess: () {
-              context.pop();
-              context.pop();
               showSnackBar(
                 context: context,
                 theme: theme,
                 message: 'Project successfully deleted',
               );
+              context.pop(true);
             },
             deleteProjectFailure: (NetworkExceptions error) {
               pmaAlertDialog(
@@ -156,6 +155,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Project Detail'),
+                  automaticallyImplyLeading: false,
+                  leading: BackButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                  ),
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
@@ -233,7 +238,18 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 ),
               );
             },
-            orElse: () => const SizedBox(),
+            fetchProjectDetailFailure: (NetworkExceptions error) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Something went wrong!'),
+                ),
+              );
+            },
+            orElse: () {
+              return const Scaffold(
+                body: SizedBox(),
+              );
+            },
           );
         },
       ),
@@ -250,14 +266,22 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         children: <Widget>[
           IconButton(
             onPressed: () {
-              context.read<ProjectDetailBloc>().add(
-                    ProjectDetailEvent.updateProjectDetail(
-                      projectDetail: projectDetail.copyWith(
-                        title: _projectTitleController.text.trim(),
-                        isEdit: false,
+              if (_projectTitleController.text.trim().isEmpty) {
+                pmaAlertDialog(
+                  context: context,
+                  theme: theme,
+                  error: 'Title can not be empty.',
+                );
+              } else {
+                context.read<ProjectDetailBloc>().add(
+                      ProjectDetailEvent.updateProjectDetail(
+                        projectDetail: projectDetail.copyWith(
+                          title: _projectTitleController.text.trim(),
+                          isEdit: false,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+              }
             },
             icon: const Icon(Icons.done_rounded),
           ),
@@ -560,7 +584,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -569,7 +593,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),

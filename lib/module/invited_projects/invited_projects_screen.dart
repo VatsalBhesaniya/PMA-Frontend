@@ -44,13 +44,19 @@ class _InvitedPorojectsScreenState extends State<InvitedPorojectsScreen> {
                   itemBuilder: (BuildContext context, int index) {
                     final Project project = projects[index];
                     return ListTile(
-                      onTap: () {
-                        context.goNamed(
+                      onTap: () async {
+                        await context.pushNamed(
                           RouteConstants.project,
                           params: <String, String>{
                             'projectId': project.id.toString(),
                           },
                         );
+                        if (mounted) {
+                          context.read<InvitedProjectsBloc>().add(
+                                const InvitedProjectsEvent
+                                    .fetchInvitedProjects(),
+                              );
+                        }
                       },
                       title: Text(
                         project.title,

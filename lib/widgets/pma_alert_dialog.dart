@@ -20,6 +20,7 @@ void pmaAlertDialog({
         content: Text(
           error,
           style: theme.textTheme.bodyMedium,
+          textAlign: TextAlign.center,
         ),
         actions: <Widget>[
           Center(
