@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/models/create_milestone.dart';
 import 'package:pma/module/create_milestone/bloc/create_milestone_bloc.dart';
@@ -91,7 +91,6 @@ class _CreateMilestoneScreenState extends State<CreateMilestoneScreen> {
                       child: Column(
                         children: <Widget>[
                           InputField(
-                            onChanged: (String value) {},
                             controller: _milestoneTitleController,
                             hintText: 'Title',
                             borderType:
@@ -160,7 +159,6 @@ class _CreateMilestoneScreenState extends State<CreateMilestoneScreen> {
         _complitonDateController.text = _dateTime(selectedDate.toString());
       },
       child: InputField(
-        onChanged: (String value) {},
         controller: _complitonDateController,
         isEnabled: false,
         hintText: 'Select Date',

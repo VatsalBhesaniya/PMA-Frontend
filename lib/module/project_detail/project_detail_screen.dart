@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
@@ -48,8 +48,23 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               pmaAlertDialog(
                 context: context,
                 theme: theme,
+                error: NetworkExceptions.getErrorMessage(error),
+              );
+            },
+            updateProjectDetailFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
                 error:
-                    'Could not delete project successfully. Please try again.',
+                    'Could not update project detail successfully. Please try again.',
+              );
+            },
+            updateProjectMemberRoleFailure: (NetworkExceptions error) {
+              pmaAlertDialog(
+                context: context,
+                theme: theme,
+                error:
+                    'Could not update member role successfully. Please try again.',
               );
             },
             removeMemberSuccess: () {
@@ -68,13 +83,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               );
             },
             deleteProjectSuccess: () {
-              context.pop();
-              context.pop();
               showSnackBar(
                 context: context,
                 theme: theme,
                 message: 'Project successfully deleted',
               );
+              context.pop(true);
             },
             deleteProjectFailure: (NetworkExceptions error) {
               pmaAlertDialog(
@@ -90,6 +104,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         buildWhen: (ProjectDetailState previous, ProjectDetailState current) {
           return current.maybeWhen(
             fetchProjectDetailSuccess: (ProjectDetail projectDetail) => true,
+            updateProjectDetailFailure: (NetworkExceptions error) => false,
+            updateProjectMemberRoleFailure: (NetworkExceptions error) => false,
             removeMemberSuccess: () => false,
             removeMemberFailure: (NetworkExceptions error) => false,
             deleteProjectSuccess: () => false,
@@ -119,6 +135,13 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               );
             },
             fetchProjectDetailSuccess: (ProjectDetail projectDetail) {
+              final List<Member> sortedMembers =
+                  List<Member>.from(projectDetail.members);
+              sortedMembers.sort(
+                (Member a, Member b) =>
+                    a.user.username.compareTo(b.user.username),
+              );
+              projectDetail = projectDetail.copyWith(members: sortedMembers);
               final User currentUser = context.read<User>();
               final Member owner = projectDetail.members
                   .where((Member member) =>
@@ -132,6 +155,12 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Project Detail'),
+                  automaticallyImplyLeading: false,
+                  leading: BackButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                  ),
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.centerDocked,
@@ -209,7 +238,18 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                 ),
               );
             },
-            orElse: () => const SizedBox(),
+            fetchProjectDetailFailure: (NetworkExceptions error) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('Something went wrong!'),
+                ),
+              );
+            },
+            orElse: () {
+              return const Scaffold(
+                body: SizedBox(),
+              );
+            },
           );
         },
       ),
@@ -226,14 +266,22 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         children: <Widget>[
           IconButton(
             onPressed: () {
-              context.read<ProjectDetailBloc>().add(
-                    ProjectDetailEvent.updateProjectDetail(
-                      projectDetail: projectDetail.copyWith(
-                        title: _projectTitleController.text.trim(),
-                        isEdit: false,
+              if (_projectTitleController.text.trim().isEmpty) {
+                pmaAlertDialog(
+                  context: context,
+                  theme: theme,
+                  error: 'Title can not be empty.',
+                );
+              } else {
+                context.read<ProjectDetailBloc>().add(
+                      ProjectDetailEvent.updateProjectDetail(
+                        projectDetail: projectDetail.copyWith(
+                          title: _projectTitleController.text.trim(),
+                          isEdit: false,
+                        ),
                       ),
-                    ),
-                  );
+                    );
+              }
             },
             icon: const Icon(Icons.done_rounded),
           ),
@@ -353,13 +401,20 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
         ),
         if (isOwner)
           TextButton.icon(
-            onPressed: () {
-              context.goNamed(
+            onPressed: () async {
+              await context.pushNamed(
                 RouteConstants.inviteMembers,
                 params: <String, String>{
                   'projectId': widget.projectId,
                 },
               );
+              if (mounted) {
+                context.read<ProjectDetailBloc>().add(
+                      ProjectDetailEvent.fetchProjectDetail(
+                        projectId: int.parse(widget.projectId),
+                      ),
+                    );
+              }
             },
             icon: const Icon(Icons.add),
             label: const Text('Add'),
@@ -434,7 +489,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
                               updatedMembers.add(projectMember);
                             }
                             context.read<ProjectDetailBloc>().add(
-                                  ProjectDetailEvent.updateProjectDetail(
+                                  ProjectDetailEvent.updateProjectMemberRole(
+                                    member:
+                                        member.copyWith(role: role.index + 1),
                                     projectDetail: projectDetail.copyWith(
                                       members: updatedMembers,
                                     ),
@@ -527,7 +584,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -536,7 +593,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),

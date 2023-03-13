@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
@@ -70,12 +70,12 @@ class _TaskScreenState extends State<TaskScreen> {
               );
             },
             deleteTaskSuccess: () {
-              context.pop();
               showSnackBar(
                 context: context,
                 theme: theme,
                 message: 'Task successfully deleted',
               );
+              context.pop();
             },
             deleteTaskFailure: (NetworkExceptions error) {
               pmaAlertDialog(
@@ -185,6 +185,12 @@ class _TaskScreenState extends State<TaskScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Task Detail'),
+                  automaticallyImplyLeading: false,
+                  leading: BackButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                  ),
                   actions: task.currentUserRole == MemberRole.guest.index + 1
                       ? null
                       : <Widget>[
@@ -1354,7 +1360,7 @@ class _TaskScreenState extends State<TaskScreen> {
               child: Text(
                 'OK',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -1363,7 +1369,7 @@ class _TaskScreenState extends State<TaskScreen> {
               child: Text(
                 'Cancel',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.onPrimary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
             ),

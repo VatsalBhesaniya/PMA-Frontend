@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/document.dart';
@@ -78,45 +78,65 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
             );
           },
           fetchDocumentsSuccess: (List<Document> documents) {
-            return ListView.separated(
-              separatorBuilder: (BuildContext context, int index) {
-                return const Divider(
-                  height: 1,
-                  indent: 16,
-                  endIndent: 20,
-                );
-              },
-              itemCount: documents.length,
-              itemBuilder: (BuildContext context, int index) {
-                final Document document = documents[index];
-                return ListTile(
-                  onTap: () {
-                    context.goNamed(
-                      RouteConstants.document,
-                      params: <String, String>{
-                        'projectId': widget.projectId,
-                        'id': document.id.toString(),
-                      },
-                    );
-                  },
-                  title: Text(document.title),
-                  trailing: widget.currentUserRole == MemberRole.guest.index + 1
+            return Scaffold(
+              floatingActionButton:
+                  widget.currentUserRole == MemberRole.guest.index + 1
                       ? null
-                      : IconButton(
-                          onPressed: () {
-                            _showDeleteDocumentConfirmDialog(
-                              context: context,
-                              theme: theme,
-                              documentId: document.id,
-                            );
-                          },
-                          color: theme.colorScheme.onError,
-                          icon: const Icon(
-                            Icons.delete_rounded,
-                          ),
+                      : _buildFloatingActionButton(
+                          context: context,
+                          theme: theme,
                         ),
-                );
-              },
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              body: ListView.separated(
+                padding: const EdgeInsets.only(top: 16, bottom: 80),
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider(
+                    height: 1,
+                    indent: 16,
+                    endIndent: 20,
+                  );
+                },
+                itemCount: documents.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final Document document = documents[index];
+                  return ListTile(
+                    onTap: () async {
+                      await context.pushNamed(
+                        RouteConstants.document,
+                        params: <String, String>{
+                          'projectId': widget.projectId,
+                          'id': document.id.toString(),
+                        },
+                      );
+                      if (mounted) {
+                        context.read<DocumentsBloc>().add(
+                              DocumentsEvent.fetchDocuments(
+                                projectId: int.parse(widget.projectId),
+                              ),
+                            );
+                      }
+                    },
+                    title: Text(document.title),
+                    trailing:
+                        widget.currentUserRole == MemberRole.guest.index + 1
+                            ? null
+                            : IconButton(
+                                onPressed: () {
+                                  _showDeleteDocumentConfirmDialog(
+                                    context: context,
+                                    theme: theme,
+                                    documentId: document.id,
+                                  );
+                                },
+                                color: theme.colorScheme.onError,
+                                icon: const Icon(
+                                  Icons.delete_rounded,
+                                ),
+                              ),
+                  );
+                },
+              ),
             );
           },
           fetchDocumentsFailure: () {
@@ -127,6 +147,42 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           orElse: () => const SizedBox(),
         );
       },
+    );
+  }
+
+  FloatingActionButton _buildFloatingActionButton({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    return FloatingActionButton(
+      onPressed: () async {
+        final int? documentId = await context.pushNamed(
+          RouteConstants.createDocument,
+          params: <String, String>{
+            'projectId': widget.projectId,
+          },
+        );
+        if (mounted && documentId != null) {
+          await context.pushNamed(
+            RouteConstants.document,
+            params: <String, String>{
+              'projectId': widget.projectId,
+              'id': documentId.toString(),
+            },
+          );
+          if (mounted) {
+            context.read<DocumentsBloc>().add(
+                  DocumentsEvent.fetchDocuments(
+                    projectId: int.parse(widget.projectId),
+                  ),
+                );
+          }
+        }
+      },
+      child: Icon(
+        Icons.add,
+        color: theme.colorScheme.primary,
+      ),
     );
   }
 

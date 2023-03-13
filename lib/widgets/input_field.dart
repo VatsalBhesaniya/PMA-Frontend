@@ -19,6 +19,7 @@ class InputField extends StatelessWidget {
     this.style,
     this.validator,
     this.focusNode,
+    this.autofocus = false,
     this.horizontalContentPadding = 16,
     this.scrollPadding = const EdgeInsets.all(20),
     this.onFieldSubmitted,
@@ -42,6 +43,7 @@ class InputField extends StatelessWidget {
   final TextStyle? style;
   final FormFieldValidator<String>? validator;
   final FocusNode? focusNode;
+  final bool autofocus;
   final double horizontalContentPadding;
   final EdgeInsets scrollPadding;
   final Function(String)? onFieldSubmitted;
@@ -60,6 +62,7 @@ class InputField extends StatelessWidget {
       obscuringCharacter: '*',
       enabled: isEnabled,
       focusNode: focusNode,
+      autofocus: autofocus,
       scrollPadding: scrollPadding,
       decoration: _inputDecoration(context, currentTheme),
       style: style ?? currentTheme.textTheme.bodyMedium,

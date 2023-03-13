@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/invited_projects/bloc/invited_projects_bloc.dart';
@@ -44,13 +44,19 @@ class _InvitedPorojectsScreenState extends State<InvitedPorojectsScreen> {
                   itemBuilder: (BuildContext context, int index) {
                     final Project project = projects[index];
                     return ListTile(
-                      onTap: () {
-                        context.goNamed(
+                      onTap: () async {
+                        await context.pushNamed(
                           RouteConstants.project,
                           params: <String, String>{
                             'projectId': project.id.toString(),
                           },
                         );
+                        if (mounted) {
+                          context.read<InvitedProjectsBloc>().add(
+                                const InvitedProjectsEvent
+                                    .fetchInvitedProjects(),
+                              );
+                        }
                       },
                       title: Text(
                         project.title,

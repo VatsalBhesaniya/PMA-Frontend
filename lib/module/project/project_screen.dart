@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/Documents/bloc/documents_bloc.dart';
@@ -65,15 +65,25 @@ class _ProjectScreenState extends State<ProjectScreen>
                       projectId: int.parse(widget.projectId),
                     ),
                   );
-              return const CircularProgressIndicator();
+              return const Scaffold(
+                body: CircularProgressIndicator(),
+              );
             },
             loadInProgress: () {
-              return const CircularProgressIndicator();
+              return const Scaffold(
+                body: CircularProgressIndicator(),
+              );
             },
             fetchProjectSuccess: (Project project) {
               return Scaffold(
                 appBar: AppBar(
                   title: Text(project.title),
+                  automaticallyImplyLeading: false,
+                  leading: BackButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                  ),
                   actions: <Widget>[
                     _buildActionButton(
                       context: context,
@@ -81,14 +91,6 @@ class _ProjectScreenState extends State<ProjectScreen>
                     ),
                   ],
                 ),
-                floatingActionButton:
-                    project.currentUserRole == MemberRole.guest.index + 1
-                        ? null
-                        : _buildFloatingActionButton(
-                            theme: theme,
-                          ),
-                floatingActionButtonLocation:
-                    FloatingActionButtonLocation.centerDocked,
                 body: Column(
                   children: <Widget>[
                     _buildTabBar(theme: theme),
@@ -101,53 +103,15 @@ class _ProjectScreenState extends State<ProjectScreen>
               );
             },
             fetchProjectFailure: () {
-              return const Center(
-                child: Text('Something went wrong.'),
+              return const Scaffold(
+                body: Center(
+                  child: Text('Something went wrong.'),
+                ),
               );
             },
             orElse: () => const SizedBox(),
           );
         },
-      ),
-    );
-  }
-
-  FloatingActionButton _buildFloatingActionButton({
-    required ThemeData theme,
-  }) {
-    return FloatingActionButton(
-      onPressed: () {
-        switch (_tabController.index) {
-          case 0:
-            context.goNamed(
-              RouteConstants.createTask,
-              params: <String, String>{
-                'projectId': widget.projectId,
-              },
-            );
-            break;
-          case 1:
-            context.goNamed(
-              RouteConstants.createNote,
-              params: <String, String>{
-                'projectId': widget.projectId,
-              },
-            );
-            break;
-          case 2:
-            context.goNamed(
-              RouteConstants.createDocument,
-              params: <String, String>{
-                'projectId': widget.projectId,
-              },
-            );
-            break;
-          default:
-        }
-      },
-      child: Icon(
-        Icons.add,
-        color: theme.colorScheme.primary,
       ),
     );
   }
@@ -204,7 +168,11 @@ class _ProjectScreenState extends State<ProjectScreen>
               tasksRepository: TasksRepository(
                 dioClient: context.read<DioClient>(),
               ),
-            ),
+            )..add(
+                TasksEvent.fetchTasks(
+                  projectId: int.parse(widget.projectId),
+                ),
+              ),
             child: TasksScreen(
               projectId: widget.projectId,
               currentUserRole: currentUserRole,
@@ -215,7 +183,11 @@ class _ProjectScreenState extends State<ProjectScreen>
               notesRepository: NotesRepository(
                 dioClient: context.read<DioClient>(),
               ),
-            ),
+            )..add(
+                NotesEvent.fetchNotes(
+                  projectId: int.parse(widget.projectId),
+                ),
+              ),
             child: NotesScreen(
               projectId: widget.projectId,
               currentUserRole: currentUserRole,
@@ -242,13 +214,16 @@ class _ProjectScreenState extends State<ProjectScreen>
     required ThemeData theme,
   }) {
     return IconButton(
-      onPressed: () {
-        context.goNamed(
+      onPressed: () async {
+        final bool? isDeleted = await context.pushNamed(
           RouteConstants.projectDetail,
           params: <String, String>{
             'projectId': widget.projectId,
           },
         );
+        if (mounted && (isDeleted ?? false)) {
+          context.pop();
+        }
       },
       icon: const Icon(Icons.settings),
     );

@@ -11,6 +11,10 @@ class ProjectDetailEvent with _$ProjectDetailEvent {
   const factory ProjectDetailEvent.updateProjectDetail({
     required ProjectDetail projectDetail,
   }) = _UpdateProjectDetail;
+  const factory ProjectDetailEvent.updateProjectMemberRole({
+    required ProjectDetail projectDetail,
+    required Member member,
+  }) = _UpdateProjectMemberRole;
   const factory ProjectDetailEvent.removeMember({
     required int projectId,
     required int userId,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/task.dart';
@@ -74,77 +74,89 @@ class _TasksScreenState extends State<TasksScreen> {
             return const CircularProgressIndicator();
           },
           fetchTasksSuccess: (List<Task> tasks) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      TaskStatus.todo.title,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    Divider(
-                      thickness: 1,
-                      color: theme.colorScheme.primary,
-                    ),
-                    _buildTasks(
-                      context: context,
-                      tasks: tasks
-                          .where((Task task) =>
-                              task.status - 1 == TaskStatus.todo.index)
-                          .toList(),
-                      theme: theme,
-                    ),
-                    Text(
-                      TaskStatus.inProgress.title,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    Divider(
-                      thickness: 1,
-                      color: theme.colorScheme.primary,
-                    ),
-                    _buildTasks(
-                      context: context,
-                      tasks: tasks
-                          .where((Task task) =>
-                              task.status - 1 == TaskStatus.inProgress.index)
-                          .toList(),
-                      theme: theme,
-                    ),
-                    Text(
-                      TaskStatus.completed.title,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    Divider(
-                      thickness: 1,
-                      color: theme.colorScheme.primary,
-                    ),
-                    _buildTasks(
-                      context: context,
-                      tasks: tasks
-                          .where((Task task) =>
-                              task.status - 1 == TaskStatus.completed.index)
-                          .toList(),
-                      theme: theme,
-                    ),
-                    Text(
-                      TaskStatus.qa.title,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    Divider(
-                      thickness: 1,
-                      color: theme.colorScheme.primary,
-                    ),
-                    _buildTasks(
-                      context: context,
-                      tasks: tasks
-                          .where((Task task) =>
-                              task.status - 1 == TaskStatus.qa.index)
-                          .toList(),
-                      theme: theme,
-                    ),
-                  ],
+            return Scaffold(
+              floatingActionButton:
+                  widget.currentUserRole == MemberRole.guest.index + 1
+                      ? null
+                      : _buildFloatingActionButton(
+                          context: context,
+                          theme: theme,
+                        ),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        TaskStatus.todo.title,
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                      Divider(
+                        thickness: 1,
+                        color: theme.colorScheme.primary,
+                      ),
+                      _buildTasks(
+                        context: context,
+                        tasks: tasks
+                            .where((Task task) =>
+                                task.status - 1 == TaskStatus.todo.index)
+                            .toList(),
+                        theme: theme,
+                      ),
+                      Text(
+                        TaskStatus.inProgress.title,
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                      Divider(
+                        thickness: 1,
+                        color: theme.colorScheme.primary,
+                      ),
+                      _buildTasks(
+                        context: context,
+                        tasks: tasks
+                            .where((Task task) =>
+                                task.status - 1 == TaskStatus.inProgress.index)
+                            .toList(),
+                        theme: theme,
+                      ),
+                      Text(
+                        TaskStatus.completed.title,
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                      Divider(
+                        thickness: 1,
+                        color: theme.colorScheme.primary,
+                      ),
+                      _buildTasks(
+                        context: context,
+                        tasks: tasks
+                            .where((Task task) =>
+                                task.status - 1 == TaskStatus.completed.index)
+                            .toList(),
+                        theme: theme,
+                      ),
+                      Text(
+                        TaskStatus.qa.title,
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                      Divider(
+                        thickness: 1,
+                        color: theme.colorScheme.primary,
+                      ),
+                      _buildTasks(
+                        context: context,
+                        tasks: tasks
+                            .where((Task task) =>
+                                task.status - 1 == TaskStatus.qa.index)
+                            .toList(),
+                        theme: theme,
+                      ),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -157,6 +169,42 @@ class _TasksScreenState extends State<TasksScreen> {
           orElse: () => const SizedBox(),
         );
       },
+    );
+  }
+
+  FloatingActionButton _buildFloatingActionButton({
+    required BuildContext context,
+    required ThemeData theme,
+  }) {
+    return FloatingActionButton(
+      onPressed: () async {
+        final int? taskId = await context.pushNamed(
+          RouteConstants.createTask,
+          params: <String, String>{
+            'projectId': widget.projectId,
+          },
+        );
+        if (mounted && taskId != null) {
+          await context.pushNamed(
+            RouteConstants.task,
+            params: <String, String>{
+              'projectId': widget.projectId,
+              'taskId': taskId.toString(),
+            },
+          );
+          if (mounted) {
+            context.read<TasksBloc>().add(
+                  TasksEvent.fetchTasks(
+                    projectId: int.parse(widget.projectId),
+                  ),
+                );
+          }
+        }
+      },
+      child: Icon(
+        Icons.add,
+        color: theme.colorScheme.primary,
+      ),
     );
   }
 
@@ -182,14 +230,21 @@ class _TasksScreenState extends State<TasksScreen> {
       itemBuilder: (BuildContext context, int index) {
         final Task task = tasks[index];
         return ListTile(
-          onTap: () {
-            context.goNamed(
+          onTap: () async {
+            await context.pushNamed(
               RouteConstants.task,
               params: <String, String>{
                 'projectId': widget.projectId,
                 'taskId': task.id.toString(),
               },
             );
+            if (mounted) {
+              context.read<TasksBloc>().add(
+                    TasksEvent.fetchTasks(
+                      projectId: int.parse(widget.projectId),
+                    ),
+                  );
+            }
           },
           title: Text(
             task.title,

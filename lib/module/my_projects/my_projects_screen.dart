@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/create_project.dart';
 import 'package:pma/models/project.dart';
@@ -26,7 +26,6 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButtonExtended(
         onPressed: () {
           _showCreateProjectDialog(
@@ -40,6 +39,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
           color: theme.colorScheme.background,
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SafeArea(
         child: BlocConsumer<MyProjectsBloc, MyProjectsState>(
           listener: (BuildContext context, MyProjectsState state) {
@@ -84,7 +84,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
               },
               fetchProjectsSuccess: (List<Project> projects) {
                 return ListView.separated(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.only(top: 16, bottom: 80),
                   separatorBuilder: (BuildContext context, int index) {
                     return const Divider();
                   },
@@ -92,13 +92,18 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                   itemBuilder: (BuildContext context, int index) {
                     final Project project = projects[index];
                     return ListTile(
-                      onTap: () {
-                        context.goNamed(
+                      onTap: () async {
+                        await context.pushNamed(
                           RouteConstants.project,
                           params: <String, String>{
                             'projectId': project.id.toString(),
                           },
                         );
+                        if (mounted) {
+                          context.read<MyProjectsBloc>().add(
+                                const MyProjectsEvent.fetchProjects(),
+                              );
+                        }
                       },
                       title: Text(
                         project.title,
@@ -166,6 +171,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                   key: _formKey,
                   child: InputField(
                     controller: _projectTitleController,
+                    autofocus: true,
                     hintText: 'Project title',
                     borderType: InputFieldBorderType.underlineInputBorder,
                     validator: (String? value) {

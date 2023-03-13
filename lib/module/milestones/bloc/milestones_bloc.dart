@@ -23,6 +23,7 @@ class MilestonesBloc extends Bloc<MilestonesEvent, MilestonesState> {
 
   FutureOr<void> _onFetchMilestones(
       _FetchMilestones event, Emitter<MilestonesState> emit) async {
+    emit(const MilestonesState.loadInProgress());
     final ApiResult<Roadmap> apiResult =
         await _milestonesRepository.fetchMilestones(projectId: event.projectId);
     apiResult.when(

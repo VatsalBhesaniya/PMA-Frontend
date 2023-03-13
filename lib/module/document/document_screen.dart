@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:go_router/go_router.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/user.dart';
@@ -54,12 +54,12 @@ class _DocumentScreenState extends State<DocumentScreen> {
               );
             },
             deleteDocumentSuccess: () {
-              context.pop();
               showSnackBar(
                 context: context,
                 theme: theme,
                 message: 'Document successfully deleted',
               );
+              context.pop();
             },
             deleteDocumentFailure: (NetworkExceptions error) {
               pmaAlertDialog(
@@ -109,6 +109,12 @@ class _DocumentScreenState extends State<DocumentScreen> {
               return Scaffold(
                 appBar: AppBar(
                   title: const Text('Document Detail'),
+                  automaticallyImplyLeading: false,
+                  leading: BackButton(
+                    onPressed: () {
+                      context.pop();
+                    },
+                  ),
                   actions:
                       document.currentUserRole == MemberRole.guest.index + 1
                           ? null
@@ -175,11 +181,17 @@ class _DocumentScreenState extends State<DocumentScreen> {
               );
             },
             fetchDocumentFailure: () {
-              return const Center(
-                child: Text('Something went wrong.'),
+              return const Scaffold(
+                body: Center(
+                  child: Text('Something went wrong.'),
+                ),
               );
             },
-            orElse: () => const SizedBox(),
+            orElse: () {
+              return const Scaffold(
+                body: SizedBox(),
+              );
+            },
           );
         },
       ),

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
-import 'package:go_router/go_router.dart';
-import 'package:pma/constants/route_constants.dart';
+import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/models/create_note.dart';
 import 'package:pma/module/create_note/bloc/create_note_bloc.dart';
 import 'package:pma/module/create_note/create_note_repository.dart';
@@ -54,14 +53,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                     theme: theme,
                     message: 'Note successfully created.',
                   );
-                  context.pop();
-                  context.goNamed(
-                    RouteConstants.note,
-                    params: <String, String>{
-                      'projectId': widget.projectId,
-                      'id': noteId.toString(),
-                    },
-                  );
+                  context.pop(noteId);
                 },
                 createNoteFailure: (NetworkExceptions error) {
                   pmaAlertDialog(
@@ -93,7 +85,6 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                       child: Column(
                         children: <Widget>[
                           InputField(
-                            onChanged: (String value) {},
                             controller: _noteTitleController,
                             hintText: 'Title',
                             borderType:

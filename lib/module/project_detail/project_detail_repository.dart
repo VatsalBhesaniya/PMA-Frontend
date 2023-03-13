@@ -19,8 +19,13 @@ class ProjectDetailRepository {
         url: '$projectDetailEndpoint/$projectId',
         httpMethod: HttpMethod.get,
       );
+      if (data == null) {
+        return const ApiResult<ProjectDetail?>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
       return ApiResult<ProjectDetail?>.success(
-        data: ProjectDetail.fromJson(data!),
+        data: ProjectDetail.fromJson(data),
       );
     } on Exception catch (e) {
       return ApiResult<ProjectDetail?>.failure(
@@ -38,6 +43,25 @@ class ProjectDetailRepository {
         url: '$projectsEndpoint/$projectId',
         httpMethod: HttpMethod.put,
         data: projectData,
+      );
+      return const ApiResult<void>.success(
+        data: null,
+      );
+    } on Exception catch (e) {
+      return ApiResult<void>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
+  Future<ApiResult<void>> updateProjectMemberRole({
+    required Map<String, dynamic> memberData,
+  }) async {
+    try {
+      await dioClient.request<Map<String, dynamic>?>(
+        url: inviteMembersEndpoint,
+        httpMethod: HttpMethod.put,
+        data: memberData,
       );
       return const ApiResult<void>.success(
         data: null,
