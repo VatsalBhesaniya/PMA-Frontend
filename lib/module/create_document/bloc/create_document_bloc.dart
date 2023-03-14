@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/create_document.dart';
 import 'package:pma/module/create_document/create_document_repository.dart';
@@ -11,7 +11,8 @@ part 'create_document_state.dart';
 part 'create_document_event.dart';
 part 'create_document_bloc.freezed.dart';
 
-class CreateDocumentBloc extends Bloc<CreateDocumentEvent, CreateDocumentState> {
+class CreateDocumentBloc
+    extends Bloc<CreateDocumentEvent, CreateDocumentState> {
   CreateDocumentBloc({
     required CreateDocumentRepository createDocumentRepository,
   })  : _createDocumentRepository = createDocumentRepository,
@@ -23,7 +24,8 @@ class CreateDocumentBloc extends Bloc<CreateDocumentEvent, CreateDocumentState> 
 
   FutureOr<void> _onCreateDocument(
       _CreateDocument event, Emitter<CreateDocumentState> emit) async {
-    final ApiResult<int?> apiResult = await _createDocumentRepository.createDocument(
+    final ApiResult<int?> apiResult =
+        await _createDocumentRepository.createDocument(
       documentData: event.document.toJson(),
     );
     apiResult.when(

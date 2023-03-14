@@ -10,7 +10,7 @@ class NoteRepository {
   });
   final DioClient dioClient;
 
-  Future<ApiResult<Note?>> fetchNote({
+  Future<ApiResult<Note>> fetchNote({
     required int noteId,
   }) async {
     try {
@@ -19,11 +19,16 @@ class NoteRepository {
         url: '$notesEndpoint/$noteId',
         httpMethod: HttpMethod.get,
       );
-      return ApiResult<Note?>.success(
-        data: Note.fromJson(data!),
+      if (data == null) {
+        return const ApiResult<Note>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+      return ApiResult<Note>.success(
+        data: Note.fromJson(data),
       );
     } on Exception catch (e) {
-      return ApiResult<Note?>.failure(
+      return ApiResult<Note>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

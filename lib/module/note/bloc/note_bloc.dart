@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/module/note/note_repository.dart';
@@ -26,15 +26,11 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
 
   FutureOr<void> _onFetchNote(_FetchNote event, Emitter<NoteState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<Note?> apiResult =
+    final ApiResult<Note> apiResult =
         await _noteRepository.fetchNote(noteId: event.noteId);
     apiResult.when(
-      success: (Note? note) {
-        if (note == null) {
-          emit(const _FetchNoteFailure());
-        } else {
-          emit(_FetchNoteSuccess(note: note));
-        }
+      success: (Note note) {
+        emit(_FetchNoteSuccess(note: note));
       },
       failure: (NetworkExceptions error) {
         emit(const _FetchNoteFailure());
