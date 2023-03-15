@@ -1,3 +1,4 @@
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/utils/api_result.dart';
@@ -6,19 +7,24 @@ import 'package:pma/utils/network_exceptions.dart';
 
 class NoteRepository {
   NoteRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
   Future<ApiResult<Note>> fetchNote({
     required int noteId,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$notesEndpoint/$noteId',
-        httpMethod: HttpMethod.get,
+      final Response<Map<String, dynamic>?> response =
+          await dio.get<Map<String, dynamic>?>(
+        '$notesEndpoint/$noteId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<Note>.failure(
           error: NetworkExceptions.defaultError(),
@@ -38,14 +44,17 @@ class NoteRepository {
     required Note note,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$notesEndpoint/${note.id}',
-        httpMethod: HttpMethod.put,
+      final Response<Map<String, dynamic>?> response =
+          await dio.put<Map<String, dynamic>?>(
+        '$notesEndpoint/${note.id}',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: note.toJson()
           ..remove('id')
           ..remove('created_by'),
       );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<Note>.failure(
           error: NetworkExceptions.defaultError(),
@@ -65,9 +74,11 @@ class NoteRepository {
     required int noteId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$notesEndpoint/$noteId',
-        httpMethod: HttpMethod.delete,
+      await dio.delete<Map<String, dynamic>?>(
+        '$notesEndpoint/$noteId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
       return const ApiResult<bool>.success(
         data: true,

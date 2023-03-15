@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/module/note/bloc/note_bloc.dart';
@@ -38,7 +39,8 @@ class _NoteScreenState extends State<NoteScreen> {
     return BlocProvider<NoteBloc>(
       create: (BuildContext context) => NoteBloc(
         noteRepository: NoteRepository(
-          dioClient: context.read<DioClient>(),
+          dio: context.read<Dio>(),
+          dioConfig: context.read<DioConfig>(),
         ),
       ),
       child: BlocConsumer<NoteBloc, NoteState>(
