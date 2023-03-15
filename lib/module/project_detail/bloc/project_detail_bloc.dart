@@ -105,13 +105,13 @@ class ProjectDetailBloc extends Bloc<ProjectDetailEvent, ProjectDetailState> {
   FutureOr<void> _onRemoveMember(
       _RemoveMember event, Emitter<ProjectDetailState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult =
+    final ApiResult<void> apiResult =
         await _projectDetailRepository.removeMember(
       projectId: event.projectId,
       userId: event.userId,
     );
     apiResult.when(
-      success: (bool isRemoved) {
+      success: (void result) {
         emit(const _RemoveMemberSuccess());
       },
       failure: (NetworkExceptions error) {
@@ -123,12 +123,12 @@ class ProjectDetailBloc extends Bloc<ProjectDetailEvent, ProjectDetailState> {
   FutureOr<void> _onDeleteProject(
       _DeleteProject event, Emitter<ProjectDetailState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult =
+    final ApiResult<void> apiResult =
         await _projectDetailRepository.deleteProject(
       projectId: event.projectId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteProjectSuccess());
       },
       failure: (NetworkExceptions error) {
