@@ -1,3 +1,4 @@
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/utils/api_result.dart';
@@ -6,18 +7,23 @@ import 'package:pma/utils/network_exceptions.dart';
 
 class NotesRepository {
   NotesRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
   Future<ApiResult<List<Note>>> fetchNotes({
     required int projectId,
   }) async {
     try {
-      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$projectNotesEndpoint/$projectId',
-        httpMethod: HttpMethod.get,
+      final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
+        '$projectNotesEndpoint/$projectId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final List<dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<List<Note>>.failure(
           error: NetworkExceptions.defaultError(),
@@ -43,9 +49,11 @@ class NotesRepository {
     required int noteId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$notesEndpoint/$noteId',
-        httpMethod: HttpMethod.delete,
+      await dio.delete<Map<String, dynamic>?>(
+        '$notesEndpoint/$noteId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
       return const ApiResult<bool>.success(
         data: true,

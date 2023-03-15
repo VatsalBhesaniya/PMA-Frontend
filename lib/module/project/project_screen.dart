@@ -184,7 +184,8 @@ class _ProjectScreenState extends State<ProjectScreen>
           BlocProvider<NotesBloc>(
             create: (BuildContext context) => NotesBloc(
               notesRepository: NotesRepository(
-                dioClient: context.read<DioClient>(),
+                dio: context.read<Dio>(),
+                dioConfig: context.read<DioConfig>(),
               ),
             )..add(
                 NotesEvent.fetchNotes(
