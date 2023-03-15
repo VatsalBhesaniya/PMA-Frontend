@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
@@ -51,6 +52,26 @@ void main() {
           Provider<DioClient>.value(
             value: dioClient,
           ),
+          Provider<Dio>.value(
+            value: Dio(
+              BaseOptions(
+                baseUrl: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
+                connectTimeout: const Duration(minutes: 1),
+                receiveTimeout: const Duration(minutes: 1),
+                headers: <String, String>{
+                  'Content-Type': 'application/json; charset=UTF-8'
+                },
+              ),
+            ),
+          ),
+          Provider<DioConfig>.value(
+            value: DioConfig(
+              baseUrl: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8'
+              },
+            ),
+          ),
           Provider<AppStorageManager>.value(value: appStorageManager),
           BlocProvider<AuthenticationBloc>(
             create: (BuildContext context) => AuthenticationBloc(
@@ -73,6 +94,9 @@ void main() {
                 router.goNamed(RouteConstants.login);
               },
               authenticated: (String token, User user) {
+                context.read<DioConfig>().addAccessTokenToHeader(
+                      value: token,
+                    );
                 context.read<DioClient>().addAccessTokenToHeader(
                       value: token,
                     );
