@@ -74,7 +74,7 @@ class NoteRepository {
     required int noteId,
   }) async {
     try {
-      await dio.delete<Map<String, dynamic>?>(
+      await dio.delete<void>(
         '$notesEndpoint/$noteId',
         options: Options(
           headers: dioConfig.headers,

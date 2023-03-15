@@ -187,7 +187,7 @@ class TaskRepository {
     required int userId,
   }) async {
     try {
-      await dio.delete<Map<String, dynamic>?>(
+      await dio.delete<void>(
         '$assignTasksEndpoint/$taskId/$projectId/$userId',
         options: Options(
           headers: dioConfig.headers,

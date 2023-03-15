@@ -46,7 +46,7 @@ class ProfileRepository {
     required int userId,
   }) async {
     try {
-      await dio.delete<Map<String, dynamic>?>(
+      await dio.delete<void>(
         '$usersEndpoint/$userId',
         options: Options(
           headers: dioConfig.headers,

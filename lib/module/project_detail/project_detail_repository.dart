@@ -88,7 +88,7 @@ class ProjectDetailRepository {
     required int userId,
   }) async {
     try {
-      await dio.delete<Map<String, dynamic>?>(
+      await dio.delete<void>(
         '$membersEndpoint/$projectId/$userId',
         options: Options(
           headers: dioConfig.headers,
@@ -108,7 +108,7 @@ class ProjectDetailRepository {
     required int projectId,
   }) async {
     try {
-      await dio.delete<Map<String, dynamic>?>(
+      await dio.delete<void>(
         '$projectsEndpoint/$projectId',
         options: Options(
           headers: dioConfig.headers,

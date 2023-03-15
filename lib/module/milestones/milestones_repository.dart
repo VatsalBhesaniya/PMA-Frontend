@@ -129,7 +129,7 @@ class MilestonesRepository {
     required int milestoneId,
   }) async {
     try {
-      await dio.delete<Map<String, dynamic>?>(
+      await dio.delete<void>(
         '$milestonesEndpoint/$milestoneId',
         options: Options(
           headers: dioConfig.headers,

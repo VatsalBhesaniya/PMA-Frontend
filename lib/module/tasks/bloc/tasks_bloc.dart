@@ -41,11 +41,11 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   FutureOr<void> _onDeleteTask(
       _DeleteTask event, Emitter<TasksState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult = await _tasksRepository.deleteTask(
+    final ApiResult<void> apiResult = await _tasksRepository.deleteTask(
       taskId: event.taskId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteTaskSuccess());
       },
       failure: (NetworkExceptions error) {

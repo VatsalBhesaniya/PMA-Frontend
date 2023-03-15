@@ -62,11 +62,11 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   FutureOr<void> _onDeleteDocument(
       _DeleteDocument event, Emitter<DocumentState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult = await _documentRepository.deleteDocument(
+    final ApiResult<void> apiResult = await _documentRepository.deleteDocument(
       documentId: event.documentId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteDocumentSuccess());
       },
       failure: (NetworkExceptions error) {

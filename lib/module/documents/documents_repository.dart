@@ -50,7 +50,7 @@ class DocumentsRepository {
     required int documentId,
   }) async {
     try {
-      await dio.delete<Map<String, dynamic>?>(
+      await dio.delete<void>(
         '$documentsEndpoint/$documentId',
         options: Options(
           headers: dioConfig.headers,

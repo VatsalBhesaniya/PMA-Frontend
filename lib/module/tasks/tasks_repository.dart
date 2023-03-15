@@ -42,21 +42,21 @@ class TasksRepository {
     }
   }
 
-  Future<ApiResult<bool>> deleteTask({
+  Future<ApiResult<void>> deleteTask({
     required int taskId,
   }) async {
     try {
-      await dio.delete<Map<String, dynamic>?>(
+      await dio.delete<void>(
         '$tasksEndpoint/$taskId',
         options: Options(
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<bool>.success(
-        data: true,
+      return const ApiResult<void>.success(
+        data: null,
       );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

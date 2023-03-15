@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/member.dart';
@@ -38,7 +39,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     return BlocProvider<ProjectDetailBloc>(
       create: (BuildContext context) => ProjectDetailBloc(
         projectDetailRepository: ProjectDetailRepository(
-          dioClient: context.read<DioClient>(),
+          dio: context.read<Dio>(),
+          dioConfig: context.read<DioConfig>(),
         ),
       ),
       child: BlocConsumer<ProjectDetailBloc, ProjectDetailState>(

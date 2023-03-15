@@ -70,7 +70,7 @@ class DocumentRepository {
     }
   }
 
-  Future<ApiResult<bool>> deleteDocument({
+  Future<ApiResult<void>> deleteDocument({
     required int documentId,
   }) async {
     try {
@@ -80,11 +80,11 @@ class DocumentRepository {
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<bool>.success(
-        data: true,
+      return const ApiResult<void>.success(
+        data: null,
       );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }
