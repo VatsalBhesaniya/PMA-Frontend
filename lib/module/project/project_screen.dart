@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_flow/go_router_flow.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/Documents/bloc/documents_bloc.dart';
@@ -53,7 +54,8 @@ class _ProjectScreenState extends State<ProjectScreen>
     return BlocProvider<ProjectBloc>(
       create: (BuildContext context) => ProjectBloc(
         projectRepository: ProjectRepository(
-          dioClient: context.read<DioClient>(),
+          dio: context.read<Dio>(),
+          dioConfig: context.read<DioConfig>(),
         ),
       ),
       child: BlocBuilder<ProjectBloc, ProjectState>(
@@ -166,7 +168,8 @@ class _ProjectScreenState extends State<ProjectScreen>
           BlocProvider<TasksBloc>(
             create: (BuildContext context) => TasksBloc(
               tasksRepository: TasksRepository(
-                dioClient: context.read<DioClient>(),
+                dio: context.read<Dio>(),
+                dioConfig: context.read<DioConfig>(),
               ),
             )..add(
                 TasksEvent.fetchTasks(
