@@ -59,10 +59,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.1
-
   flutter_test:
     sdk: flutter
   freezed: ^2.3.2
+  http_mock_adapter: ^0.4.2
   json_serializable: ^6.6.1
 
 # For information on the generic Dart part of this file, see the
