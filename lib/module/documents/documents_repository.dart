@@ -1,3 +1,4 @@
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/utils/api_result.dart';
@@ -6,18 +7,23 @@ import 'package:pma/utils/network_exceptions.dart';
 
 class DocumentsRepository {
   DocumentsRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
   Future<ApiResult<List<Document>>> fetchDocuments({
     required int projectId,
   }) async {
     try {
-      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$projectDocumentsEndpoint/$projectId',
-        httpMethod: HttpMethod.get,
+      final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
+        '$projectDocumentsEndpoint/$projectId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final List<dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<List<Document>>.failure(
           error: NetworkExceptions.defaultError(),
@@ -40,19 +46,21 @@ class DocumentsRepository {
     }
   }
 
-  Future<ApiResult<bool>> deleteDocument({
+  Future<ApiResult<void>> deleteDocument({
     required int documentId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$documentsEndpoint/$documentId',
-        httpMethod: HttpMethod.delete,
+      await dio.delete<Map<String, dynamic>?>(
+        '$documentsEndpoint/$documentId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<bool>.success(
-        data: true,
+      return const ApiResult<void>.success(
+        data: null,
       );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

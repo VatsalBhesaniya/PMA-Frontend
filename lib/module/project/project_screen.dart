@@ -199,7 +199,8 @@ class _ProjectScreenState extends State<ProjectScreen>
           BlocProvider<DocumentsBloc>(
             create: (BuildContext context) => DocumentsBloc(
               documentsRepository: DocumentsRepository(
-                dioClient: context.read<DioClient>(),
+                dio: context.read<Dio>(),
+                dioConfig: context.read<DioConfig>(),
               ),
             ),
             child: DocumentsScreen(
