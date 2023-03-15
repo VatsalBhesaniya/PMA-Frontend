@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:go_router_flow/go_router_flow.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/models/create_task.dart';
 import 'package:pma/module/create_task/bloc/create_task_bloc.dart';
 import 'package:pma/module/create_task/create_task_repository.dart';
@@ -40,7 +41,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         child: BlocProvider<CreateTaskBloc>(
           create: (BuildContext context) => CreateTaskBloc(
             createTaskRepository: CreateTaskRepository(
-              dioClient: context.read<DioClient>(),
+              dioConfig: context.read<DioConfig>(),
+              dio: context.read<Dio>(),
             ),
           ),
           child: BlocConsumer<CreateTaskBloc, CreateTaskState>(

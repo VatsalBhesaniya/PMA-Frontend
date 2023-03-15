@@ -1,3 +1,4 @@
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/task.dart';
 import 'package:pma/utils/api_result.dart';
@@ -6,21 +7,25 @@ import 'package:pma/utils/network_exceptions.dart';
 
 class CreateTaskRepository {
   CreateTaskRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
   Future<ApiResult<int>> createTask({
     required Map<String, dynamic> taskData,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: createTasksEndpoint,
-        httpMethod: HttpMethod.post,
+      final Response<Map<String, dynamic>?> response =
+          await dio.post<Map<String, dynamic>?>(
+        createTasksEndpoint,
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: taskData,
       );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<int>.failure(
           error: NetworkExceptions.defaultError(),
