@@ -32,11 +32,29 @@ void main() {
       sharedPreferences: sharedPreferences,
       flutterSecureStorage: const FlutterSecureStorage(),
     );
+    final String baseURL = Platform.isAndroid ? androidBaseUrl : iosBaseUrl;
     final DioClient dioClient = DioClient(
-      baseURL: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
+      baseURL: baseURL,
+    );
+    final Dio dio = Dio(
+      BaseOptions(
+        baseUrl: baseURL,
+        connectTimeout: const Duration(minutes: 1),
+        receiveTimeout: const Duration(minutes: 1),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+      ),
+    );
+    final DioConfig dioConfig = DioConfig(
+      baseUrl: baseURL,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8'
+      },
     );
     final UserRepository userRepository = UserRepository(
-      dioClient: dioClient,
+      dioConfig: dioConfig,
+      dio: dio,
       appStorageManager: appStorageManager,
     );
     late User currentUser;
@@ -53,24 +71,10 @@ void main() {
             value: dioClient,
           ),
           Provider<Dio>.value(
-            value: Dio(
-              BaseOptions(
-                baseUrl: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
-                connectTimeout: const Duration(minutes: 1),
-                receiveTimeout: const Duration(minutes: 1),
-                headers: <String, String>{
-                  'Content-Type': 'application/json; charset=UTF-8'
-                },
-              ),
-            ),
+            value: dio,
           ),
           Provider<DioConfig>.value(
-            value: DioConfig(
-              baseUrl: Platform.isAndroid ? androidBaseUrl : iosBaseUrl,
-              headers: <String, String>{
-                'Content-Type': 'application/json; charset=UTF-8'
-              },
-            ),
+            value: dioConfig,
           ),
           Provider<AppStorageManager>.value(value: appStorageManager),
           BlocProvider<AuthenticationBloc>(

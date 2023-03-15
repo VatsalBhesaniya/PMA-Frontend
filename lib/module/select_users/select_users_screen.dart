@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/select_users/bloc/select_users_bloc.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
 import 'package:pma/widgets/search_bar.dart';
@@ -40,10 +38,7 @@ class _SelectUsersScreenState extends State<SelectUsersScreen> {
     final ThemeData theme = Theme.of(context);
     return BlocProvider<SelectUsersBloc>(
       create: (BuildContext context) => SelectUsersBloc(
-        userRepository: UserRepository(
-          dioClient: context.read<DioClient>(),
-          appStorageManager: context.read<AppStorageManager>(),
-        ),
+        userRepository: RepositoryProvider.of<UserRepository>(context),
       ),
       child: BlocConsumer<SelectUsersBloc, SelectUsersState>(
         listener: (BuildContext context, SelectUsersState state) {

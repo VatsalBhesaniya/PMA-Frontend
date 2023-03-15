@@ -28,7 +28,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
     final ThemeData theme = Theme.of(context);
     return BlocProvider<UpdatePasswordBloc>(
       create: (BuildContext context) => UpdatePasswordBloc(
-        userRepository: context.read<UserRepository>(),
+        userRepository: RepositoryProvider.of<UserRepository>(context),
       ),
       child: Scaffold(
         appBar: AppBar(
