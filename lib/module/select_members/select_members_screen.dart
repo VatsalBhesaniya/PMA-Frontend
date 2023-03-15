@@ -1,10 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pma/config/dio_config.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/select_members/bloc/select_members_bloc.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
 import 'package:pma/widgets/search_bar.dart';

@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_flow/go_router_flow.dart';
@@ -8,7 +9,6 @@ import 'package:pma/module/invited_projects/bloc/invited_projects_bloc.dart';
 import 'package:pma/module/invited_projects/invited_projects_screen.dart';
 import 'package:pma/module/my_projects/bloc/my_projects_bloc.dart';
 import 'package:pma/module/my_projects/my_projects_screen.dart';
-import 'package:pma/utils/dio_client.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

@@ -1,7 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/config/dio_config.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/update_user.dart';
@@ -9,7 +11,6 @@ import 'package:pma/models/user.dart';
 import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/profile/bloc/profile_bloc.dart';
 import 'package:pma/module/profile/profile_repository.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';

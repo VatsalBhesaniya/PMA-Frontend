@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_flow/go_router_flow.dart';
@@ -15,7 +16,6 @@ import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 import 'package:pma/module/tasks/tasks_repository.dart';
 import 'package:pma/module/tasks/tasks_screen.dart';
-import 'package:pma/utils/dio_client.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({

@@ -1,8 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/utils/api_result.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class NotesRepository {

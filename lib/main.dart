@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -16,7 +17,6 @@ import 'package:pma/module/login/bloc/login_bloc.dart';
 import 'package:pma/router/go_router.dart';
 import 'package:pma/theme/app_theme.dart';
 import 'package:pma/theme/pma_theme.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,9 +33,6 @@ void main() {
       flutterSecureStorage: const FlutterSecureStorage(),
     );
     final String baseURL = Platform.isAndroid ? androidBaseUrl : iosBaseUrl;
-    final DioClient dioClient = DioClient(
-      baseURL: baseURL,
-    );
     final Dio dio = Dio(
       BaseOptions(
         baseUrl: baseURL,
@@ -67,9 +64,6 @@ void main() {
               darkTheme: buildDarkTheme(),
             ),
           ),
-          Provider<DioClient>.value(
-            value: dioClient,
-          ),
           Provider<Dio>.value(
             value: dio,
           ),
@@ -99,9 +93,6 @@ void main() {
               },
               authenticated: (String token, User user) {
                 context.read<DioConfig>().addAccessTokenToHeader(
-                      value: token,
-                    );
-                context.read<DioClient>().addAccessTokenToHeader(
                       value: token,
                     );
                 currentUser = user;
