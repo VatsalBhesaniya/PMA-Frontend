@@ -33,7 +33,7 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
         emit(_FetchNoteSuccess(note: note));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchNoteFailure());
+        emit(_FetchNoteFailure(error: error));
       },
     );
   }
@@ -53,7 +53,7 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
         emit(_FetchNoteSuccess(note: note));
       },
       failure: (NetworkExceptions error) {
-        emit(const _UpdateNoteFailure());
+        emit(_UpdateNoteFailure(error: error));
       },
     );
   }

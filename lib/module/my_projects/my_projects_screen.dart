@@ -113,7 +113,7 @@ class _MyPorojectsScreenState extends State<MyPorojectsScreen> {
                   },
                 );
               },
-              fetchProjectsFailure: () {
+              fetchProjectsFailure: (NetworkExceptions error) {
                 return Center(
                   child: Text(
                     'Something went wrong.',

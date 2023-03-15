@@ -37,7 +37,7 @@ class MyProjectsBloc extends Bloc<MyProjectsEvent, MyProjectsState> {
         );
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchProjectsFailure());
+        emit(_FetchProjectsFailure(error: error));
       },
     );
   }

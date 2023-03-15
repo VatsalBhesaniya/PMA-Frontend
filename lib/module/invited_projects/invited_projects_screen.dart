@@ -4,6 +4,7 @@ import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/invited_projects/bloc/invited_projects_bloc.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 class InvitedPorojectsScreen extends StatefulWidget {
   const InvitedPorojectsScreen({super.key});
@@ -66,7 +67,7 @@ class _InvitedPorojectsScreenState extends State<InvitedPorojectsScreen> {
                   },
                 );
               },
-              fetchInvitedProjectsFailure: () {
+              fetchInvitedProjectsFailure: (NetworkExceptions error) {
                 return Center(
                   child: Text(
                     'Something went wrong.',

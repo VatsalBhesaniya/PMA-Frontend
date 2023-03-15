@@ -36,7 +36,7 @@ class InvitedProjectsBloc
         );
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchInvitedProjectsFailure());
+        emit(_FetchInvitedProjectsFailure(error: error));
       },
     );
   }

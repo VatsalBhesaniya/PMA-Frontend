@@ -16,6 +16,7 @@ import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 import 'package:pma/module/tasks/tasks_repository.dart';
 import 'package:pma/module/tasks/tasks_screen.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({
@@ -104,7 +105,7 @@ class _ProjectScreenState extends State<ProjectScreen>
                 ),
               );
             },
-            fetchProjectFailure: () {
+            fetchProjectFailure: (NetworkExceptions error) {
               return const Scaffold(
                 body: Center(
                   child: Text('Something went wrong.'),

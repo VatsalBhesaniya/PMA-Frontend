@@ -47,7 +47,7 @@ class _NoteScreenState extends State<NoteScreen> {
       child: BlocConsumer<NoteBloc, NoteState>(
         listener: (BuildContext context, NoteState state) {
           state.maybeWhen(
-            updateNoteFailure: () async {
+            updateNoteFailure: (NetworkExceptions error) async {
               pmaAlertDialog(
                 context: context,
                 theme: theme,
@@ -74,7 +74,7 @@ class _NoteScreenState extends State<NoteScreen> {
         },
         buildWhen: (NoteState previous, NoteState current) {
           return current.maybeWhen(
-            updateNoteFailure: () => false,
+            updateNoteFailure: (NetworkExceptions error) => false,
             deleteNoteSuccess: () => false,
             deleteNoteFailure: (NetworkExceptions error) => false,
             orElse: () => true,
@@ -161,7 +161,7 @@ class _NoteScreenState extends State<NoteScreen> {
                 ),
               );
             },
-            fetchNoteFailure: () {
+            fetchNoteFailure: (NetworkExceptions error) {
               return const Scaffold(
                 body: Center(
                   child: Text('Something went wrong.'),

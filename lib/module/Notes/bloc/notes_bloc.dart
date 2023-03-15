@@ -25,18 +25,14 @@ class NotesBloc extends Bloc<NotesEvent, NotesState> {
   FutureOr<void> _onFetchNotes(
       _FetchNotes event, Emitter<NotesState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<List<Note>?> apiResult =
+    final ApiResult<List<Note>> apiResult =
         await _notesRepository.fetchNotes(projectId: event.projectId);
     apiResult.when(
-      success: (List<Note>? notes) {
-        if (notes == null) {
-          emit(const _FetchNotesFailure());
-        } else {
-          emit(_FetchNotesSuccess(notes: notes));
-        }
+      success: (List<Note> notes) {
+        emit(_FetchNotesSuccess(notes: notes));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchNotesFailure());
+        emit(_FetchNotesFailure(error: error));
       },
     );
   }

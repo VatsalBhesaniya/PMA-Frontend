@@ -24,18 +24,14 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   FutureOr<void> _onFetchProject(
       _FetchProject event, Emitter<ProjectState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<Project?> apiResult =
+    final ApiResult<Project> apiResult =
         await _projectRepository.fetchProject(projectId: event.projectId);
     apiResult.when(
-      success: (Project? project) {
-        if (project == null) {
-          emit(const _FetchProjectFailure());
-        } else {
-          emit(_FetchProjectSuccess(project: project));
-        }
+      success: (Project project) {
+        emit(_FetchProjectSuccess(project: project));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchProjectFailure());
+        emit(_FetchProjectFailure(error: error));
       },
     );
   }

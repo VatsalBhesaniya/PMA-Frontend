@@ -161,7 +161,7 @@ class _TasksScreenState extends State<TasksScreen> {
               ),
             );
           },
-          fetchTasksFailure: () {
+          fetchTasksFailure: (NetworkExceptions error) {
             return const Center(
               child: Text('Something went wrong.'),
             );

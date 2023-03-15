@@ -33,7 +33,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         emit(_FetchTasksSuccess(tasks: tasks ?? <Task>[]));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchTasksFailure());
+        emit(_FetchTasksFailure(error: error));
       },
     );
   }

@@ -34,7 +34,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
         emit(_FetchDocumentSuccess(document: document));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchDocumentFailure());
+        emit(_FetchDocumentFailure(error: error));
       },
     );
   }
@@ -54,7 +54,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
         emit(_FetchDocumentSuccess(document: document));
       },
       failure: (NetworkExceptions error) {
-        emit(const _UpdateDocumentFailure());
+        emit(_UpdateDocumentFailure(error: error));
       },
     );
   }

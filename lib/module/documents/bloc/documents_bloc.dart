@@ -32,7 +32,7 @@ class DocumentsBloc extends Bloc<DocumentsEvent, DocumentsState> {
         emit(_FetchDocumentsSuccess(documents: documents));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchDocumentsFailure());
+        emit(_FetchDocumentsFailure(error: error));
       },
     );
   }

@@ -48,7 +48,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
       child: BlocConsumer<DocumentBloc, DocumentState>(
         listener: (BuildContext context, DocumentState state) {
           state.maybeWhen(
-            updateDocumentFailure: () async {
+            updateDocumentFailure: (NetworkExceptions error) async {
               pmaAlertDialog(
                 context: context,
                 theme: theme,
@@ -77,7 +77,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
         },
         buildWhen: (DocumentState previous, DocumentState current) {
           return current.maybeWhen(
-            updateDocumentFailure: () => false,
+            updateDocumentFailure: (NetworkExceptions error) => false,
             deleteDocumentSuccess: () => false,
             deleteDocumentFailure: (NetworkExceptions error) => false,
             orElse: () => true,
@@ -183,7 +183,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
                 ),
               );
             },
-            fetchDocumentFailure: () {
+            fetchDocumentFailure: (NetworkExceptions error) {
               return const Scaffold(
                 body: Center(
                   child: Text('Something went wrong.'),
