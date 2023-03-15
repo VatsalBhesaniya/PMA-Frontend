@@ -38,7 +38,7 @@ class InviteMembersBloc extends Bloc<InviteMembersEvent, InviteMembersState> {
       membersData: members,
     );
     apiResult.when(
-      success: (void response) {
+      success: (void result) {
         emit(const InviteMembersState.inviteMembersSuccess());
       },
       failure: (NetworkExceptions error) {
