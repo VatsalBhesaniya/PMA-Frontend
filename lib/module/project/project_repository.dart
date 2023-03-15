@@ -1,3 +1,4 @@
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/models/search_user.dart';
@@ -7,24 +8,34 @@ import 'package:pma/utils/network_exceptions.dart';
 
 class ProjectRepository {
   ProjectRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
-  Future<ApiResult<Project?>> fetchProject({
+  Future<ApiResult<Project>> fetchProject({
     required int projectId,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$projectsEndpoint/$projectId',
-        httpMethod: HttpMethod.get,
+      final Response<Map<String, dynamic>?> response =
+          await dio.get<Map<String, dynamic>?>(
+        '$projectsEndpoint/$projectId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return ApiResult<Project?>.success(
-        data: Project.fromJson(data!),
+      final Map<String, dynamic>? data = response.data;
+      if (data == null) {
+        return const ApiResult<Project>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+      return ApiResult<Project>.success(
+        data: Project.fromJson(data),
       );
     } on Exception catch (e) {
-      return ApiResult<Project?>.failure(
+      return ApiResult<Project>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }
@@ -36,10 +47,13 @@ class ProjectRepository {
     required int taskId,
   }) async {
     try {
-      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$projectMembersEndpoint/$projectId/$taskId?search=$searchText',
-        httpMethod: HttpMethod.get,
+      final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
+        '$projectMembersEndpoint/$projectId/$taskId?search=$searchText',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final List<dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<List<SearchUser>>.failure(
           error: NetworkExceptions.defaultError(),
