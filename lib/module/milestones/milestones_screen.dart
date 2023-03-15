@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/milestone.dart';
 import 'package:pma/models/roadmap.dart';
@@ -34,7 +35,8 @@ class _MilestonesScreenState extends State<MilestonesScreen> {
     return BlocProvider<MilestonesBloc>(
       create: (BuildContext context) => MilestonesBloc(
         milestonesRepository: MilestonesRepository(
-          dioClient: context.read<DioClient>(),
+          dioConfig: context.read<DioConfig>(),
+          dio: context.read<Dio>(),
         ),
       ),
       child: BlocConsumer<MilestonesBloc, MilestonesState>(
