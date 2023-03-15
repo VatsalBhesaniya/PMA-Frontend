@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/select_members/bloc/select_members_bloc.dart';
@@ -42,7 +43,8 @@ class _SelectMembersScreenState extends State<SelectMembersScreen> {
     return BlocProvider<SelectMembersBloc>(
       create: (BuildContext context) => SelectMembersBloc(
         projectRepository: ProjectRepository(
-          dioClient: context.read<DioClient>(),
+          dio: context.read<Dio>(),
+          dioConfig: context.read<DioConfig>(),
         ),
       ),
       child: BlocConsumer<SelectMembersBloc, SelectMembersState>(
