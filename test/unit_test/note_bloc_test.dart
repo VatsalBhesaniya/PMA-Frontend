@@ -1,6 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http_mock_adapter/http_mock_adapter.dart';
 import 'package:http_mock_adapter/src/handlers/request_handler.dart';
@@ -11,7 +10,6 @@ import 'package:pma/module/note/bloc/note_bloc.dart';
 import 'package:pma/module/note/note_repository.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
   group('Bloc Success Scenarios: ', () {
     late Dio dio;
     late DioAdapter dioAdapter;
