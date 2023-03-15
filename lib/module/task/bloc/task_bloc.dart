@@ -78,11 +78,11 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
   FutureOr<void> _onDeleteTask(
       _DeleteTask event, Emitter<TaskState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult = await _taskRepository.deleteTask(
+    final ApiResult<void> apiResult = await _taskRepository.deleteTask(
       taskId: event.taskId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteTaskSuccess());
       },
       failure: (NetworkExceptions error) {
@@ -149,7 +149,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       userId: event.userId,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           const TaskState.removeMemberSuccess(),
         );
@@ -250,7 +250,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       notesData: notesData,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(const TaskState.attachNotesSuccess());
       },
       failure: (NetworkExceptions error) {
@@ -273,7 +273,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       documentsData: documentsData,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(const TaskState.attachDocumentsSuccess());
       },
       failure: (NetworkExceptions error) {
@@ -289,7 +289,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       noteId: event.attachNote.noteId,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(const TaskState.removeAttachedNoteSuccess());
       },
       failure: (NetworkExceptions error) {
@@ -306,7 +306,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
       documentId: event.attachDocument.documentId,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(const TaskState.removeAttachedDocumentSuccess());
       },
       failure: (NetworkExceptions error) {

@@ -40,7 +40,7 @@ class AssignTaskBloc extends Bloc<AssignTaskEvent, AssignTaskState> {
       membersData: members,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           const AssignTaskState.assignTaskToMemberSuccess(),
         );

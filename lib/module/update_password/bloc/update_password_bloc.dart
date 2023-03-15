@@ -29,7 +29,7 @@ class UpdatePasswordBloc
       userData: event.updatePassword.toJson(),
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(const UpdatePasswordState.updatePasswordSuccess());
       },
       failure: (NetworkExceptions error) {

@@ -61,11 +61,11 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   FutureOr<void> _onDeleteNote(
       _DeleteNote event, Emitter<NoteState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult = await _noteRepository.deleteNote(
+    final ApiResult<void> apiResult = await _noteRepository.deleteNote(
       noteId: event.noteId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteNoteSuccess());
       },
       failure: (NetworkExceptions error) {

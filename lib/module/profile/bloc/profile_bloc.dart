@@ -97,7 +97,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       userId: event.userId,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           const ProfileState.deleteUserSuccess(),
         );

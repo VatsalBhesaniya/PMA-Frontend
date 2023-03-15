@@ -40,7 +40,7 @@ class UserRepository {
     appStorageManager.clearStorage();
   }
 
-  Future<ApiResult<String?>> login({
+  Future<ApiResult<String>> login({
     required String email,
     required String password,
   }) async {
@@ -58,15 +58,15 @@ class UserRepository {
       );
       final Map<String, dynamic>? data = response.data;
       if (data == null) {
-        return const ApiResult<String?>.failure(
+        return const ApiResult<String>.failure(
           error: NetworkExceptions.defaultError(),
         );
       }
-      return ApiResult<String?>.success(
+      return ApiResult<String>.success(
         data: data['access_token'] as String,
       );
     } on Exception catch (e) {
-      return ApiResult<String?>.failure(
+      return ApiResult<String>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }
@@ -134,7 +134,7 @@ class UserRepository {
     }
   }
 
-  Future<ApiResult<List<SearchUser>?>> fetchUsers({
+  Future<ApiResult<List<SearchUser>>> fetchUsers({
     required int projectId,
     required String searchText,
   }) async {
@@ -147,7 +147,7 @@ class UserRepository {
       );
       final List<dynamic>? data = response.data;
       if (data == null) {
-        return const ApiResult<List<SearchUser>?>.failure(
+        return const ApiResult<List<SearchUser>>.failure(
           error: NetworkExceptions.defaultError(),
         );
       }
@@ -155,11 +155,11 @@ class UserRepository {
           .map((dynamic user) =>
               SearchUser.fromJson(user as Map<String, dynamic>))
           .toList();
-      return ApiResult<List<SearchUser>?>.success(
+      return ApiResult<List<SearchUser>>.success(
         data: users,
       );
     } on Exception catch (e) {
-      return ApiResult<List<SearchUser>?>.failure(
+      return ApiResult<List<SearchUser>>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

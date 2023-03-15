@@ -29,7 +29,7 @@ class CreateMilestoneBloc
       milestoneData: event.milestone.toJson(),
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           const CreateMilestoneState.createMilestoneSuccess(),
         );

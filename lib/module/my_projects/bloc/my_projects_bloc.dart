@@ -48,7 +48,7 @@ class MyProjectsBloc extends Bloc<MyProjectsEvent, MyProjectsState> {
       projectData: event.project.toJson(),
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(const _CreateProjectSuccess());
       },
       failure: (NetworkExceptions error) {

@@ -23,20 +23,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   FutureOr<void> _onlogin(
       _LoginSubmitted event, Emitter<LoginState> emit) async {
     emit(const LoginState.loadInProgress());
-    final ApiResult<String?> apiResult = await _userRepository.login(
+    final ApiResult<String> apiResult = await _userRepository.login(
         email: event.email, password: event.password);
     apiResult.when(
-      success: (String? token) {
-        if (token != null) {
-          _userRepository.persistToken(token);
-          emit(const LoginState.loginSuccess());
-        } else {
-          emit(
-            const LoginState.loginFailure(
-              error: NetworkExceptions.defaultError(),
-            ),
-          );
-        }
+      success: (String token) {
+        _userRepository.persistToken(token);
+        emit(const LoginState.loginSuccess());
       },
       failure: (NetworkExceptions error) {
         emit(LoginState.loginFailure(error: error));

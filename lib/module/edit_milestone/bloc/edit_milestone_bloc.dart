@@ -85,7 +85,7 @@ class EditMilestoneBloc extends Bloc<EditMilestoneEvent, EditMilestoneState> {
       milestoneId: event.milestoneId,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           const EditMilestoneState.deleteMilestoneSuccess(),
         );

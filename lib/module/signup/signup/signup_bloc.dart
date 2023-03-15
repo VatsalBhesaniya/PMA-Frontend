@@ -27,7 +27,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
       userJson: event.user.toJson(),
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           SignupState.signupSuccess(user: event.user),
         );
