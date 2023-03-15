@@ -8,14 +8,15 @@ import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/module/note/bloc/note_bloc.dart';
 import 'package:pma/module/note/note_repository.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 void main() {
-  group('Bloc Success Scenarios: ', () {
+  group('Note Bloc', () {
     late Dio dio;
     late DioAdapter dioAdapter;
     late NoteBloc noteBloc;
     const int noteId = 1;
-    const String fetchNotesUrl = '$notesEndpoint/$noteId';
+    const String notesUrl = '$notesEndpoint/$noteId';
     final Note note = Note(
       id: 1,
       projectId: 1,
@@ -54,49 +55,155 @@ void main() {
       );
     });
 
-    blocTest<NoteBloc, NoteState>(
-      'Success',
-      setUp: () {
-        return dioAdapter.onGet(
-          fetchNotesUrl,
-          (MockServer request) => request.reply(200, data),
+    group(
+      'Fetch Note',
+      () {
+        blocTest<NoteBloc, NoteState>(
+          'Success',
+          setUp: () {
+            return dioAdapter.onGet(
+              notesUrl,
+              (MockServer request) => request.reply(200, data),
+            );
+          },
+          build: () => noteBloc,
+          act: (NoteBloc bloc) => bloc.add(
+            const NoteEvent.fetchNote(noteId: 1),
+          ),
+          wait: const Duration(milliseconds: 10),
+          expect: () => <NoteState>[
+            const NoteState.loadInProgress(),
+            NoteState.fetchNoteSuccess(
+              note: Note(
+                id: 1,
+                projectId: 1,
+                title: 'title',
+                createdAt: 'createdAt',
+              ),
+            ),
+          ],
+        );
+
+        blocTest<NoteBloc, NoteState>(
+          'Failure',
+          setUp: () {
+            return dioAdapter.onGet(
+              notesUrl,
+              (MockServer request) => request.reply(200, null),
+            );
+          },
+          build: () => noteBloc,
+          act: (NoteBloc bloc) => bloc.add(
+            const NoteEvent.fetchNote(noteId: 1),
+          ),
+          wait: const Duration(milliseconds: 10),
+          expect: () => <NoteState>[
+            const NoteState.loadInProgress(),
+            const NoteState.fetchNoteFailure(
+              error: NetworkExceptions.defaultError(),
+            ),
+          ],
         );
       },
-      build: () => noteBloc,
-      act: (NoteBloc bloc) => bloc.add(
-        const NoteEvent.fetchNote(noteId: 1),
-      ),
-      wait: const Duration(milliseconds: 10),
-      expect: () => <NoteState>[
-        const NoteState.loadInProgress(),
-        NoteState.fetchNoteSuccess(
-          note: Note(
-            id: 1,
-            projectId: 1,
-            title: 'title',
-            createdAt: 'createdAt',
-          ),
-        ),
-      ],
     );
 
-    blocTest<NoteBloc, NoteState>(
-      'Failure',
-      setUp: () {
-        return dioAdapter.onGet(
-          fetchNotesUrl,
-          (MockServer request) => request.reply(200, null),
+    group(
+      'Update Note',
+      () {
+        blocTest<NoteBloc, NoteState>(
+          'Success',
+          setUp: () {
+            return dioAdapter.onPut(
+              notesUrl,
+              data: Matchers.any,
+              (MockServer request) => request.reply(200, data),
+            );
+          },
+          build: () => noteBloc,
+          act: (NoteBloc bloc) => bloc.add(
+            NoteEvent.updateNote(note: note),
+          ),
+          wait: const Duration(milliseconds: 10),
+          expect: () => <NoteState>[
+            const NoteState.loadInProgress(),
+            NoteState.fetchNoteSuccess(
+              note: Note(
+                id: 1,
+                projectId: 1,
+                title: 'title',
+                createdAt: 'createdAt',
+              ),
+            ),
+          ],
+        );
+
+        blocTest<NoteBloc, NoteState>(
+          'Failure',
+          setUp: () {
+            return dioAdapter.onPut(
+              notesUrl,
+              data: Matchers.any,
+              (MockServer request) => request.reply(200, null),
+            );
+          },
+          build: () => noteBloc,
+          act: (NoteBloc bloc) => bloc.add(
+            NoteEvent.updateNote(note: note),
+          ),
+          wait: const Duration(milliseconds: 10),
+          expect: () => <NoteState>[
+            const NoteState.loadInProgress(),
+            const NoteState.updateNoteFailure(
+              error: NetworkExceptions.defaultError(),
+            ),
+          ],
         );
       },
-      build: () => noteBloc,
-      act: (NoteBloc bloc) => bloc.add(
-        const NoteEvent.fetchNote(noteId: 1),
-      ),
-      wait: const Duration(milliseconds: 10),
-      expect: () => <NoteState>[
-        const NoteState.loadInProgress(),
-        const NoteState.fetchNoteFailure(),
-      ],
+    );
+
+    group(
+      'Delete Note',
+      () {
+        blocTest<NoteBloc, NoteState>(
+          'Success',
+          setUp: () {
+            return dioAdapter.onDelete(
+              notesUrl,
+              (MockServer request) => request.reply(204, null),
+            );
+          },
+          build: () => noteBloc,
+          act: (NoteBloc bloc) => bloc.add(
+            const NoteEvent.deleteNote(noteId: 1),
+          ),
+          wait: const Duration(milliseconds: 10),
+          expect: () => <NoteState>[
+            const NoteState.loadInProgress(),
+            const NoteState.deleteNoteSuccess(),
+          ],
+        );
+
+        blocTest<NoteBloc, NoteState>(
+          'Failure',
+          setUp: () {
+            return dioAdapter.onDelete(
+              notesUrl,
+              (MockServer request) => request.reply(200, null),
+            );
+          },
+          build: () => noteBloc,
+          act: (NoteBloc bloc) => bloc.add(
+            const NoteEvent.deleteNote(noteId: 1),
+          ),
+          wait: const Duration(milliseconds: 10),
+          expect: () => <NoteState>[
+            const NoteState.loadInProgress(),
+            const NoteState.deleteNoteFailure(
+              error: NetworkExceptions.defaultError(),
+            ),
+          ],
+        );
+      },
     );
   });
 }
