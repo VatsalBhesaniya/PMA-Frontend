@@ -73,15 +73,20 @@ class ProjectsRepository {
     required Map<String, dynamic> projectData,
   }) async {
     try {
-      await dio.post<void>(
+      final Response<void> response = await dio.post<void>(
         createProjectEndpoint,
         options: Options(
           headers: dioConfig.headers,
         ),
         data: projectData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 201) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
