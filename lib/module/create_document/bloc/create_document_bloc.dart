@@ -24,6 +24,7 @@ class CreateDocumentBloc
 
   FutureOr<void> _onCreateDocument(
       _CreateDocument event, Emitter<CreateDocumentState> emit) async {
+    emit(const CreateDocumentState.loadInProgress());
     final ApiResult<int?> apiResult =
         await _createDocumentRepository.createDocument(
       documentData: event.document.toJson(),

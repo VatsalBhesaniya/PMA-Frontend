@@ -105,8 +105,9 @@ void main() {
         blocTest<CreateTaskBloc, CreateTaskState>(
           'Failure',
           setUp: () {
-            return dioAdapter.onGet(
+            return dioAdapter.onPost(
               createTaskUrl,
+              data: createTaskData,
               (MockServer request) => request.reply(200, null),
             );
           },

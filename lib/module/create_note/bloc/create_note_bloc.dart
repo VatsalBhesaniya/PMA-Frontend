@@ -23,6 +23,7 @@ class CreateNoteBloc extends Bloc<CreateNoteEvent, CreateNoteState> {
 
   FutureOr<void> _onCreateNote(
       _CreateNote event, Emitter<CreateNoteState> emit) async {
+    emit(const CreateNoteState.loadInProgress());
     final ApiResult<int> apiResult = await _createNoteRepository.createNote(
       noteData: event.note.toJson(),
     );
