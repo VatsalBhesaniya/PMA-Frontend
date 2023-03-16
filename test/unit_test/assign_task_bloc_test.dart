@@ -71,9 +71,10 @@ void main() {
         blocTest<AssignTaskBloc, AssignTaskState>(
           'Success',
           setUp: () {
-            return dioAdapter.onGet(
+            return dioAdapter.onPost(
               assignTaskUrl,
-              (MockServer request) => request.reply(200, inviteMemberData),
+              data: inviteMemberData,
+              (MockServer request) => request.reply(200, null),
             );
           },
           build: () => assignTaskBloc,
@@ -94,8 +95,9 @@ void main() {
         blocTest<AssignTaskBloc, AssignTaskState>(
           'Failure',
           setUp: () {
-            return dioAdapter.onGet(
+            return dioAdapter.onPost(
               assignTaskUrl,
+              data: inviteMemberData,
               (MockServer request) => request.reply(500, null),
             );
           },
