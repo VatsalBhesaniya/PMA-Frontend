@@ -28,8 +28,8 @@ void main() {
       completionDate: '2023-03-16T02:51:10.577757+05:30',
     );
     final Milestone milestone = Milestone(
-      id: 1,
-      projectId: 1,
+      id: milestoneId,
+      projectId: projectId,
       title: 'title',
       completionDate: '2023-03-16T02:51:10.577757+05:30',
       description: <dynamic>[],
