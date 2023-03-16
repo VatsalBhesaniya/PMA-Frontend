@@ -76,14 +76,19 @@ class TaskRepository {
     required int taskId,
   }) async {
     try {
-      await dio.delete<void>(
+      final Response<void> response = await dio.delete<void>(
         '$tasksEndpoint/$taskId',
         options: Options(
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -164,15 +169,20 @@ class TaskRepository {
     required List<Map<String, dynamic>> membersData,
   }) async {
     try {
-      await dio.post<void>(
+      final Response<void> response = await dio.post<void>(
         '$assignTasksEndpoint/$taskId',
         options: Options(
           headers: dioConfig.headers,
         ),
         data: membersData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -187,14 +197,19 @@ class TaskRepository {
     required int userId,
   }) async {
     try {
-      await dio.delete<void>(
+      final Response<void> response = await dio.delete<void>(
         '$assignTasksEndpoint/$taskId/$projectId/$userId',
         options: Options(
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -207,15 +222,20 @@ class TaskRepository {
     required List<Map<String, dynamic>> notesData,
   }) async {
     try {
-      await dio.post<void>(
+      final Response<void> response = await dio.post<void>(
         attachNotesEndpoint,
         options: Options(
           headers: dioConfig.headers,
         ),
         data: notesData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -229,14 +249,19 @@ class TaskRepository {
     required int noteId,
   }) async {
     try {
-      await dio.delete<void>(
+      final Response<void> response = await dio.delete<void>(
         '$attachNotesEndpoint/$taskId/$noteId',
         options: Options(
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -249,15 +274,20 @@ class TaskRepository {
     required List<Map<String, dynamic>> documentsData,
   }) async {
     try {
-      await dio.post<void>(
+      final Response<void> response = await dio.post<void>(
         attachDocumentsEndpoint,
         options: Options(
           headers: dioConfig.headers,
         ),
         data: documentsData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -271,14 +301,19 @@ class TaskRepository {
     required int documentId,
   }) async {
     try {
-      await dio.delete<void>(
+      final Response<void> response = await dio.delete<void>(
         '$attachDocumentsEndpoint/$taskId/$documentId',
         options: Options(
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
