@@ -24,6 +24,7 @@ class CreateMilestoneBloc
 
   FutureOr<void> _onCreateMilestone(
       _CreateMilestone event, Emitter<CreateMilestoneState> emit) async {
+    emit(const CreateMilestoneState.loadInProgress());
     final ApiResult<void> apiResult =
         await _milestonesRepository.createMilestone(
       milestoneData: event.milestone.toJson(),
