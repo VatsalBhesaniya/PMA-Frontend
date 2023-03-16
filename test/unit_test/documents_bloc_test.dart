@@ -5,21 +5,21 @@ import 'package:http_mock_adapter/http_mock_adapter.dart';
 import 'package:http_mock_adapter/src/handlers/request_handler.dart';
 import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
-import 'package:pma/models/note.dart';
-import 'package:pma/module/Notes/notes_repository.dart';
-import 'package:pma/module/notes/bloc/notes_bloc.dart';
+import 'package:pma/models/document.dart';
+import 'package:pma/module/Documents/bloc/documents_bloc.dart';
+import 'package:pma/module/Documents/documents_repository.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 void main() {
-  group('Notes Bloc', () {
+  group('Documents Bloc', () {
     late Dio dio;
     late DioAdapter dioAdapter;
-    late NotesBloc notesBloc;
+    late DocumentsBloc documentsBloc;
     const int projectId = 1;
-    const int noteId = 1;
-    const String fetchNotesUrl = '$projectNotesEndpoint/$projectId';
-    const String deleteNoteUrl = '$notesEndpoint/$noteId';
-    final Note note = Note(
+    const int documentId = 1;
+    const String fetchDocumentsUrl = '$projectDocumentsEndpoint/$projectId';
+    const String deleteDocumentUrl = '$documentsEndpoint/$documentId';
+    final Document document = Document(
       id: 59,
       projectId: 50,
       title: 'Test Title',
@@ -34,7 +34,7 @@ void main() {
       isEdit: false,
       isSelected: false,
     );
-    final List<dynamic> data = <dynamic>[note.toJson()];
+    final List<dynamic> data = <dynamic>[document.toJson()];
 
     setUp(() {
       dio = Dio(
@@ -52,8 +52,8 @@ void main() {
         matcher: const UrlRequestMatcher(),
       );
       dio.httpClientAdapter = dioAdapter;
-      notesBloc = NotesBloc(
-        notesRepository: NotesRepository(
+      documentsBloc = DocumentsBloc(
+        documentsRepository: DocumentsRepository(
           dio: dio,
           dioConfig: DioConfig(
             baseUrl: iosBaseUrl,
@@ -67,45 +67,45 @@ void main() {
     });
 
     group(
-      'Fetch Notes',
+      'Fetch Documents',
       () {
-        blocTest<NotesBloc, NotesState>(
+        blocTest<DocumentsBloc, DocumentsState>(
           'Success',
           setUp: () {
             return dioAdapter.onGet(
-              fetchNotesUrl,
+              fetchDocumentsUrl,
               (MockServer request) => request.reply(200, data),
             );
           },
-          build: () => notesBloc,
-          act: (NotesBloc bloc) => bloc.add(
-            const NotesEvent.fetchNotes(projectId: projectId),
+          build: () => documentsBloc,
+          act: (DocumentsBloc bloc) => bloc.add(
+            const DocumentsEvent.fetchDocuments(projectId: projectId),
           ),
           wait: const Duration(milliseconds: 10),
-          expect: () => <NotesState>[
-            const NotesState.loadInProgress(),
-            NotesState.fetchNotesSuccess(
-              notes: <Note>[note],
+          expect: () => <DocumentsState>[
+            const DocumentsState.loadInProgress(),
+            DocumentsState.fetchDocumentsSuccess(
+              documents: <Document>[document],
             ),
           ],
         );
 
-        blocTest<NotesBloc, NotesState>(
+        blocTest<DocumentsBloc, DocumentsState>(
           'Failure',
           setUp: () {
             return dioAdapter.onGet(
-              fetchNotesUrl,
+              fetchDocumentsUrl,
               (MockServer request) => request.reply(200, null),
             );
           },
-          build: () => notesBloc,
-          act: (NotesBloc bloc) => bloc.add(
-            const NotesEvent.fetchNotes(projectId: projectId),
+          build: () => documentsBloc,
+          act: (DocumentsBloc bloc) => bloc.add(
+            const DocumentsEvent.fetchDocuments(projectId: projectId),
           ),
           wait: const Duration(milliseconds: 10),
-          expect: () => <NotesState>[
-            const NotesState.loadInProgress(),
-            const NotesState.fetchNotesFailure(
+          expect: () => <DocumentsState>[
+            const DocumentsState.loadInProgress(),
+            const DocumentsState.fetchDocumentsFailure(
               error: NetworkExceptions.defaultError(),
             ),
           ],
@@ -114,43 +114,43 @@ void main() {
     );
 
     group(
-      'Delete Note',
+      'Delete Document',
       () {
-        blocTest<NotesBloc, NotesState>(
+        blocTest<DocumentsBloc, DocumentsState>(
           'Success',
           setUp: () {
             return dioAdapter.onDelete(
-              deleteNoteUrl,
+              deleteDocumentUrl,
               (MockServer request) => request.reply(204, null),
             );
           },
-          build: () => notesBloc,
-          act: (NotesBloc bloc) => bloc.add(
-            const NotesEvent.deleteNote(noteId: noteId),
+          build: () => documentsBloc,
+          act: (DocumentsBloc bloc) => bloc.add(
+            const DocumentsEvent.deleteDocument(documentId: documentId),
           ),
           wait: const Duration(milliseconds: 10),
-          expect: () => <NotesState>[
-            const NotesState.loadInProgress(),
-            const NotesState.deleteNoteSuccess(),
+          expect: () => <DocumentsState>[
+            const DocumentsState.loadInProgress(),
+            const DocumentsState.deleteDocumentSuccess(),
           ],
         );
 
-        blocTest<NotesBloc, NotesState>(
+        blocTest<DocumentsBloc, DocumentsState>(
           'Failure',
           setUp: () {
             return dioAdapter.onDelete(
-              deleteNoteUrl,
+              deleteDocumentUrl,
               (MockServer request) => request.reply(200, null),
             );
           },
-          build: () => notesBloc,
-          act: (NotesBloc bloc) => bloc.add(
-            const NotesEvent.deleteNote(noteId: noteId),
+          build: () => documentsBloc,
+          act: (DocumentsBloc bloc) => bloc.add(
+            const DocumentsEvent.deleteDocument(documentId: documentId),
           ),
           wait: const Duration(milliseconds: 10),
-          expect: () => <NotesState>[
-            const NotesState.loadInProgress(),
-            const NotesState.deleteNoteFailure(
+          expect: () => <DocumentsState>[
+            const DocumentsState.loadInProgress(),
+            const DocumentsState.deleteDocumentFailure(
               error: NetworkExceptions.defaultError(),
             ),
           ],

@@ -74,14 +74,19 @@ class DocumentRepository {
     required int documentId,
   }) async {
     try {
-      await dio.delete<void>(
+      final Response<void> response = await dio.delete<void>(
         '$documentsEndpoint/$documentId',
         options: Options(
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
