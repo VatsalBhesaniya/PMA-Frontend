@@ -41,7 +41,7 @@ class ProjectsRepository {
     }
   }
 
-  Future<ApiResult<List<Project>?>> fetchInvitedProjects() async {
+  Future<ApiResult<List<Project>>> fetchInvitedProjects() async {
     try {
       final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
         invitedProjectsEndpoint,
@@ -51,7 +51,7 @@ class ProjectsRepository {
       );
       final List<dynamic>? data = response.data;
       if (data == null) {
-        return const ApiResult<List<Project>?>.failure(
+        return const ApiResult<List<Project>>.failure(
           error: NetworkExceptions.defaultError(),
         );
       }
@@ -59,11 +59,11 @@ class ProjectsRepository {
           .map((dynamic project) =>
               Project.fromJson(project as Map<String, dynamic>))
           .toList();
-      return ApiResult<List<Project>?>.success(
+      return ApiResult<List<Project>>.success(
         data: projects,
       );
     } on Exception catch (e) {
-      return ApiResult<List<Project>?>.failure(
+      return ApiResult<List<Project>>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

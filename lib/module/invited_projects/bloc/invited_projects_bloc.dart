@@ -25,13 +25,13 @@ class InvitedProjectsBloc
   FutureOr<void> _onFetchProjects(
       _FetchInvitedProjects event, Emitter<InvitedProjectsState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<List<Project>?> apiResult =
+    final ApiResult<List<Project>> apiResult =
         await _projectsRepository.fetchInvitedProjects();
     apiResult.when(
-      success: (List<Project>? data) {
+      success: (List<Project> data) {
         emit(
           _FetchInvitedProjectsSuccess(
-            projects: data ?? <Project>[],
+            projects: data,
           ),
         );
       },
