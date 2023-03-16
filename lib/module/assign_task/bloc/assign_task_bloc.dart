@@ -31,7 +31,6 @@ class AssignTaskBloc extends Bloc<AssignTaskEvent, AssignTaskState> {
         userId: user.id,
         projectId: event.projectId,
         role: 3,
-        status: 2,
       );
       members.add(member.toJson());
     }

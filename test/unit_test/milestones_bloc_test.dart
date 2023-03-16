@@ -13,7 +13,7 @@ import 'package:pma/module/milestones/milestones_repository.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 void main() {
-  group('Notes Bloc', () {
+  group('Milestones Bloc', () {
     late Dio dio;
     late DioAdapter dioAdapter;
     late MilestonesBloc milestonesBloc;
@@ -66,7 +66,7 @@ void main() {
     });
 
     group(
-      'Fetch Notes',
+      'Fetch Milestones',
       () {
         blocTest<MilestonesBloc, MilestonesState>(
           'Success',

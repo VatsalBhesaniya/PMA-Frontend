@@ -29,7 +29,6 @@ class InviteMembersBloc extends Bloc<InviteMembersEvent, InviteMembersState> {
         userId: user.id,
         projectId: event.projectId,
         role: 3,
-        status: 2,
       );
       members.add(member.toJson());
     }
