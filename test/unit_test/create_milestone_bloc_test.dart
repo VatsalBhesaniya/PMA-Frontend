@@ -16,7 +16,7 @@ void main() {
     late Dio dio;
     late DioAdapter dioAdapter;
     late CreateMilestoneBloc createMilestoneBloc;
-    const int noteId = 1;
+    const int milestoneId = 1;
     const int projectId = 1;
     const String createMilestoneUrl = createMilestonesEndpoint;
     final CreateMilestone createMilestone = CreateMilestone(
@@ -29,7 +29,7 @@ void main() {
     );
     final Map<String, dynamic> createMilestoneData = createMilestone.toJson();
     final Milestone milestone = Milestone(
-      id: noteId,
+      id: milestoneId,
       projectId: projectId,
       title: 'title',
       completionDate: '2023-03-16T02:51:10.577757+05:30',
