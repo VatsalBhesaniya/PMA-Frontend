@@ -23,6 +23,7 @@ class CreateTaskBloc extends Bloc<CreateTaskEvent, CreateTaskState> {
 
   FutureOr<void> _onCreateTask(
       _CreateTask event, Emitter<CreateTaskState> emit) async {
+    emit(const CreateTaskState.loadInProgress());
     final ApiResult<int> apiResult = await _createTaskRepository.createTask(
       taskData: event.task.toJson(),
     );
