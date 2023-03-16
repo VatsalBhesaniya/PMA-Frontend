@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/models/invite_member.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/invite_members/invite_members_repository.dart';
@@ -28,7 +29,7 @@ class InviteMembersBloc extends Bloc<InviteMembersEvent, InviteMembersState> {
       final InviteMember member = InviteMember(
         userId: user.id,
         projectId: event.projectId,
-        role: 3,
+        role: MemberRole.member.index + 1,
       );
       members.add(member.toJson());
     }
