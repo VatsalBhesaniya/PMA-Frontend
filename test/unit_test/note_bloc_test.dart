@@ -21,7 +21,7 @@ void main() {
       id: 1,
       projectId: 1,
       title: 'title',
-      createdAt: 'createdAt',
+      createdAt: '2023-03-16T02:51:10.577757+05:30',
     );
     final Map<String, dynamic> data = note.toJson();
 
@@ -68,18 +68,13 @@ void main() {
           },
           build: () => noteBloc,
           act: (NoteBloc bloc) => bloc.add(
-            const NoteEvent.fetchNote(noteId: 1),
+            const NoteEvent.fetchNote(noteId: noteId),
           ),
           wait: const Duration(milliseconds: 10),
           expect: () => <NoteState>[
             const NoteState.loadInProgress(),
             NoteState.fetchNoteSuccess(
-              note: Note(
-                id: 1,
-                projectId: 1,
-                title: 'title',
-                createdAt: 'createdAt',
-              ),
+              note: note,
             ),
           ],
         );
@@ -94,7 +89,7 @@ void main() {
           },
           build: () => noteBloc,
           act: (NoteBloc bloc) => bloc.add(
-            const NoteEvent.fetchNote(noteId: 1),
+            const NoteEvent.fetchNote(noteId: noteId),
           ),
           wait: const Duration(milliseconds: 10),
           expect: () => <NoteState>[
@@ -127,12 +122,7 @@ void main() {
           expect: () => <NoteState>[
             const NoteState.loadInProgress(),
             NoteState.fetchNoteSuccess(
-              note: Note(
-                id: 1,
-                projectId: 1,
-                title: 'title',
-                createdAt: 'createdAt',
-              ),
+              note: note,
             ),
           ],
         );
@@ -174,7 +164,7 @@ void main() {
           },
           build: () => noteBloc,
           act: (NoteBloc bloc) => bloc.add(
-            const NoteEvent.deleteNote(noteId: 1),
+            const NoteEvent.deleteNote(noteId: noteId),
           ),
           wait: const Duration(milliseconds: 10),
           expect: () => <NoteState>[
@@ -193,7 +183,7 @@ void main() {
           },
           build: () => noteBloc,
           act: (NoteBloc bloc) => bloc.add(
-            const NoteEvent.deleteNote(noteId: 1),
+            const NoteEvent.deleteNote(noteId: noteId),
           ),
           wait: const Duration(milliseconds: 10),
           expect: () => <NoteState>[
