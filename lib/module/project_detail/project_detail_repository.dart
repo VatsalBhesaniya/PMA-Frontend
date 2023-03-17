@@ -45,15 +45,20 @@ class ProjectDetailRepository {
     required Map<String, dynamic> projectData,
   }) async {
     try {
-      await dio.put<Map<String, dynamic>?>(
+      final Response<void> response = await dio.put<void>(
         '$projectsEndpoint/$projectId',
         options: Options(
           headers: dioConfig.headers,
         ),
         data: projectData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -66,15 +71,20 @@ class ProjectDetailRepository {
     required Map<String, dynamic> memberData,
   }) async {
     try {
-      await dio.put<Map<String, dynamic>?>(
+      final Response<void> response = await dio.put<Map<String, dynamic>?>(
         inviteMembersEndpoint,
         options: Options(
           headers: dioConfig.headers,
         ),
         data: memberData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -88,14 +98,19 @@ class ProjectDetailRepository {
     required int userId,
   }) async {
     try {
-      await dio.delete<void>(
+      final Response<void> response = await dio.delete<void>(
         '$membersEndpoint/$projectId/$userId',
         options: Options(
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -108,14 +123,19 @@ class ProjectDetailRepository {
     required int projectId,
   }) async {
     try {
-      await dio.delete<void>(
+      final Response<void> response = await dio.delete<void>(
         '$projectsEndpoint/$projectId',
         options: Options(
           headers: dioConfig.headers,
         ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
