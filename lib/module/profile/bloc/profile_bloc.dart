@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/update_user.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/module/app/user_repository.dart';
@@ -18,10 +17,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc({
     required UserRepository userRepository,
     required ProfileRepository profileRepository,
-    required AppStorageManager appStorageManager,
   })  : _userRepository = userRepository,
         _profileRepository = profileRepository,
-        _appStorageManager = appStorageManager,
         super(const ProfileState.initial()) {
     on<_FetchUser>(_onFetchUser);
     on<_EditProfile>(_onEditProfile);
@@ -31,12 +28,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   final UserRepository _userRepository;
   final ProfileRepository _profileRepository;
-  final AppStorageManager _appStorageManager;
 
   FutureOr<void> _onFetchUser(
       _FetchUser event, Emitter<ProfileState> emit) async {
     const ProfileState.loadInProgress();
-    final String? token = await _appStorageManager.getUserTokenString();
+    final String? token = event.token;
     if (token == null) {
       emit(
         const ProfileState.fetchUserFailure(

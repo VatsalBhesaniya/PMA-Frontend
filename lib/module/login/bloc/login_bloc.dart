@@ -27,8 +27,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         email: event.email, password: event.password);
     apiResult.when(
       success: (String token) {
-        _userRepository.persistToken(token);
-        emit(const LoginState.loginSuccess());
+        emit(LoginState.loginSuccess(token: token));
       },
       failure: (NetworkExceptions error) {
         emit(LoginState.loginFailure(error: error));

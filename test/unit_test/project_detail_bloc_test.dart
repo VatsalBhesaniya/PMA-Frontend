@@ -244,9 +244,8 @@ void main() {
         blocTest<ProjectDetailBloc, ProjectDetailState>(
           'Success',
           setUp: () {
-            return dioAdapter.onPut(
+            return dioAdapter.onDelete(
               removeMemberUrl,
-              data: memberData,
               (MockServer request) => request.reply(204, null),
             );
           },
@@ -267,9 +266,8 @@ void main() {
         blocTest<ProjectDetailBloc, ProjectDetailState>(
           'Failure',
           setUp: () {
-            return dioAdapter.onPut(
+            return dioAdapter.onDelete(
               removeMemberUrl,
-              data: memberData,
               (MockServer request) => request.reply(200, null),
             );
           },
@@ -297,9 +295,8 @@ void main() {
         blocTest<ProjectDetailBloc, ProjectDetailState>(
           'Success',
           setUp: () {
-            return dioAdapter.onPut(
+            return dioAdapter.onDelete(
               deleteProjectUrl,
-              data: memberData,
               (MockServer request) => request.reply(204, null),
             );
           },
@@ -319,9 +316,8 @@ void main() {
         blocTest<ProjectDetailBloc, ProjectDetailState>(
           'Failure',
           setUp: () {
-            return dioAdapter.onPut(
+            return dioAdapter.onDelete(
               deleteProjectUrl,
-              data: memberData,
               (MockServer request) => request.reply(200, null),
             );
           },

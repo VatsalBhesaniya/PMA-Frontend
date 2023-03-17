@@ -5,7 +5,6 @@ import 'package:go_router_flow/go_router_flow.dart';
 import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/update_user.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/module/app/user_repository.dart';
@@ -16,7 +15,11 @@ import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({
+    super.key,
+    required this.token,
+  });
+  final String? token;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -39,7 +42,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           dio: context.read<Dio>(),
           dioConfig: context.read<DioConfig>(),
         ),
-        appStorageManager: context.read<AppStorageManager>(),
       ),
       child: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (BuildContext context, ProfileState state) {
@@ -56,6 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context.read<ProfileBloc>().add(
                     ProfileEvent.fetchUser(
                       userId: context.read<User>().id,
+                      token: widget.token,
                     ),
                   );
             },
@@ -96,6 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context.read<ProfileBloc>().add(
                     ProfileEvent.fetchUser(
                       userId: context.read<User>().id,
+                      token: widget.token,
                     ),
                   );
               return const Scaffold(
@@ -142,6 +146,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             fetchUserFailure: (NetworkExceptions error) {
               return Scaffold(
+                appBar: AppBar(
+                  title: const Text('Profile'),
+                ),
                 body: Center(
                   child: Text(
                     'Something went wrong.',

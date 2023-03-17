@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/utils/api_result.dart';
@@ -11,34 +10,9 @@ class UserRepository {
   UserRepository({
     required this.dioConfig,
     required this.dio,
-    required this.appStorageManager,
   });
   final DioConfig dioConfig;
   final Dio dio;
-  final AppStorageManager appStorageManager;
-
-  // getToken
-  Future<String?> getToken() async {
-    final String? token = await appStorageManager.getUserToken();
-    return token;
-  }
-
-  // getToken string
-  Future<String?> getTokenString() async {
-    final String? tokenString = await appStorageManager.getUserTokenString();
-    return tokenString;
-  }
-
-  // persistToken
-  Future<void> persistToken(String token) async {
-    appStorageManager.setUserToken('Bearer $token');
-    appStorageManager.setUserTokenString(token);
-  }
-
-  // deleteToken
-  Future<void> deleteToken() async {
-    appStorageManager.clearStorage();
-  }
 
   Future<ApiResult<String>> login({
     required String email,
@@ -76,29 +50,21 @@ class UserRepository {
     required Map<String, dynamic> userJson,
   }) async {
     try {
-      final Response<Map<String, dynamic>?> response =
-          await dio.post<Map<String, dynamic>?>(
+      final Response<void> response = await dio.post<void>(
         signupEndpoint,
         options: Options(
           headers: dioConfig.headers,
         ),
         data: userJson,
       );
-      final Map<String, dynamic>? data = response.data;
-      if (data == null) {
-        return const ApiResult<String?>.failure(
-          error: NetworkExceptions.defaultError(),
-        );
-      }
       if (response.statusCode == 201) {
         return const ApiResult<void>.success(
           data: null,
         );
-      } else {
-        return const ApiResult<void>.failure(
-          error: NetworkExceptions.defaultError(),
-        );
       }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
+      );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
@@ -106,7 +72,6 @@ class UserRepository {
     }
   }
 
-  // getUser
   Future<ApiResult<User>> fetchCurrentUser({
     required String token,
   }) async {
@@ -169,8 +134,7 @@ class UserRepository {
     required Map<String, dynamic> userData,
   }) async {
     try {
-      final Response<Map<String, dynamic>?> response =
-          await dio.put<Map<String, dynamic>?>(
+      final Response<void> response = await dio.put<void>(
         updatePasswordEndpoint,
         options: Options(
           headers: dioConfig.headers,

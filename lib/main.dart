@@ -52,9 +52,11 @@ void main() {
     final UserRepository userRepository = UserRepository(
       dioConfig: dioConfig,
       dio: dio,
-      appStorageManager: appStorageManager,
     );
     late User currentUser;
+    final String? userToken = await appStorageManager.getUserToken();
+    final String? userTokenString =
+        await appStorageManager.getUserTokenString();
     runApp(
       MultiProvider(
         providers: <SingleChildWidget>[
@@ -74,7 +76,10 @@ void main() {
           BlocProvider<AuthenticationBloc>(
             create: (BuildContext context) => AuthenticationBloc(
               userRepository: userRepository,
-            )..add(const AuthenticationEvent.appStarted()),
+            )..add(AuthenticationEvent.appStarted(
+                token: userToken,
+                tokenString: userTokenString,
+              )),
           ),
           RepositoryProvider<UserRepository>(
             create: (BuildContext context) => userRepository,
@@ -89,6 +94,7 @@ void main() {
           listener: (BuildContext context, AuthenticationState state) {
             state.maybeWhen(
               unauthenticated: () {
+                appStorageManager.clearStorage();
                 router.goNamed(RouteConstants.login);
               },
               authenticated: (String token, User user) {
