@@ -132,7 +132,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.onPrimary,
         border: Border.all(color: theme.colorScheme.outline),
         borderRadius: const BorderRadius.all(
           Radius.circular(8),
