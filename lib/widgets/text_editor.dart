@@ -32,8 +32,11 @@ class TextEditor extends StatelessWidget {
         QuillToolbar.basic(
           controller: controller,
           iconTheme: QuillIconTheme(
-              iconSelectedColor: theme.colorScheme.primary,
-              iconSelectedFillColor: theme.colorScheme.primaryContainer),
+            iconUnselectedFillColor: theme.colorScheme.onSurface,
+            iconSelectedColor: theme.colorScheme.primary,
+            iconSelectedFillColor: theme.colorScheme.primaryContainer,
+            disabledIconColor: theme.colorScheme.primaryContainer,
+          ),
           showAlignmentButtons: true,
           toolbarIconAlignment: WrapAlignment.start,
           toolbarSectionSpacing: 0,

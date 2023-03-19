@@ -12,15 +12,15 @@ ThemeData buildLightTheme() {
     buttonTheme: const ButtonThemeData(
       colorScheme: _lightColorScheme,
     ),
-    textTheme: _buildTextTheme(base.textTheme),
-    primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
+    textTheme: _buildTextTheme(base.textTheme, _lightColorScheme),
+    primaryTextTheme: _buildTextTheme(base.primaryTextTheme, _lightColorScheme),
     iconTheme: base.iconTheme.copyWith(color: oldRose),
     primaryIconTheme: base.iconTheme.copyWith(color: oldRose),
   );
 }
 
 ThemeData buildDarkTheme() {
-  final ThemeData base = ThemeData.light();
+  final ThemeData base = ThemeData.dark();
   return base.copyWith(
     colorScheme: _darkColorScheme,
     primaryColor: raisinBlack,
@@ -30,8 +30,8 @@ ThemeData buildDarkTheme() {
     buttonTheme: const ButtonThemeData(
       colorScheme: _darkColorScheme,
     ),
-    textTheme: _buildTextTheme(base.textTheme),
-    primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
+    textTheme: _buildTextTheme(base.textTheme, _darkColorScheme),
+    primaryTextTheme: _buildTextTheme(base.primaryTextTheme, _darkColorScheme),
     iconTheme: base.iconTheme.copyWith(color: raisinBlack),
     primaryIconTheme: base.iconTheme.copyWith(color: raisinBlack),
   );
@@ -45,7 +45,7 @@ const ColorScheme _lightColorScheme = ColorScheme(
   onSecondary: surfaceWhite,
   secondaryContainer: paleDogwood,
   surface: platinum,
-  onSurface: platinum,
+  onSurface: surfaceWhite,
   background: seashell,
   onBackground: seashell,
   error: errorRedLight,
@@ -71,11 +71,59 @@ const ColorScheme _darkColorScheme = ColorScheme(
   brightness: Brightness.dark,
 );
 
-TextTheme _buildTextTheme(TextTheme baseTheme) {
+TextTheme _buildTextTheme(
+  TextTheme baseTheme,
+  ColorScheme colorScheme,
+) {
   return GoogleFonts.poppinsTextTheme(baseTheme).copyWith(
+    bodySmall: GoogleFonts.poppins(
+      textStyle: baseTheme.bodySmall,
+      color: colorScheme.primary,
+    ),
+    bodyMedium: GoogleFonts.poppins(
+      textStyle: baseTheme.bodyMedium,
+      color: colorScheme.primary,
+    ),
     bodyLarge: GoogleFonts.poppins(
       textStyle: baseTheme.bodyLarge,
       fontSize: 18,
+      color: colorScheme.primary,
+    ),
+    labelSmall: GoogleFonts.poppins(
+      textStyle: baseTheme.labelSmall,
+      color: colorScheme.primary,
+    ),
+    labelMedium: GoogleFonts.poppins(
+      textStyle: baseTheme.labelMedium,
+      color: colorScheme.primary,
+    ),
+    labelLarge: GoogleFonts.poppins(
+      textStyle: baseTheme.labelLarge,
+      color: colorScheme.primary,
+    ),
+    titleSmall: GoogleFonts.poppins(
+      textStyle: baseTheme.titleSmall,
+      color: colorScheme.primary,
+    ),
+    titleMedium: GoogleFonts.poppins(
+      textStyle: baseTheme.titleMedium,
+      color: colorScheme.primary,
+    ),
+    titleLarge: GoogleFonts.poppins(
+      textStyle: baseTheme.titleLarge,
+      color: colorScheme.primary,
+    ),
+    headlineSmall: GoogleFonts.poppins(
+      textStyle: baseTheme.headlineSmall,
+      color: colorScheme.primary,
+    ),
+    headlineMedium: GoogleFonts.poppins(
+      textStyle: baseTheme.headlineMedium,
+      color: colorScheme.primary,
+    ),
+    headlineLarge: GoogleFonts.poppins(
+      textStyle: baseTheme.headlineLarge,
+      color: colorScheme.primary,
     ),
   );
 }
