@@ -1,7 +1,4 @@
-// ignore_for_file: invalid_annotation_target
-
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 part 'search_user.freezed.dart';
 part 'search_user.g.dart';
 

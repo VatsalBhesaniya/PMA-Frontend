@@ -68,13 +68,17 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                     projectId: int.parse(widget.projectId),
                   ),
                 );
-            return const Center(
-              child: CircularProgressIndicator(),
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
             );
           },
           loadInProgress: () {
-            return const Center(
-              child: CircularProgressIndicator(),
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
             );
           },
           fetchDocumentsSuccess: (List<Document> documents) {

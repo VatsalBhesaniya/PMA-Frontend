@@ -1,7 +1,4 @@
-// ignore_for_file: invalid_annotation_target
-
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 part 'create_note.freezed.dart';
 part 'create_note.g.dart';
 

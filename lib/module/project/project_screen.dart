@@ -69,12 +69,16 @@ class _ProjectScreenState extends State<ProjectScreen>
                     ),
                   );
               return const Scaffold(
-                body: CircularProgressIndicator(),
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
               );
             },
             loadInProgress: () {
               return const Scaffold(
-                body: CircularProgressIndicator(),
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
               );
             },
             fetchProjectSuccess: (Project project) {

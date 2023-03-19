@@ -682,7 +682,9 @@ class _TaskScreenState extends State<TaskScreen> {
           builder: (BuildContext context, TaskState state) {
             return state.maybeWhen(
               fetchAttachedNotesLoading: () {
-                return const CircularProgressIndicator();
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               },
               fetchAttachedNotesSuccess: (List<Note> notes) {
                 return _buildNotes(notes, context, theme, isGuest);
@@ -1031,7 +1033,9 @@ class _TaskScreenState extends State<TaskScreen> {
           builder: (BuildContext context, TaskState state) {
             return state.maybeWhen(
               fetchAttachedDocumentsLoading: () {
-                return const CircularProgressIndicator();
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               },
               fetchAttachedDocumentsSuccess: (List<Document> documents) {
                 return _buildDocuments(documents, context, theme, isGuest);
@@ -1381,140 +1385,4 @@ class _TaskScreenState extends State<TaskScreen> {
       },
     );
   }
-
-  // void _showAttachedTasks(BuildContext context, Task task) {
-  //   showModalBottomSheet<void>(
-  //     context: context,
-  //     backgroundColor: Colors.transparent,
-  //     isScrollControlled: true,
-  //     builder: (BuildContext ctx) {
-  //       return BlocBuilder<TaskBloc, TaskState>(
-  //         bloc: context.read<TaskBloc>()
-  //           ..add(
-  //             TaskEvent.fetchAttachedNotes(
-  //               noteIds: task.notes,
-  //             ),
-  //           ),
-  //         buildWhen: (TaskState previous, TaskState current) {
-  //           return current.maybeWhen(
-  //             fetchAttachedNotesLoading: () => true,
-  //             fetchAttachedNotesSuccess: (List<Note> notes) => true,
-  //             fetchAttachedNotesFailure: () => true,
-  //             orElse: () => false,
-  //           );
-  //         },
-  //         builder: (BuildContext ctx, TaskState state) {
-  //           return state.maybeWhen(
-  //             fetchAttachedNotesLoading: () {
-  //               return const CircularProgressIndicator();
-  //             },
-  //             fetchAttachedNotesSuccess: (List<Note> notes) {
-  //               return ConstrainedBox(
-  //                 constraints: BoxConstraints(
-  //                   maxHeight: MediaQuery.of(context).size.height / 1.2,
-  //                 ),
-  //                 child: Container(
-  //                   decoration: const BoxDecoration(
-  //                     borderRadius: BorderRadius.only(
-  //                       topLeft: Radius.circular(16),
-  //                       topRight: Radius.circular(16),
-  //                     ),
-  //                     color: Colors.white,
-  //                   ),
-  //                   child: Column(
-  //                     mainAxisSize: MainAxisSize.min,
-  //                     children: <Widget>[
-  //                       Align(
-  //                         alignment: Alignment.topRight,
-  //                         child: IconButton(
-  //                           onPressed: () {
-  //                             Navigator.pop(context);
-  //                           },
-  //                           icon: const Icon(
-  //                             Icons.close_rounded,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                       ExpansionPanelList(
-  //                         expansionCallback: (int index, bool isExpanded) {
-  //                           final List<Note> updatedNotes = <Note>[];
-  //                           for (int i = 0; i < notes.length; i++) {
-  //                             Note note = notes[i];
-  //                             if (i == index) {
-  //                               note = notes[index]
-  //                                   .copyWith(isExpanded: !isExpanded);
-  //                             }
-  //                             updatedNotes.add(note);
-  //                           }
-  //                           context.read<TaskBloc>().add(
-  //                                 TaskEvent.expandTask(
-  //                                   notes: updatedNotes,
-  //                                 ),
-  //                               );
-  //                         },
-  //                         children: notes.map<ExpansionPanel>((Note note) {
-  //                           return ExpansionPanel(
-  //                             headerBuilder:
-  //                                 (BuildContext context, bool isExpanded) {
-  //                               return ListTile(
-  //                                 title: Text(note.title),
-  //                               );
-  //                             },
-  //                             body: Column(
-  //                               children: [
-  //                                 ListTile(
-  //                                   title: Text(note.description ?? ''),
-  //                                   subtitle: const Text(
-  //                                     'To delete this panel, tap the trash can icon',
-  //                                   ),
-  //                                   trailing: const Icon(Icons.delete),
-  //                                   onTap: () {
-  //                                     setState(
-  //                                       () {
-  //                                         notes.removeWhere(
-  //                                             (Note currentItem) =>
-  //                                                 note == currentItem);
-  //                                       },
-  //                                     );
-  //                                   },
-  //                                 ),
-  //                                 ListTile(
-  //                                   title: Text(note.description ?? ''),
-  //                                   subtitle: const Text(
-  //                                     'To delete this panel, tap the trash can icon',
-  //                                   ),
-  //                                   trailing: const Icon(Icons.delete),
-  //                                   onTap: () {
-  //                                     setState(
-  //                                       () {
-  //                                         notes.removeWhere(
-  //                                             (Note currentItem) =>
-  //                                                 note == currentItem);
-  //                                       },
-  //                                     );
-  //                                   },
-  //                                 ),
-  //                               ],
-  //                             ),
-  //                             isExpanded: note.isExpanded,
-  //                           );
-  //                         }).toList(),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //             fetchAttachedNotesFailure: () {
-  //               return const Text('Something went wrong!');
-  //             },
-  //             orElse: () {
-  //               return const SizedBox();
-  //             },
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
 }

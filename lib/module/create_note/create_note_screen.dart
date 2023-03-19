@@ -78,35 +78,39 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
             builder: (BuildContext context, CreateNoteState state) {
               return state.maybeWhen(
                 loadInProgress: () {
-                  return const CircularProgressIndicator();
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 },
                 initial: () {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: <Widget>[
-                          InputField(
-                            controller: _noteTitleController,
-                            hintText: 'Title',
-                            borderType:
-                                InputFieldBorderType.underlineInputBorder,
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter title';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          _buildDescription(theme: theme),
-                          const SizedBox(height: 16),
-                          _buildCreateButton(
-                            context: context,
-                            theme: theme,
-                          ),
-                        ],
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: <Widget>[
+                            InputField(
+                              controller: _noteTitleController,
+                              hintText: 'Title',
+                              borderType:
+                                  InputFieldBorderType.underlineInputBorder,
+                              validator: (String? value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter title';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            _buildDescription(theme: theme),
+                            const SizedBox(height: 16),
+                            _buildCreateButton(
+                              context: context,
+                              theme: theme,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
