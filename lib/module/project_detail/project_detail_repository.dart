@@ -1,24 +1,30 @@
+import 'package:dio/dio.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/project_detail.dart';
 import 'package:pma/utils/api_result.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class ProjectDetailRepository {
   ProjectDetailRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
   Future<ApiResult<ProjectDetail?>> fetchProjectDetail({
     required int projectId,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$projectDetailEndpoint/$projectId',
-        httpMethod: HttpMethod.get,
+      final Response<Map<String, dynamic>?> response =
+          await dio.get<Map<String, dynamic>?>(
+        '$projectDetailEndpoint/$projectId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<ProjectDetail?>.failure(
           error: NetworkExceptions.defaultError(),
@@ -39,13 +45,20 @@ class ProjectDetailRepository {
     required Map<String, dynamic> projectData,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$projectsEndpoint/$projectId',
-        httpMethod: HttpMethod.put,
+      final Response<void> response = await dio.put<void>(
+        '$projectsEndpoint/$projectId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: projectData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -58,13 +71,20 @@ class ProjectDetailRepository {
     required Map<String, dynamic> memberData,
   }) async {
     try {
-      await dioClient.request<Map<String, dynamic>?>(
-        url: inviteMembersEndpoint,
-        httpMethod: HttpMethod.put,
+      final Response<void> response = await dio.put<Map<String, dynamic>?>(
+        inviteMembersEndpoint,
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: memberData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -73,38 +93,52 @@ class ProjectDetailRepository {
     }
   }
 
-  Future<ApiResult<bool>> removeMember({
+  Future<ApiResult<void>> removeMember({
     required int projectId,
     required int userId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$membersEndpoint/$projectId/$userId',
-        httpMethod: HttpMethod.delete,
+      final Response<void> response = await dio.delete<void>(
+        '$membersEndpoint/$projectId/$userId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<bool>.success(
-        data: true,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }
   }
 
-  Future<ApiResult<bool>> deleteProject({
+  Future<ApiResult<void>> deleteProject({
     required int projectId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$projectsEndpoint/$projectId',
-        httpMethod: HttpMethod.delete,
+      final Response<void> response = await dio.delete<void>(
+        '$projectsEndpoint/$projectId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<bool>.success(
-        data: true,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

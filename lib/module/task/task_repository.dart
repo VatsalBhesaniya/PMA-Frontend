@@ -1,26 +1,32 @@
+import 'package:dio/dio.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
 import 'package:pma/utils/api_result.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class TaskRepository {
   TaskRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
   Future<ApiResult<Task>> fetchTask({
     required int taskId,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$tasksEndpoint/$taskId',
-        httpMethod: HttpMethod.get,
+      final Response<Map<String, dynamic>?> response =
+          await dio.get<Map<String, dynamic>?>(
+        '$tasksEndpoint/$taskId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<Task>.failure(
           error: NetworkExceptions.defaultError(),
@@ -40,14 +46,17 @@ class TaskRepository {
     required Task task,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$tasksEndpoint/${task.id}',
-        httpMethod: HttpMethod.put,
+      final Response<Map<String, dynamic>?> response =
+          await dio.put<Map<String, dynamic>?>(
+        '$tasksEndpoint/${task.id}',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: task.toJson()
           ..remove('id')
           ..remove('created_by'),
       );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<Task>.failure(
           error: NetworkExceptions.defaultError(),
@@ -63,19 +72,26 @@ class TaskRepository {
     }
   }
 
-  Future<ApiResult<bool>> deleteTask({
+  Future<ApiResult<void>> deleteTask({
     required int taskId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$tasksEndpoint/$taskId',
-        httpMethod: HttpMethod.delete,
+      final Response<void> response = await dio.delete<void>(
+        '$tasksEndpoint/$taskId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<bool>.success(
-        data: true,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }
@@ -89,10 +105,13 @@ class TaskRepository {
       for (final int id in noteIds) {
         queryParams += 'noteId=$id&';
       }
-      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$notesEndpoint/attached$queryParams',
-        httpMethod: HttpMethod.get,
+      final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
+        '$notesEndpoint/attached$queryParams',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final List<dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<List<Note>>.failure(
           error: NetworkExceptions.defaultError(),
@@ -119,10 +138,13 @@ class TaskRepository {
       for (final int id in documentIds) {
         queryParams += 'documentId=$id&';
       }
-      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$documentsEndpoint/attached$queryParams',
-        httpMethod: HttpMethod.get,
+      final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
+        '$documentsEndpoint/attached$queryParams',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final List<dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<List<Document>>.failure(
           error: NetworkExceptions.defaultError(),
@@ -147,13 +169,20 @@ class TaskRepository {
     required List<Map<String, dynamic>> membersData,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$assignTasksEndpoint/$taskId',
-        httpMethod: HttpMethod.post,
+      final Response<void> response = await dio.post<void>(
+        '$assignTasksEndpoint/$taskId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: membersData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -168,12 +197,19 @@ class TaskRepository {
     required int userId,
   }) async {
     try {
-      await dioClient.request<Map<String, dynamic>?>(
-        url: '$assignTasksEndpoint/$taskId/$projectId/$userId',
-        httpMethod: HttpMethod.delete,
+      final Response<void> response = await dio.delete<void>(
+        '$assignTasksEndpoint/$taskId/$projectId/$userId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -186,13 +222,20 @@ class TaskRepository {
     required List<Map<String, dynamic>> notesData,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: attachNotesEndpoint,
-        httpMethod: HttpMethod.post,
+      final Response<void> response = await dio.post<void>(
+        attachNotesEndpoint,
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: notesData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -206,12 +249,19 @@ class TaskRepository {
     required int noteId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$attachNotesEndpoint/$taskId/$noteId',
-        httpMethod: HttpMethod.delete,
+      final Response<void> response = await dio.delete<void>(
+        '$attachNotesEndpoint/$taskId/$noteId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -224,13 +274,20 @@ class TaskRepository {
     required List<Map<String, dynamic>> documentsData,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: attachDocumentsEndpoint,
-        httpMethod: HttpMethod.post,
+      final Response<void> response = await dio.post<void>(
+        attachDocumentsEndpoint,
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: documentsData,
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 200) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -244,12 +301,19 @@ class TaskRepository {
     required int documentId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$attachDocumentsEndpoint/$taskId/$documentId',
-        httpMethod: HttpMethod.delete,
+      final Response<void> response = await dio.delete<void>(
+        '$attachDocumentsEndpoint/$taskId/$documentId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
@@ -263,10 +327,13 @@ class TaskRepository {
     required int projectId,
   }) async {
     try {
-      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$projectNotesEndpoint/$taskId/$projectId',
-        httpMethod: HttpMethod.get,
+      final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
+        '$projectNotesEndpoint/$taskId/$projectId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final List<dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<List<Note>>.failure(
           error: NetworkExceptions.defaultError(),
@@ -290,10 +357,13 @@ class TaskRepository {
     required int projectId,
   }) async {
     try {
-      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$projectDocumentsEndpoint/$taskId/$projectId',
-        httpMethod: HttpMethod.get,
+      final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
+        '$projectDocumentsEndpoint/$taskId/$projectId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final List<dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<List<Document>>.failure(
           error: NetworkExceptions.defaultError(),

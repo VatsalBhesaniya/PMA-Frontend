@@ -1,46 +1,30 @@
+import 'package:dio/dio.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/utils/api_result.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class DocumentRepository {
   DocumentRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
-  Future<ApiResult<Document?>> fetchDocument({
+  Future<ApiResult<Document>> fetchDocument({
     required int documentId,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$documentsEndpoint/$documentId',
-        httpMethod: HttpMethod.get,
+      final Response<Map<String, dynamic>?> response =
+          await dio.get<Map<String, dynamic>?>(
+        '$documentsEndpoint/$documentId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return ApiResult<Document?>.success(
-        data: Document.fromJson(data!),
-      );
-    } on Exception catch (e) {
-      return ApiResult<Document?>.failure(
-        error: NetworkExceptions.dioException(e),
-      );
-    }
-  }
-
-  Future<ApiResult<Document>> updateDocument({
-    required Document document,
-  }) async {
-    try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$documentsEndpoint/${document.id}',
-        httpMethod: HttpMethod.put,
-        data: document.toJson()
-          ..remove('id')
-          ..remove('created_by'),
-      );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<Document>.failure(
           error: NetworkExceptions.defaultError(),
@@ -56,19 +40,56 @@ class DocumentRepository {
     }
   }
 
-  Future<ApiResult<bool>> deleteDocument({
+  Future<ApiResult<Document>> updateDocument({
+    required Document document,
+  }) async {
+    try {
+      final Response<Map<String, dynamic>?> response =
+          await dio.put<Map<String, dynamic>?>(
+        '$documentsEndpoint/${document.id}',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
+        data: document.toJson()
+          ..remove('id')
+          ..remove('created_by'),
+      );
+      final Map<String, dynamic>? data = response.data;
+      if (data == null) {
+        return const ApiResult<Document>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+      return ApiResult<Document>.success(
+        data: Document.fromJson(data),
+      );
+    } on Exception catch (e) {
+      return ApiResult<Document>.failure(
+        error: NetworkExceptions.dioException(e),
+      );
+    }
+  }
+
+  Future<ApiResult<void>> deleteDocument({
     required int documentId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$documentsEndpoint/$documentId',
-        httpMethod: HttpMethod.delete,
+      final Response<void> response = await dio.delete<void>(
+        '$documentsEndpoint/$documentId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<bool>.success(
-        data: true,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
-      return ApiResult<bool>.failure(
+      return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }

@@ -1,27 +1,32 @@
+import 'package:dio/dio.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/utils/api_result.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class ProfileRepository {
   ProfileRepository({
-    required this.dioClient,
+    required this.dioConfig,
+    required this.dio,
   });
-
-  final DioClient dioClient;
+  final DioConfig dioConfig;
+  final Dio dio;
 
   Future<ApiResult<User>> updateUser({
     required int userId,
     required Map<String, dynamic> userData,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$usersEndpoint/$userId',
-        httpMethod: HttpMethod.put,
+      final Response<Map<String, dynamic>?> response =
+          await dio.put<Map<String, dynamic>?>(
+        '$usersEndpoint/$userId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: userData,
       );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<User>.failure(
           error: NetworkExceptions.defaultError(),
@@ -41,12 +46,19 @@ class ProfileRepository {
     required int userId,
   }) async {
     try {
-      await dioClient.request<void>(
-        url: '$usersEndpoint/$userId',
-        httpMethod: HttpMethod.delete,
+      final Response<void> response = await dio.delete<void>(
+        '$usersEndpoint/$userId',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      return const ApiResult<void>.success(
-        data: null,
+      if (response.statusCode == 204) {
+        return const ApiResult<void>.success(
+          data: null,
+        );
+      }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
       );
     } on Exception catch (e) {
       return ApiResult<void>.failure(

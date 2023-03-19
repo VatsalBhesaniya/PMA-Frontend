@@ -12,7 +12,6 @@ class InviteMember with _$InviteMember {
     @JsonKey(name: 'user_id') required int userId,
     @JsonKey(name: 'project_id') required int projectId,
     @JsonKey() required int role,
-    @JsonKey() required int status,
   }) = _InviteMember;
 
   factory InviteMember.fromJson(Map<String, dynamic> json) =>

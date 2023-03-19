@@ -7,7 +7,9 @@ class MyProjectsState with _$MyProjectsState {
   const factory MyProjectsState.fetchProjectsSuccess({
     required List<Project> projects,
   }) = _FetchProjectsSuccess;
-  const factory MyProjectsState.fetchProjectsFailure() = _FetchProjectsFailure;
+  const factory MyProjectsState.fetchProjectsFailure({
+    required NetworkExceptions error,
+  }) = _FetchProjectsFailure;
   const factory MyProjectsState.createProjectSuccess() = _CreateProjectSuccess;
   const factory MyProjectsState.createProjectFailure({
     required NetworkExceptions error,

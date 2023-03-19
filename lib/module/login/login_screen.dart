@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
+import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/module/authentication/bloc/authentication_bloc.dart';
 import 'package:pma/module/login/bloc/login_bloc.dart';
 import 'package:pma/router/go_router.dart';
@@ -33,10 +34,23 @@ class _LoginScreenState extends State<LoginScreen> {
         child: BlocConsumer<LoginBloc, LoginState>(
           listener: (BuildContext context, LoginState state) {
             state.maybeWhen(
-              loginSuccess: () {
-                context.read<AuthenticationBloc>().add(
-                      const AuthenticationEvent.appStarted(),
-                    );
+              loginSuccess: (String token) async {
+                final AppStorageManager appStorageManager =
+                    context.read<AppStorageManager>();
+                appStorageManager.setUserToken('Bearer $token');
+                appStorageManager.setUserTokenString(token);
+                final String? userToken =
+                    await appStorageManager.getUserToken();
+                final String? userTokenString =
+                    await appStorageManager.getUserTokenString();
+                if (mounted) {
+                  context.read<AuthenticationBloc>().add(
+                        AuthenticationEvent.appStarted(
+                          token: userToken,
+                          tokenString: userTokenString,
+                        ),
+                      );
+                }
               },
               loginFailure: (NetworkExceptions error) {
                 pmaAlertDialog(
@@ -50,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
           },
           buildWhen: (LoginState previous, LoginState current) {
             return current.maybeWhen(
-              loginSuccess: () => false,
+              loginSuccess: (String token) => false,
               orElse: () => true,
             );
           },

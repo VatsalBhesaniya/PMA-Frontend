@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/task.dart';
 import 'package:pma/module/tasks/tasks_repository.dart';
@@ -33,7 +33,7 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
         emit(_FetchTasksSuccess(tasks: tasks ?? <Task>[]));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchTasksFailure());
+        emit(_FetchTasksFailure(error: error));
       },
     );
   }
@@ -41,11 +41,11 @@ class TasksBloc extends Bloc<TasksEvent, TasksState> {
   FutureOr<void> _onDeleteTask(
       _DeleteTask event, Emitter<TasksState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult = await _tasksRepository.deleteTask(
+    final ApiResult<void> apiResult = await _tasksRepository.deleteTask(
       taskId: event.taskId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteTaskSuccess());
       },
       failure: (NetworkExceptions error) {

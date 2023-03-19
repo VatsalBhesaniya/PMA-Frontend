@@ -1,20 +1,25 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_flow/go_router_flow.dart';
+import 'package:pma/config/dio_config.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/update_user.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/profile/bloc/profile_bloc.dart';
 import 'package:pma/module/profile/profile_repository.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({
+    super.key,
+    required this.token,
+  });
+  final String? token;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -34,9 +39,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       create: (BuildContext context) => ProfileBloc(
         userRepository: RepositoryProvider.of<UserRepository>(context),
         profileRepository: ProfileRepository(
-          dioClient: context.read<DioClient>(),
+          dio: context.read<Dio>(),
+          dioConfig: context.read<DioConfig>(),
         ),
-        appStorageManager: context.read<AppStorageManager>(),
       ),
       child: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (BuildContext context, ProfileState state) {
@@ -53,6 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context.read<ProfileBloc>().add(
                     ProfileEvent.fetchUser(
                       userId: context.read<User>().id,
+                      token: widget.token,
                     ),
                   );
             },
@@ -93,6 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context.read<ProfileBloc>().add(
                     ProfileEvent.fetchUser(
                       userId: context.read<User>().id,
+                      token: widget.token,
                     ),
                   );
               return const Scaffold(
@@ -139,6 +146,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             fetchUserFailure: (NetworkExceptions error) {
               return Scaffold(
+                appBar: AppBar(
+                  title: const Text('Profile'),
+                ),
                 body: Center(
                   child: Text(
                     'Something went wrong.',

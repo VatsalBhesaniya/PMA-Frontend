@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/note.dart';
 import 'package:pma/module/note/note_repository.dart';
@@ -26,18 +26,14 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
 
   FutureOr<void> _onFetchNote(_FetchNote event, Emitter<NoteState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<Note?> apiResult =
+    final ApiResult<Note> apiResult =
         await _noteRepository.fetchNote(noteId: event.noteId);
     apiResult.when(
-      success: (Note? note) {
-        if (note == null) {
-          emit(const _FetchNoteFailure());
-        } else {
-          emit(_FetchNoteSuccess(note: note));
-        }
+      success: (Note note) {
+        emit(_FetchNoteSuccess(note: note));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchNoteFailure());
+        emit(_FetchNoteFailure(error: error));
       },
     );
   }
@@ -57,7 +53,7 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
         emit(_FetchNoteSuccess(note: note));
       },
       failure: (NetworkExceptions error) {
-        emit(const _UpdateNoteFailure());
+        emit(_UpdateNoteFailure(error: error));
       },
     );
   }
@@ -65,11 +61,11 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
   FutureOr<void> _onDeleteNote(
       _DeleteNote event, Emitter<NoteState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult = await _noteRepository.deleteNote(
+    final ApiResult<void> apiResult = await _noteRepository.deleteNote(
       noteId: event.noteId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteNoteSuccess());
       },
       failure: (NetworkExceptions error) {

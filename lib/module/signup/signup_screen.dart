@@ -7,7 +7,6 @@ import 'package:pma/module/app/user_repository.dart';
 import 'package:pma/module/login/bloc/login_bloc.dart';
 import 'package:pma/module/signup/signup/signup_bloc.dart';
 import 'package:pma/router/go_router.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';

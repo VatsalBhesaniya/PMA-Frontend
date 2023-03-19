@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/module/app/user_repository.dart';
@@ -24,8 +24,8 @@ class AuthenticationBloc
   Future<void> _onAppStarted(
       _AppStarted event, Emitter<AuthenticationState> emit) async {
     emit(const _LoadInProgress());
-    final String? token = await _userRepository.getToken();
-    final String? tokenString = await _userRepository.getTokenString();
+    final String? token = event.token;
+    final String? tokenString = event.tokenString;
     if (token != null && tokenString != null) {
       final ApiResult<User> apiResult =
           await _userRepository.fetchCurrentUser(token: tokenString);
@@ -46,8 +46,6 @@ class AuthenticationBloc
   }
 
   void _onLogout(_Logout event, Emitter<AuthenticationState> emit) {
-    emit(const _LoadInProgress());
-    _userRepository.deleteToken();
     emit(const _Unauthenticated());
   }
 }

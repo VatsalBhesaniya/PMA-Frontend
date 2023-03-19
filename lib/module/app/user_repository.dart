@@ -1,89 +1,70 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/api_constants.dart';
-import 'package:pma/manager/app_storage_manager.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/utils/api_result.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 
 class UserRepository {
   UserRepository({
-    required this.dioClient,
-    required this.appStorageManager,
+    required this.dioConfig,
+    required this.dio,
   });
-  final DioClient dioClient;
-  final AppStorageManager appStorageManager;
+  final DioConfig dioConfig;
+  final Dio dio;
 
-  // getToken
-  Future<String?> getToken() async {
-    final String? token = await appStorageManager.getUserToken();
-    return token;
-  }
-
-  Future<String?> getTokenString() async {
-    final String? tokenString = await appStorageManager.getUserTokenString();
-    return tokenString;
-  }
-
-  // persistToken
-  Future<void> persistToken(String token) async {
-    appStorageManager.setUserToken('Bearer $token');
-    appStorageManager.setUserTokenString(token);
-  }
-
-  // deleteToken
-  Future<void> deleteToken() async {
-    appStorageManager.clearStorage();
-  }
-
-  //login
-  Future<ApiResult<String?>> login({
+  Future<ApiResult<String>> login({
     required String email,
     required String password,
   }) async {
     try {
-      final Map<String, dynamic>? data = await dioClient.request(
-        url: loginEndpoint,
-        httpMethod: HttpMethod.post,
+      final Response<Map<String, dynamic>?> response =
+          await dio.post<Map<String, dynamic>?>(
+        loginEndpoint,
+        options: Options(
+          headers: dioConfig.headers,
+        ),
         data: FormData.fromMap(<String, dynamic>{
           'username': email,
           'password': password,
         }),
       );
-      return ApiResult<String?>.success(
-        data: data != null ? data['access_token'] as String : null,
+      final Map<String, dynamic>? data = response.data;
+      if (data == null) {
+        return const ApiResult<String>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+      return ApiResult<String>.success(
+        data: data['access_token'] as String,
       );
     } on Exception catch (e) {
-      return ApiResult<String?>.failure(
+      return ApiResult<String>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }
   }
 
-  //signup
   Future<ApiResult<void>> signup({
     required Map<String, dynamic> userJson,
   }) async {
     try {
-      final http.Response response = await http.post(
-        Uri.parse('${dioClient.baseURL}$signupEndpoint'),
-        headers: <String, String>{
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-        body: jsonEncode(userJson),
+      final Response<void> response = await dio.post<void>(
+        signupEndpoint,
+        options: Options(
+          headers: dioConfig.headers,
+        ),
+        data: userJson,
       );
       if (response.statusCode == 201) {
         return const ApiResult<void>.success(
           data: null,
         );
-      } else {
-        return const ApiResult<void>.failure(
-          error: NetworkExceptions.defaultError(),
-        );
       }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
+      );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),
@@ -91,25 +72,26 @@ class UserRepository {
     }
   }
 
-  // getUser
   Future<ApiResult<User>> fetchCurrentUser({
     required String token,
   }) async {
     try {
-      final Map<String, dynamic>? data =
-          await dioClient.request<Map<String, dynamic>?>(
-        url: '$usersEndpoint/current/$token',
-        httpMethod: HttpMethod.get,
+      final Response<Map<String, dynamic>?> response =
+          await dio.get<Map<String, dynamic>?>(
+        '$currentUsersEndpoint/$token',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
+      final Map<String, dynamic>? data = response.data;
       if (data == null) {
         return const ApiResult<User>.failure(
           error: NetworkExceptions.defaultError(),
         );
-      } else {
-        return ApiResult<User>.success(
-          data: User.fromJson(data),
-        );
       }
+      return ApiResult<User>.success(
+        data: User.fromJson(data),
+      );
     } on Exception catch (e) {
       return ApiResult<User>.failure(
         error: NetworkExceptions.dioException(e),
@@ -117,24 +99,32 @@ class UserRepository {
     }
   }
 
-  Future<ApiResult<List<SearchUser>?>> fetchUsers({
+  Future<ApiResult<List<SearchUser>>> fetchUsers({
     required int projectId,
     required String searchText,
   }) async {
     try {
-      final List<dynamic>? data = await dioClient.request<List<dynamic>?>(
-        url: '$usersEndpoint/$projectId?search=$searchText',
-        httpMethod: HttpMethod.get,
+      final Response<List<dynamic>?> response = await dio.get<List<dynamic>?>(
+        '$usersEndpoint/$projectId?search=$searchText',
+        options: Options(
+          headers: dioConfig.headers,
+        ),
       );
-      final List<SearchUser>? users = data
-          ?.map((dynamic user) =>
+      final List<dynamic>? data = response.data;
+      if (data == null) {
+        return const ApiResult<List<SearchUser>>.failure(
+          error: NetworkExceptions.defaultError(),
+        );
+      }
+      final List<SearchUser> users = data
+          .map((dynamic user) =>
               SearchUser.fromJson(user as Map<String, dynamic>))
           .toList();
-      return ApiResult<List<SearchUser>?>.success(
+      return ApiResult<List<SearchUser>>.success(
         data: users,
       );
     } on Exception catch (e) {
-      return ApiResult<List<SearchUser>?>.failure(
+      return ApiResult<List<SearchUser>>.failure(
         error: NetworkExceptions.dioException(e),
       );
     }
@@ -144,23 +134,21 @@ class UserRepository {
     required Map<String, dynamic> userData,
   }) async {
     try {
-      final http.Response response = await http.put(
-        Uri.parse('${dioClient.baseURL}$updatePasswordEndpoint'),
-        headers: <String, String>{
-          HttpHeaders.contentTypeHeader: 'application/json',
-        },
-        body: jsonEncode(userData),
+      final Response<void> response = await dio.put<void>(
+        updatePasswordEndpoint,
+        options: Options(
+          headers: dioConfig.headers,
+        ),
+        data: userData,
       );
-
       if (response.statusCode == 200) {
         return const ApiResult<void>.success(
           data: null,
         );
-      } else {
-        return const ApiResult<void>.failure(
-          error: NetworkExceptions.defaultError(),
-        );
       }
+      return const ApiResult<void>.failure(
+        error: NetworkExceptions.defaultError(),
+      );
     } on Exception catch (e) {
       return ApiResult<void>.failure(
         error: NetworkExceptions.dioException(e),

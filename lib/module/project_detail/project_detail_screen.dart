@@ -1,8 +1,11 @@
 import 'package:collection/collection.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
+import 'package:pma/config/dio_config.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/member.dart';
@@ -10,7 +13,6 @@ import 'package:pma/models/project_detail.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/module/project_detail/bloc/project_detail_bloc.dart';
 import 'package:pma/module/project_detail/project_detail_repository.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/floating_action_button_extended.dart';
 import 'package:pma/widgets/input_field.dart';
@@ -38,7 +40,8 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
     return BlocProvider<ProjectDetailBloc>(
       create: (BuildContext context) => ProjectDetailBloc(
         projectDetailRepository: ProjectDetailRepository(
-          dioClient: context.read<DioClient>(),
+          dio: context.read<Dio>(),
+          dioConfig: context.read<DioConfig>(),
         ),
       ),
       child: BlocConsumer<ProjectDetailBloc, ProjectDetailState>(

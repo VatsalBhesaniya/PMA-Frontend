@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/home/projects_repository.dart';
@@ -25,18 +25,18 @@ class InvitedProjectsBloc
   FutureOr<void> _onFetchProjects(
       _FetchInvitedProjects event, Emitter<InvitedProjectsState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<List<Project>?> apiResult =
+    final ApiResult<List<Project>> apiResult =
         await _projectsRepository.fetchInvitedProjects();
     apiResult.when(
-      success: (List<Project>? data) {
+      success: (List<Project> data) {
         emit(
           _FetchInvitedProjectsSuccess(
-            projects: data ?? <Project>[],
+            projects: data,
           ),
         );
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchInvitedProjectsFailure());
+        emit(_FetchInvitedProjectsFailure(error: error));
       },
     );
   }

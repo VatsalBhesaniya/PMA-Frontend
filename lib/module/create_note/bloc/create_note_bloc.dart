@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/create_note.dart';
 import 'package:pma/module/create_note/create_note_repository.dart';
@@ -23,6 +23,7 @@ class CreateNoteBloc extends Bloc<CreateNoteEvent, CreateNoteState> {
 
   FutureOr<void> _onCreateNote(
       _CreateNote event, Emitter<CreateNoteState> emit) async {
+    emit(const CreateNoteState.loadInProgress());
     final ApiResult<int> apiResult = await _createNoteRepository.createNote(
       noteData: event.note.toJson(),
     );

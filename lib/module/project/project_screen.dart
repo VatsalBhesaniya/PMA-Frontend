@@ -1,6 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router_flow/go_router_flow.dart';
+import 'package:pma/config/dio_config.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/models/project.dart';
 import 'package:pma/module/Documents/bloc/documents_bloc.dart';
@@ -14,7 +16,7 @@ import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/tasks/bloc/tasks_bloc.dart';
 import 'package:pma/module/tasks/tasks_repository.dart';
 import 'package:pma/module/tasks/tasks_screen.dart';
-import 'package:pma/utils/dio_client.dart';
+import 'package:pma/utils/network_exceptions.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({
@@ -53,7 +55,8 @@ class _ProjectScreenState extends State<ProjectScreen>
     return BlocProvider<ProjectBloc>(
       create: (BuildContext context) => ProjectBloc(
         projectRepository: ProjectRepository(
-          dioClient: context.read<DioClient>(),
+          dio: context.read<Dio>(),
+          dioConfig: context.read<DioConfig>(),
         ),
       ),
       child: BlocBuilder<ProjectBloc, ProjectState>(
@@ -102,7 +105,7 @@ class _ProjectScreenState extends State<ProjectScreen>
                 ),
               );
             },
-            fetchProjectFailure: () {
+            fetchProjectFailure: (NetworkExceptions error) {
               return const Scaffold(
                 body: Center(
                   child: Text('Something went wrong.'),
@@ -166,7 +169,8 @@ class _ProjectScreenState extends State<ProjectScreen>
           BlocProvider<TasksBloc>(
             create: (BuildContext context) => TasksBloc(
               tasksRepository: TasksRepository(
-                dioClient: context.read<DioClient>(),
+                dio: context.read<Dio>(),
+                dioConfig: context.read<DioConfig>(),
               ),
             )..add(
                 TasksEvent.fetchTasks(
@@ -181,7 +185,8 @@ class _ProjectScreenState extends State<ProjectScreen>
           BlocProvider<NotesBloc>(
             create: (BuildContext context) => NotesBloc(
               notesRepository: NotesRepository(
-                dioClient: context.read<DioClient>(),
+                dio: context.read<Dio>(),
+                dioConfig: context.read<DioConfig>(),
               ),
             )..add(
                 NotesEvent.fetchNotes(
@@ -196,7 +201,8 @@ class _ProjectScreenState extends State<ProjectScreen>
           BlocProvider<DocumentsBloc>(
             create: (BuildContext context) => DocumentsBloc(
               documentsRepository: DocumentsRepository(
-                dioClient: context.read<DioClient>(),
+                dio: context.read<Dio>(),
+                dioConfig: context.read<DioConfig>(),
               ),
             ),
             child: DocumentsScreen(

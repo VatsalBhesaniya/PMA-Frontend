@@ -134,7 +134,7 @@ class _NotesScreenState extends State<NotesScreen> {
               ),
             );
           },
-          fetchNotesFailure: () {
+          fetchNotesFailure: (NetworkExceptions error) {
             return const Center(
               child: Text('Something went wrong.'),
             );

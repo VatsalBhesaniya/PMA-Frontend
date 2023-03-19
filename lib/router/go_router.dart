@@ -63,10 +63,10 @@ final GoRouter router = GoRouter(
           },
           routes: <RouteBase>[
             GoRoute(
-              path: RouteConstants.profile,
+              path: '${RouteConstants.profile}/:token',
               name: RouteConstants.profile,
               builder: (BuildContext context, GoRouterState state) {
-                return const ProfileScreen();
+                return ProfileScreen(token: state.params['token']);
               },
             ),
           ],

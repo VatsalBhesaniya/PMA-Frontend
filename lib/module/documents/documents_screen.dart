@@ -139,7 +139,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
               ),
             );
           },
-          fetchDocumentsFailure: () {
+          fetchDocumentsFailure: (NetworkExceptions error) {
             return const Center(
               child: Text('Something went wrong.'),
             );

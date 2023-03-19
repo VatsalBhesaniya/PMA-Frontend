@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/app/user_repository.dart';
@@ -24,23 +24,15 @@ class SelectUsersBloc extends Bloc<SelectUsersEvent, SelectUsersState> {
   FutureOr<void> _onSearchUsers(
       _SearchUsers event, Emitter<SelectUsersState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<List<SearchUser>?> apiResult = await _userRepository
+    final ApiResult<List<SearchUser>> apiResult = await _userRepository
         .fetchUsers(projectId: event.projectId, searchText: event.searchText);
     apiResult.when(
-      success: (List<SearchUser>? users) {
-        if (users == null) {
-          emit(
-            const SelectUsersState.searchUsersFailure(
-              error: NetworkExceptions.defaultError(),
-            ),
-          );
-        } else {
-          emit(
-            SelectUsersState.searchUsersSuccess(
-              users: users,
-            ),
-          );
-        }
+      success: (List<SearchUser> users) {
+        emit(
+          SelectUsersState.searchUsersSuccess(
+            users: users,
+          ),
+        );
       },
       failure: (NetworkExceptions error) {
         emit(

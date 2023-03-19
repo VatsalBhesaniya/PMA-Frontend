@@ -1,13 +1,15 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
+import 'package:pma/config/dio_config.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/models/user.dart';
 import 'package:pma/module/document/bloc/document_bloc.dart';
 import 'package:pma/module/document/document_repository.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
@@ -39,13 +41,14 @@ class _DocumentScreenState extends State<DocumentScreen> {
     return BlocProvider<DocumentBloc>(
       create: (BuildContext context) => DocumentBloc(
         documentRepository: DocumentRepository(
-          dioClient: context.read<DioClient>(),
+          dioConfig: context.read<DioConfig>(),
+          dio: context.read<Dio>(),
         ),
       ),
       child: BlocConsumer<DocumentBloc, DocumentState>(
         listener: (BuildContext context, DocumentState state) {
           state.maybeWhen(
-            updateDocumentFailure: () async {
+            updateDocumentFailure: (NetworkExceptions error) async {
               pmaAlertDialog(
                 context: context,
                 theme: theme,
@@ -74,7 +77,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
         },
         buildWhen: (DocumentState previous, DocumentState current) {
           return current.maybeWhen(
-            updateDocumentFailure: () => false,
+            updateDocumentFailure: (NetworkExceptions error) => false,
             deleteDocumentSuccess: () => false,
             deleteDocumentFailure: (NetworkExceptions error) => false,
             orElse: () => true,
@@ -180,7 +183,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
                 ),
               );
             },
-            fetchDocumentFailure: () {
+            fetchDocumentFailure: (NetworkExceptions error) {
               return const Scaffold(
                 body: Center(
                   child: Text('Something went wrong.'),

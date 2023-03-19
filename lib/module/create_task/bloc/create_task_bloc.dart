@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/create_task.dart';
 import 'package:pma/module/create_task/create_task_repository.dart';
@@ -23,6 +23,7 @@ class CreateTaskBloc extends Bloc<CreateTaskEvent, CreateTaskState> {
 
   FutureOr<void> _onCreateTask(
       _CreateTask event, Emitter<CreateTaskState> emit) async {
+    emit(const CreateTaskState.loadInProgress());
     final ApiResult<int> apiResult = await _createTaskRepository.createTask(
       taskData: event.task.toJson(),
     );

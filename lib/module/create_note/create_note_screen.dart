@@ -1,11 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router_flow/go_router_flow.dart';
+import 'package:pma/config/dio_config.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/models/create_note.dart';
 import 'package:pma/module/create_note/bloc/create_note_bloc.dart';
 import 'package:pma/module/create_note/create_note_repository.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
@@ -41,7 +43,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
         child: BlocProvider<CreateNoteBloc>(
           create: (BuildContext context) => CreateNoteBloc(
             createNoteRepository: CreateNoteRepository(
-              dioClient: context.read<DioClient>(),
+              dioConfig: context.read<DioConfig>(),
+              dio: context.read<Dio>(),
             ),
           ),
           child: BlocConsumer<CreateNoteBloc, CreateNoteState>(

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/create_milestone.dart';
 import 'package:pma/models/milestone.dart';
@@ -27,6 +27,7 @@ class EditMilestoneBloc extends Bloc<EditMilestoneEvent, EditMilestoneState> {
 
   FutureOr<void> _onFetchMilestone(
       _FetchMilestone event, Emitter<EditMilestoneState> emit) async {
+    emit(const EditMilestoneState.loadInProgress());
     final ApiResult<Milestone> apiResult =
         await _milestonesRepository.fetchMilestone(
       milestoneId: event.milestoneId,
@@ -59,6 +60,7 @@ class EditMilestoneBloc extends Bloc<EditMilestoneEvent, EditMilestoneState> {
 
   FutureOr<void> _onUpdateMilestone(
       _UpdateMilestone event, Emitter<EditMilestoneState> emit) async {
+    emit(const EditMilestoneState.loadInProgress());
     final ApiResult<Milestone> apiResult =
         await _milestonesRepository.updateMilestone(
       milestoneId: event.milestoneId,
@@ -80,12 +82,13 @@ class EditMilestoneBloc extends Bloc<EditMilestoneEvent, EditMilestoneState> {
 
   FutureOr<void> _onDeleteMilestone(
       _DeleteMilestone event, Emitter<EditMilestoneState> emit) async {
+    emit(const EditMilestoneState.loadInProgress());
     final ApiResult<void> apiResult =
         await _milestonesRepository.deleteMilestone(
       milestoneId: event.milestoneId,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           const EditMilestoneState.deleteMilestoneSuccess(),
         );

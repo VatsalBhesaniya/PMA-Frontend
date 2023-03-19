@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/models/invite_member.dart';
 import 'package:pma/models/search_user.dart';
 import 'package:pma/module/task/task_repository.dart';
@@ -30,8 +31,7 @@ class AssignTaskBloc extends Bloc<AssignTaskEvent, AssignTaskState> {
       final InviteMember member = InviteMember(
         userId: user.id,
         projectId: event.projectId,
-        role: 3,
-        status: 2,
+        role: MemberRole.member.index + 1,
       );
       members.add(member.toJson());
     }
@@ -40,7 +40,7 @@ class AssignTaskBloc extends Bloc<AssignTaskEvent, AssignTaskState> {
       membersData: members,
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           const AssignTaskState.assignTaskToMemberSuccess(),
         );

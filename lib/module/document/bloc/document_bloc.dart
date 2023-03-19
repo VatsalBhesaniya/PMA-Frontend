@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/module/document/document_repository.dart';
@@ -27,18 +27,14 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   FutureOr<void> _onFetchDocument(
       _FetchDocument event, Emitter<DocumentState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<Document?> apiResult =
+    final ApiResult<Document> apiResult =
         await _documentRepository.fetchDocument(documentId: event.documentId);
     apiResult.when(
-      success: (Document? document) {
-        if (document == null) {
-          emit(const _FetchDocumentFailure());
-        } else {
-          emit(_FetchDocumentSuccess(document: document));
-        }
+      success: (Document document) {
+        emit(_FetchDocumentSuccess(document: document));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchDocumentFailure());
+        emit(_FetchDocumentFailure(error: error));
       },
     );
   }
@@ -58,7 +54,7 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
         emit(_FetchDocumentSuccess(document: document));
       },
       failure: (NetworkExceptions error) {
-        emit(const _UpdateDocumentFailure());
+        emit(_UpdateDocumentFailure(error: error));
       },
     );
   }
@@ -66,11 +62,11 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
   FutureOr<void> _onDeleteDocument(
       _DeleteDocument event, Emitter<DocumentState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult = await _documentRepository.deleteDocument(
+    final ApiResult<void> apiResult = await _documentRepository.deleteDocument(
       documentId: event.documentId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteDocumentSuccess());
       },
       failure: (NetworkExceptions error) {

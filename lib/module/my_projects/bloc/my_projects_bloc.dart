@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/create_project.dart';
 import 'package:pma/models/project.dart';
@@ -37,7 +37,7 @@ class MyProjectsBloc extends Bloc<MyProjectsEvent, MyProjectsState> {
         );
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchProjectsFailure());
+        emit(_FetchProjectsFailure(error: error));
       },
     );
   }
@@ -48,7 +48,7 @@ class MyProjectsBloc extends Bloc<MyProjectsEvent, MyProjectsState> {
       projectData: event.project.toJson(),
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(const _CreateProjectSuccess());
       },
       failure: (NetworkExceptions error) {

@@ -4,6 +4,7 @@ part of 'profile_bloc.dart';
 class ProfileEvent with _$ProfileEvent {
   const factory ProfileEvent.fetchUser({
     required int userId,
+    required String? token,
   }) = _FetchUser;
   const factory ProfileEvent.editProfile({
     required User user,

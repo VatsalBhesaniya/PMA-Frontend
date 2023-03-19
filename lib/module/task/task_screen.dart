@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:go_router_flow/go_router_flow.dart';
 import 'package:intl/intl.dart';
+import 'package:pma/config/dio_config.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/constants/route_constants.dart';
 import 'package:pma/extentions/extensions.dart';
 import 'package:pma/models/attach_document.dart';
@@ -13,7 +16,6 @@ import 'package:pma/models/note.dart';
 import 'package:pma/models/task.dart';
 import 'package:pma/module/task/bloc/task_bloc.dart';
 import 'package:pma/module/task/task_repository.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
@@ -44,7 +46,8 @@ class _TaskScreenState extends State<TaskScreen> {
     return BlocProvider<TaskBloc>(
       create: (BuildContext context) => TaskBloc(
         taskRepository: TaskRepository(
-          dioClient: context.read<DioClient>(),
+          dioConfig: context.read<DioConfig>(),
+          dio: context.read<Dio>(),
         ),
       ),
       child: BlocConsumer<TaskBloc, TaskState>(

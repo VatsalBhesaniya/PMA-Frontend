@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/create_milestone.dart';
 import 'package:pma/module/milestones/milestones_repository.dart';
@@ -24,12 +24,13 @@ class CreateMilestoneBloc
 
   FutureOr<void> _onCreateMilestone(
       _CreateMilestone event, Emitter<CreateMilestoneState> emit) async {
+    emit(const CreateMilestoneState.loadInProgress());
     final ApiResult<void> apiResult =
         await _milestonesRepository.createMilestone(
       milestoneData: event.milestone.toJson(),
     );
     apiResult.when(
-      success: (void value) {
+      success: (void result) {
         emit(
           const CreateMilestoneState.createMilestoneSuccess(),
         );

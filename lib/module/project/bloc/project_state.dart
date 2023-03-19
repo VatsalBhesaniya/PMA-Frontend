@@ -7,5 +7,7 @@ class ProjectState with _$ProjectState {
   const factory ProjectState.fetchProjectSuccess({
     required Project project,
   }) = _FetchProjectSuccess;
-  const factory ProjectState.fetchProjectFailure() = _FetchProjectFailure;
+  const factory ProjectState.fetchProjectFailure({
+    required NetworkExceptions error,
+  }) = _FetchProjectFailure;
 }

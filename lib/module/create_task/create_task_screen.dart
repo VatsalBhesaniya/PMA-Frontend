@@ -1,11 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:go_router_flow/go_router_flow.dart';
+import 'package:pma/config/dio_config.dart';
+import 'package:pma/constants/enum.dart';
 import 'package:pma/models/create_task.dart';
 import 'package:pma/module/create_task/bloc/create_task_bloc.dart';
 import 'package:pma/module/create_task/create_task_repository.dart';
-import 'package:pma/utils/dio_client.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/input_field.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
@@ -40,7 +42,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         child: BlocProvider<CreateTaskBloc>(
           create: (BuildContext context) => CreateTaskBloc(
             createTaskRepository: CreateTaskRepository(
-              dioClient: context.read<DioClient>(),
+              dioConfig: context.read<DioConfig>(),
+              dio: context.read<Dio>(),
             ),
           ),
           child: BlocConsumer<CreateTaskBloc, CreateTaskState>(

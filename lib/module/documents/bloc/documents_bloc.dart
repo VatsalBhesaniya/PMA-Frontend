@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/document.dart';
 import 'package:pma/module/Documents/documents_repository.dart';
@@ -25,18 +25,14 @@ class DocumentsBloc extends Bloc<DocumentsEvent, DocumentsState> {
   FutureOr<void> _onFetchDocuments(
       _FetchDocuments event, Emitter<DocumentsState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<List<Document>?> apiResult =
+    final ApiResult<List<Document>> apiResult =
         await _documentsRepository.fetchDocuments(projectId: event.projectId);
     apiResult.when(
-      success: (List<Document>? documents) {
-        if (documents == null) {
-          emit(const _FetchDocumentsFailure());
-        } else {
-          emit(_FetchDocumentsSuccess(documents: documents));
-        }
+      success: (List<Document> documents) {
+        emit(_FetchDocumentsSuccess(documents: documents));
       },
       failure: (NetworkExceptions error) {
-        emit(const _FetchDocumentsFailure());
+        emit(_FetchDocumentsFailure(error: error));
       },
     );
   }
@@ -44,11 +40,11 @@ class DocumentsBloc extends Bloc<DocumentsEvent, DocumentsState> {
   FutureOr<void> _onDeleteDocument(
       _DeleteDocument event, Emitter<DocumentsState> emit) async {
     emit(const _LoadInProgress());
-    final ApiResult<bool> apiResult = await _documentsRepository.deleteDocument(
+    final ApiResult<void> apiResult = await _documentsRepository.deleteDocument(
       documentId: event.documentId,
     );
     apiResult.when(
-      success: (bool isDeleted) {
+      success: (void result) {
         emit(const _DeleteDocumentSuccess());
       },
       failure: (NetworkExceptions error) {

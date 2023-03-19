@@ -49,8 +49,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildMenuItem({required ThemeData theme}) {
     return ListTile(
-      onTap: () {
-        context.goNamed(RouteConstants.profile);
+      onTap: () async {
+        final String? token =
+            await context.read<AppStorageManager>().getUserTokenString();
+        if (mounted) {
+          context.goNamed(RouteConstants.profile, params: <String, String>{
+            'token': token ?? '',
+          });
+        }
       },
       leading: const Icon(Icons.person),
       title: Text(
