@@ -682,7 +682,9 @@ class _TaskScreenState extends State<TaskScreen> {
           builder: (BuildContext context, TaskState state) {
             return state.maybeWhen(
               fetchAttachedNotesLoading: () {
-                return const CircularProgressIndicator();
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               },
               fetchAttachedNotesSuccess: (List<Note> notes) {
                 return _buildNotes(notes, context, theme, isGuest);
@@ -1031,7 +1033,9 @@ class _TaskScreenState extends State<TaskScreen> {
           builder: (BuildContext context, TaskState state) {
             return state.maybeWhen(
               fetchAttachedDocumentsLoading: () {
-                return const CircularProgressIndicator();
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               },
               fetchAttachedDocumentsSuccess: (List<Document> documents) {
                 return _buildDocuments(documents, context, theme, isGuest);

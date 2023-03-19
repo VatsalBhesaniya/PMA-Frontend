@@ -77,25 +77,29 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             builder: (BuildContext context, CreateTaskState state) {
               return state.maybeWhen(
                 loadInProgress: () {
-                  return const CircularProgressIndicator();
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 },
                 initial: () {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: <Widget>[
-                          _buildTitle(),
-                          const SizedBox(height: 16),
-                          _buildDescription(theme: theme),
-                          const SizedBox(height: 32),
-                          _buildCreateButton(
-                            context: context,
-                            theme: theme,
-                          ),
-                          const SizedBox(height: 32),
-                        ],
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: <Widget>[
+                            _buildTitle(),
+                            const SizedBox(height: 16),
+                            _buildDescription(theme: theme),
+                            const SizedBox(height: 32),
+                            _buildCreateButton(
+                              context: context,
+                              theme: theme,
+                            ),
+                            const SizedBox(height: 32),
+                          ],
+                        ),
                       ),
                     ),
                   );

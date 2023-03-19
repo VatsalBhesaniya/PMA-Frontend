@@ -102,10 +102,14 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
                           milestoneId: int.parse(widget.milestoneId),
                         ),
                       );
-                  return const CircularProgressIndicator();
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 },
                 loadInProgress: () {
-                  return const CircularProgressIndicator();
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 },
                 fetchMilestoneSuccess: (Milestone milestone) {
                   if (milestone.description != null) {
@@ -114,53 +118,55 @@ class _EditMilestoneScreenState extends State<EditMilestoneScreen> {
                   }
                   _complitonDateController.text =
                       _dateTime(milestone.completionDate);
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: <Widget>[
-                          InputField(
-                            controller: _milestoneTitleController
-                              ..text = milestone.title,
-                            hintText: 'Title',
-                            borderType:
-                                InputFieldBorderType.underlineInputBorder,
-                            validator: (String? value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter title';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          _buildDescription(theme: theme),
-                          const SizedBox(height: 16),
-                          _buildMarkAsCompleted(context, theme, milestone),
-                          const SizedBox(height: 16),
-                          _buildCompletionDate(
-                            context: context,
-                            theme: theme,
-                            milestone: milestone,
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              _buildSaveButton(
-                                context: context,
-                                theme: theme,
-                                milestone: milestone,
-                              ),
-                              const SizedBox(width: 32),
-                              _buildDeleteButton(
-                                context: context,
-                                theme: theme,
-                                milestone: milestone,
-                              ),
-                            ],
-                          ),
-                        ],
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: <Widget>[
+                            InputField(
+                              controller: _milestoneTitleController
+                                ..text = milestone.title,
+                              hintText: 'Title',
+                              borderType:
+                                  InputFieldBorderType.underlineInputBorder,
+                              validator: (String? value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter title';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            _buildDescription(theme: theme),
+                            const SizedBox(height: 16),
+                            _buildMarkAsCompleted(context, theme, milestone),
+                            const SizedBox(height: 16),
+                            _buildCompletionDate(
+                              context: context,
+                              theme: theme,
+                              milestone: milestone,
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                _buildSaveButton(
+                                  context: context,
+                                  theme: theme,
+                                  milestone: milestone,
+                                ),
+                                const SizedBox(width: 32),
+                                _buildDeleteButton(
+                                  context: context,
+                                  theme: theme,
+                                  milestone: milestone,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );

@@ -67,10 +67,18 @@ class _NotesScreenState extends State<NotesScreen> {
                     projectId: int.parse(widget.projectId),
                   ),
                 );
-            return const CircularProgressIndicator();
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
           },
           loadInProgress: () {
-            return const CircularProgressIndicator();
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
           },
           fetchNotesSuccess: (List<Note> notes) {
             return Scaffold(

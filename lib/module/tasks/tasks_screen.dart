@@ -68,10 +68,18 @@ class _TasksScreenState extends State<TasksScreen> {
                     projectId: int.parse(widget.projectId),
                   ),
                 );
-            return const CircularProgressIndicator();
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
           },
           loadInProgress: () {
-            return const CircularProgressIndicator();
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
           },
           fetchTasksSuccess: (List<Task> tasks) {
             return Scaffold(
