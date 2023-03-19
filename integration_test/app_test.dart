@@ -33,6 +33,11 @@ void main() {
       navigator.pop();
       await tester.pumpAndSettle();
 
+      await tester.tap(find.text('Forgot password?'));
+      await tester.pumpAndSettle();
+      navigator.pop();
+      await tester.pumpAndSettle();
+
       final Finder emailFormField = find.byType(TextFormField).first;
       final Finder passwordFormField = find.byType(TextFormField).last;
       final Finder loginButton = find.byType(ElevatedButton).first;
