@@ -26,6 +26,18 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
+      final NavigatorState navigator = tester.state(find.byType(Navigator));
+
+      await tester.tap(find.text('Register'));
+      await tester.pumpAndSettle();
+      navigator.pop();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Forgot password?'));
+      await tester.pumpAndSettle();
+      navigator.pop();
+      await tester.pumpAndSettle();
+
       final Finder emailFormField = find.byType(TextFormField).first;
       final Finder passwordFormField = find.byType(TextFormField).last;
       final Finder loginButton = find.byType(ElevatedButton).first;
@@ -47,7 +59,6 @@ void main() {
       await tester.tap(find.text('Task One'));
       await tester.pumpAndSettle();
 
-      final NavigatorState navigator = tester.state(find.byType(Navigator));
       navigator.pop();
       await tester.pumpAndSettle();
 
