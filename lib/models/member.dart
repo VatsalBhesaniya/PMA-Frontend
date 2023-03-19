@@ -1,8 +1,5 @@
-// ignore_for_file: invalid_annotation_target
-
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:pma/models/user.dart';
-
 part 'member.freezed.dart';
 part 'member.g.dart';
 

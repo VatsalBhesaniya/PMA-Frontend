@@ -29,12 +29,6 @@ class PmaApp extends StatelessWidget {
             routeInformationParser: router.routeInformationParser,
             routerDelegate: router.routerDelegate,
             routeInformationProvider: router.routeInformationProvider,
-            // routerConfig: AppRouter(context.read<LoginBloc>()).router,
-            // routeInformationParser: AppRouter(loginBloc: context.read<LoginBloc>())
-            //     .router
-            //     .routeInformationParser,
-            // routerDelegate:
-            //     AppRouter(loginBloc: context.read<LoginBloc>()).router.routerDelegate,
           );
         },
       ),

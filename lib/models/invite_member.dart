@@ -1,7 +1,4 @@
-// ignore_for_file: invalid_annotation_target
-
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 part 'invite_member.freezed.dart';
 part 'invite_member.g.dart';
 
