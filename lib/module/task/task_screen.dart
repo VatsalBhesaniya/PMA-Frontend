@@ -556,6 +556,7 @@ class _TaskScreenState extends State<TaskScreen> {
                           description: _controller.document.toDelta().toJson(),
                           descriptionPlainText:
                               _controller.document.toPlainText(),
+                          isEdit: false,
                         ),
                       ),
                     );

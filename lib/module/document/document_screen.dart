@@ -219,6 +219,7 @@ class _DocumentScreenState extends State<DocumentScreen> {
                           title: _documentTitleController.text.trim(),
                           content: _controller.document.toDelta().toJson(),
                           contentPlainText: _controller.document.toPlainText(),
+                          isEdit: false,
                         ),
                       ),
                     );

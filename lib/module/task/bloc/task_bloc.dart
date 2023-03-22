@@ -66,8 +66,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     final ApiResult<Task> apiResult =
         await _taskRepository.updateTask(task: event.task);
     apiResult.when(
-      success: (Task task) {
-        emit(_FetchTaskSuccess(task: task));
+      success: (Task updatedTask) {
+        emit(_FetchTaskSuccess(task: event.task));
       },
       failure: (NetworkExceptions error) {
         emit(_UpdateTaskFailure(error: error));
