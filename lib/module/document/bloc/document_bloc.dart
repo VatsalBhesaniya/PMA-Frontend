@@ -50,8 +50,8 @@ class DocumentBloc extends Bloc<DocumentEvent, DocumentState> {
     final ApiResult<Document> apiResult =
         await _documentRepository.updateDocument(document: event.document);
     apiResult.when(
-      success: (Document document) {
-        emit(_FetchDocumentSuccess(document: document));
+      success: (Document updatedDocument) {
+        emit(_FetchDocumentSuccess(document: event.document));
       },
       failure: (NetworkExceptions error) {
         emit(_UpdateDocumentFailure(error: error));

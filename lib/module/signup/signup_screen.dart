@@ -77,111 +77,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.all(16),
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              const SizedBox(height: 16),
-                              _buildInputField(
-                                controller: _firstNameController,
-                                hintText: 'First Name',
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter First Name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              _buildInputField(
-                                controller: _lastNameController,
-                                hintText: 'Last Name',
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter Last Name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              _buildInputField(
-                                controller: _usernameController,
-                                hintText: 'Username',
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter Username';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              _buildInputField(
-                                controller: _emailController,
-                                hintText: 'Email Address',
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter Email Address';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              _buildInputField(
-                                controller: _passwordController,
-                                hintText: 'Password',
-                                isObscure: true,
-                                validator: (String? value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter Password';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 32),
-                              ElevatedButton(
-                                onPressed: () {
-                                  final FormState? formState =
-                                      _formKey.currentState;
-                                  if (formState != null &&
-                                      formState.validate()) {
-                                    context.read<SignupBloc>().add(
-                                          SignupEvent.signupSubmitted(
-                                            user: CreateUser(
-                                              firstName: _firstNameController
-                                                  .text
-                                                  .trim(),
-                                              lastName: _lastNameController.text
-                                                  .trim(),
-                                              username: _usernameController.text
-                                                  .trim(),
-                                              email:
-                                                  _emailController.text.trim(),
-                                              password: _passwordController.text
-                                                  .trim(),
-                                            ),
-                                          ),
-                                        );
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  fixedSize: const Size(100, 40),
-                                  textStyle: const TextStyle(fontSize: 16),
-                                  shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(50),
-                                    ),
-                                  ),
-                                ),
-                                child: const Text('Signup'),
-                              ),
-                              const SizedBox(height: 48),
-                              const Text('Already have an account?'),
-                              TextButton(
-                                onPressed: () {
-                                  router.goNamed(RouteConstants.login);
-                                },
-                                child: const Text('Login'),
-                              ),
-                            ],
-                          ),
-                        ),
+                        child: _buildForm(context),
                       ),
                     ),
                   );
@@ -190,6 +86,106 @@ class _SignupScreenState extends State<SignupScreen> {
             },
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildForm(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const SizedBox(height: 16),
+          _buildInputField(
+            controller: _firstNameController,
+            hintText: 'First Name',
+            validator: (String? value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter First Name';
+              }
+              return null;
+            },
+          ),
+          _buildInputField(
+            controller: _lastNameController,
+            hintText: 'Last Name',
+            validator: (String? value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter Last Name';
+              }
+              return null;
+            },
+          ),
+          _buildInputField(
+            controller: _usernameController,
+            hintText: 'Username',
+            validator: (String? value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter Username';
+              }
+              return null;
+            },
+          ),
+          _buildInputField(
+            controller: _emailController,
+            hintText: 'Email Address',
+            validator: (String? value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter Email Address';
+              }
+              return null;
+            },
+          ),
+          _buildInputField(
+            controller: _passwordController,
+            hintText: 'Password',
+            isObscure: true,
+            validator: (String? value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Please enter Password';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: () {
+              final FormState? formState = _formKey.currentState;
+              if (formState != null && formState.validate()) {
+                context.read<SignupBloc>().add(
+                      SignupEvent.signupSubmitted(
+                        user: CreateUser(
+                          firstName: _firstNameController.text.trim(),
+                          lastName: _lastNameController.text.trim(),
+                          username: _usernameController.text.trim(),
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text.trim(),
+                        ),
+                      ),
+                    );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              fixedSize: const Size(100, 40),
+              textStyle: const TextStyle(fontSize: 16),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(50),
+                ),
+              ),
+            ),
+            child: const Text('Signup'),
+          ),
+          const SizedBox(height: 48),
+          const Text('Already have an account?'),
+          TextButton(
+            onPressed: () {
+              router.goNamed(RouteConstants.login);
+            },
+            child: const Text('Login'),
+          ),
+        ],
       ),
     );
   }

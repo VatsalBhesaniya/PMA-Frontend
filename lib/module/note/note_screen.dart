@@ -218,6 +218,7 @@ class _NoteScreenState extends State<NoteScreen> {
                           title: _noteTitleController.text.trim(),
                           content: _controller.document.toDelta().toJson(),
                           contentPlainText: _controller.document.toPlainText(),
+                          isEdit: false,
                         ),
                       ),
                     );

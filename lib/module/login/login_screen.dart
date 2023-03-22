@@ -80,119 +80,135 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: SingleChildScrollView(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            InputField(
-                              controller: _emailController,
-                              hintText: 'Email address',
-                              validator: (String? value) {
-                                if (value != null && value.trim().isNotEmpty) {
-                                  return Validations()
-                                      .emailValidator(email: value);
-                                }
-                                return null;
-                              },
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(50),
-                              ),
-                              inputFieldHeight: InputFieldHeight.large,
-                            ),
-                            const SizedBox(
-                              height: 16,
-                            ),
-                            InputField(
-                              controller: _passwordController,
-                              hintText: 'Password',
-                              validator: (String? value) {
-                                if (value != null && value.trim().isNotEmpty) {
-                                  return Validations()
-                                      .passwordValidator(password: value);
-                                }
-                                return null;
-                              },
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(50),
-                              ),
-                              inputFieldHeight: InputFieldHeight.large,
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: GestureDetector(
-                                onTap: () {
-                                  router.goNamed(RouteConstants.updatePassword);
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    'Forgot password?',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.outline,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 32,
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                final FormState? formState =
-                                    _formKey.currentState;
-                                if (formState != null && formState.validate()) {
-                                  context.read<LoginBloc>().add(
-                                        LoginEvent.loginSubmitted(
-                                          email: _emailController.text.trim(),
-                                          password:
-                                              _passwordController.text.trim(),
-                                        ),
-                                      );
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: const Size(100, 40),
-                                textStyle: const TextStyle(fontSize: 16),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(50),
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                'Login',
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: theme.colorScheme.background,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 48),
-                            Text(
-                              "Don't have an account?",
-                              style: theme.textTheme.bodyMedium,
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                router.goNamed(RouteConstants.signup);
-                              },
-                              child: Text(
-                                'Register',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: _buildLoginForm(theme, context),
                     ),
                   ),
                 );
               },
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginForm(ThemeData theme, BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _buildEmailAddressField(),
+          const SizedBox(height: 16),
+          _buildPasswordField(),
+          _buildForgotPassword(theme),
+          const SizedBox(height: 32),
+          _buildLoginButton(context, theme),
+          const SizedBox(height: 48),
+          Text(
+            "Don't have an account?",
+            style: theme.textTheme.bodyMedium,
+          ),
+          _buildRegistreButton(theme),
+        ],
+      ),
+    );
+  }
+
+  InputField _buildEmailAddressField() {
+    return InputField(
+      controller: _emailController,
+      hintText: 'Email address',
+      validator: (String? value) {
+        if (value != null && value.trim().isNotEmpty) {
+          return Validations().emailValidator(email: value);
+        }
+        return null;
+      },
+      borderRadius: const BorderRadius.all(
+        Radius.circular(50),
+      ),
+      inputFieldHeight: InputFieldHeight.large,
+    );
+  }
+
+  InputField _buildPasswordField() {
+    return InputField(
+      controller: _passwordController,
+      hintText: 'Password',
+      validator: (String? value) {
+        if (value != null && value.trim().isNotEmpty) {
+          return Validations().passwordValidator(password: value);
+        }
+        return null;
+      },
+      borderRadius: const BorderRadius.all(
+        Radius.circular(50),
+      ),
+      inputFieldHeight: InputFieldHeight.large,
+    );
+  }
+
+  Widget _buildForgotPassword(ThemeData theme) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: () {
+          router.goNamed(RouteConstants.updatePassword);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            'Forgot password?',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.outline,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  ElevatedButton _buildLoginButton(BuildContext context, ThemeData theme) {
+    return ElevatedButton(
+      onPressed: () {
+        final FormState? formState = _formKey.currentState;
+        if (formState != null && formState.validate()) {
+          context.read<LoginBloc>().add(
+                LoginEvent.loginSubmitted(
+                  email: _emailController.text.trim(),
+                  password: _passwordController.text.trim(),
+                ),
+              );
+        }
+      },
+      style: ElevatedButton.styleFrom(
+        fixedSize: const Size(100, 40),
+        textStyle: const TextStyle(fontSize: 16),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(50),
+          ),
+        ),
+      ),
+      child: Text(
+        'Login',
+        style: theme.textTheme.bodyLarge?.copyWith(
+          color: theme.colorScheme.background,
+        ),
+      ),
+    );
+  }
+
+  TextButton _buildRegistreButton(ThemeData theme) {
+    return TextButton(
+      onPressed: () {
+        router.goNamed(RouteConstants.signup);
+      },
+      child: Text(
+        'Register',
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.primary,
         ),
       ),
     );

@@ -49,8 +49,8 @@ class NoteBloc extends Bloc<NoteEvent, NoteState> {
     final ApiResult<Note> apiResult =
         await _noteRepository.updateNote(note: event.note);
     apiResult.when(
-      success: (Note note) {
-        emit(_FetchNoteSuccess(note: note));
+      success: (Note updatedNote) {
+        emit(_FetchNoteSuccess(note: event.note));
       },
       failure: (NetworkExceptions error) {
         emit(_UpdateNoteFailure(error: error));
