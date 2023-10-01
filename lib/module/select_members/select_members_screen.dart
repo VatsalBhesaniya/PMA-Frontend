@@ -7,7 +7,7 @@ import 'package:pma/module/project/project_repository.dart';
 import 'package:pma/module/select_members/bloc/select_members_bloc.dart';
 import 'package:pma/utils/network_exceptions.dart';
 import 'package:pma/widgets/pma_alert_dialog.dart';
-import 'package:pma/widgets/search_bar.dart';
+import 'package:pma/widgets/search_box.dart';
 
 class SelectMembersScreen extends StatefulWidget {
   const SelectMembersScreen({
@@ -116,7 +116,7 @@ class _SelectMembersScreenState extends State<SelectMembersScreen> {
   }
 
   Widget _buildSearchBar({required BuildContext context}) {
-    return SearchBar(
+    return SearchBox(
       controller: _searchController,
       focusNode: _searchFocusNode,
       hintText: 'username',
